@@ -2,12 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- मोबाइल इंटरफ़ेस के लिए ज़रूरी स्क्रीन सेटिंग (Viewport) -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0f172a">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -119,230 +114,6 @@
         }
     </style>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
-    <!-- ==================== MOBILE INTERFACE CSS (शुरू) ==================== -->
-<style id="ug-mobile-interface-css">
-    /* मोबाइल ब्राउज़र की सही ऊँचाई के लिए वेरिएबल */
-    :root {
-        --ug-vh: 1vh;
-    }
-
-    /* डेस्कटॉप पर मोबाइल बॉटम बार को छिपा कर रखें */
-    #ug-mobile-bottom-bar,
-    #ug-mobile-backdrop {
-        display: none;
-    }
-
-    /* केवल मोबाइल और छोटे टैबलेट (768px या उससे कम चौड़ाई) के लिए नियम */
-    @media (max-width: 768px) {
-        /* 1. स्क्रीन को दाएं-बाएं हिलने (Horizontal Scroll) से रोकें */
-        html, body {
-            max-width: 100vw !important;
-            overflow-x: hidden !important;
-            height: calc(var(--ug-vh, 1vh) * 100) !important;
-            height: 100dvh !important;
-            -webkit-text-size-adjust: 100%;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* नीचे के मोबाइल बॉटम बार के लिए थोड़ी खाली जगह छोड़ें */
-        body {
-            padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
-        }
-
-        /* 2. साइडबार (Sidebar) को मोबाइल स्लाइड मेनू (Drawer) में बदलें */
-        .sidebar, aside {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            height: 100dvh !important;
-            width: 82vw !important;
-            max-width: 310px !important;
-            z-index: 9998 !important;
-            transform: translateX(-105%);
-            transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            overflow-y: auto !important;
-            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35) !important;
-        }
-
-        /* जब मोबाइल मेनू खुले */
-        .sidebar.ug-mobile-open, aside.ug-mobile-open {
-            transform: translateX(0) !important;
-        }
-
-        /* मेनू खुलने पर पीछे का हल्का काला पर्दा (Backdrop) */
-        #ug-mobile-backdrop.ug-show {
-            display: block !important;
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.55);
-            backdrop-filter: blur(2px);
-            z-index: 9997;
-        }
-
-        /* 3. प्रश्न, ऑप्शन और सॉल्यूशन बॉक्स को मोबाइल स्क्रीन पर फिट करें */
-        .solution-html-container .q-row,
-        .solution-html-container > div {
-            width: 100% !important;
-            min-width: 0 !important;
-            padding: 12px !important;
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 10px !important;
-            box-sizing: border-box !important;
-        }
-
-        .solution-html-container .q-num-text {
-            width: 100% !important;
-            font-size: 1.1rem !important;
-            white-space: normal !important;
-            word-break: break-word !important;
-            text-align: left !important;
-        }
-
-        .solution-html-container .q-opts {
-            width: 100% !important;
-            margin-left: 0 !important;
-            display: flex !important;
-            flex-wrap: wrap !important;
-            gap: 10px !important;
-        }
-
-        /* 4. सभी फोटो, वीडियो और कैनवास मोबाइल से बाहर न निकलें */
-        img, video, svg, canvas, iframe {
-            max-width: 100% !important;
-            height: auto;
-        }
-
-        /* 5. उंगली से दबाने (Touch) के लिए बटन और इनपुट को आसान बनाएं */
-        button, a, label {
-            touch-action: manipulation;
-        }
-
-        /* iPhone/Android में टाइप करते समय ज़ूम होने की समस्या रोकें */
-        input, select, textarea {
-            font-size: 16px !important;
-        }
-
-        /* चौड़ी टेबल के लिए स्क्रॉल बॉक्स */
-        .ug-table-scroll {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        /* 6. मोबाइल ऐप जैसा बॉटम नेविगेशन बार (Bottom App Bar) */
-        #ug-mobile-bottom-bar {
-            display: flex !important;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: calc(58px + env(safe-area-inset-bottom, 0px));
-            padding-bottom: env(safe-area-inset-bottom, 0px);
-            background: #0f172a;
-            border-top: 1px solid rgba(148, 163, 184, 0.25);
-            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
-            z-index: 9999;
-            align-items: center;
-            justify-content: space-around;
-        }
-
-        #ug-mobile-bottom-bar button {
-            flex: 1;
-            height: 100%;
-            background: transparent;
-            border: none;
-            color: #e2e8f0;
-            font-family: 'Noto Sans Devanagari', sans-serif;
-            font-size: 11px;
-            font-weight: 600;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 3px;
-            cursor: pointer;
-        }
-
-        #ug-mobile-bottom-bar button:active {
-            background: rgba(255, 255, 255, 0.12);
-            color: #38bdf8;
-        }
-
-        #ug-mobile-bottom-bar .ug-icon {
-            font-size: 17px;
-            line-height: 1;
-        }
-    }
-</style>
-<!-- ==================== MOBILE INTERFACE CSS (समाप्त) ==================== -->
-
-<!-- ==================== MOBILE + LAPTOP RESPONSIVE FIX (शुरू) ==================== -->
-<style id="ug-mobile-laptop-responsive-fix">
-    /* सभी स्क्रीन पर मुख्य लेआउट को viewport के भीतर रखें */
-    html { width: 100%; max-width: 100%; }
-    img, video, canvas, iframe { max-width: 100%; }
-
-    /* मोबाइल: बड़े प्रश्न-बॉक्स और inline चौड़ाइयों को स्क्रीन में फिट करें */
-    @media screen and (max-width: 768px) {
-        html, body { max-width: 100% !important; }
-        .direction-test-mode,
-        .direction-test-mode .q-row,
-        .direction-test-mode .q-top-header,
-        .direction-test-mode .q-num-text,
-        .direction-test-mode .q-opts {
-            box-sizing: border-box !important;
-            max-width: 100% !important;
-        }
-        .direction-test-mode .q-row {
-            min-width: 0 !important;
-            width: 100% !important;
-            padding: 12px !important;
-            flex-direction: column !important;
-            align-items: stretch !important;
-            overflow-wrap: anywhere !important;
-        }
-        .direction-test-mode .q-top-header {
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            gap: 10px !important;
-        }
-        .direction-test-mode .q-num-text {
-            width: auto !important;
-            min-width: 0 !important;
-            font-size: clamp(1.15rem, 5vw, 2rem) !important;
-            letter-spacing: normal !important;
-            white-space: normal !important;
-            overflow-wrap: anywhere !important;
-            text-align: left !important;
-        }
-        .direction-test-mode .q-opts {
-            width: 100% !important;
-            flex-wrap: wrap !important;
-            gap: 10px !important;
-        }
-        .direction-test-mode .q-opts label {
-            max-width: 100% !important;
-            white-space: normal !important;
-            overflow-wrap: anywhere !important;
-        }
-        .direction-test-mode table,
-        .ug-table-scroll table {
-            max-width: 100% !important;
-        }
-    }
-
-    /* लैपटॉप/डेस्कटॉप: मोबाइल नेविगेशन छिपा रहे और मुख्य सामग्री उपलब्ध चौड़ाई ले */
-    @media screen and (min-width: 769px) {
-        #ug-mobile-bottom-bar,
-        #ug-mobile-backdrop { display: none !important; }
-        .direction-test-mode .q-row { box-sizing: border-box; }
-    }
-</style>
-<!-- ==================== MOBILE + LAPTOP RESPONSIVE FIX (समाप्त) ==================== -->
-
 </head>
 <body>
     <script>
@@ -1419,8 +1190,7 @@
                         window.parent.postMessage({ type: 'TEST_COMPLETE', payload: { totalAttempted: attempted, correct: correctCount, tScore: tScore, details: details } }, '*');
                     }
                 <\/script>
-            
-</body>
+            </body>
             </html>`;
         };
 
@@ -2419,29 +2189,17 @@ const LoginView = ({ authMethods, authInstance, user, firebaseReady, globalLogo,
             return;
         setError('');
         setLoading(true);
-        // Mobile networks/webviews can leave Firebase Auth promises pending.
-        // Bound each authentication request so the React loading state always recovers.
-        const runAuthWithTimeout = (authPromise) => new Promise((resolve, reject) => {
-            const timer = setTimeout(() => reject(new Error('LOGIN_NETWORK_TIMEOUT')), 25000);
-            Promise.resolve(authPromise).then((value) => {
-                clearTimeout(timer);
-                resolve(value);
-            }, (error) => {
-                clearTimeout(timer);
-                reject(error);
-            });
-        });
         try {
             const cleanEmail = email.trim().toLowerCase();
             if (isLogin) {
                 try {
-                    await runAuthWithTimeout(authMethods.signInWithEmailAndPassword(authInstance, cleanEmail, password));
+                    await authMethods.signInWithEmailAndPassword(authInstance, cleanEmail, password);
                 }
                 catch (loginErr) {
                     let errMsg = String(loginErr.message || loginErr.code || '');
                     if (cleanEmail === 'unlimitedgyantest@gmail.com' && (errMsg.includes('user-not-found') || errMsg.includes('invalid-credential') || errMsg.includes('INVALID_LOGIN_CREDENTIALS'))) {
                         try {
-                            const userCred = await runAuthWithTimeout(authMethods.createUserWithEmailAndPassword(authInstance, cleanEmail, password));
+                            const userCred = await authMethods.createUserWithEmailAndPassword(authInstance, cleanEmail, password);
                             if (authMethods.dbInstance && userCred?.user && appId) {
                                 try {
                                     const docRef = getProfileRef(userCred.user.uid);
@@ -2460,7 +2218,7 @@ const LoginView = ({ authMethods, authInstance, user, firebaseReady, globalLogo,
                 }
             }
             else {
-                const userCred = await runAuthWithTimeout(authMethods.createUserWithEmailAndPassword(authInstance, cleanEmail, password));
+                const userCred = await authMethods.createUserWithEmailAndPassword(authInstance, cleanEmail, password);
                 if (authMethods.dbInstance && userCred?.user && appId) {
                     try {
                         const docRef = getProfileRef(userCred.user.uid);
@@ -2481,16 +2239,11 @@ const LoginView = ({ authMethods, authInstance, user, firebaseReady, globalLogo,
             else if (errMsg.includes('email-already-in-use')) {
                 setError('Yeh email pehle se registered hai. Kripya "Login Karein".');
             }
-            else if (errMsg.includes('LOGIN_NETWORK_TIMEOUT')) {
-                setError('Firebase se 25 seconds mein jawab nahi mila. Internet connection check karke Chrome mein website dobara kholen aur phir login karein.');
-            }
             else {
                 setError(`Error: ${errMsg}`);
             }
         }
-        finally {
-            setLoading(false);
-        }
+        setLoading(false);
     };
     const handleLogout = async () => { if (authMethods)
         await authMethods.signOut(authInstance); };
@@ -2840,24 +2593,6 @@ const SolutionViewer = ({ testConfig, result, onBack }) => {
                 window.MathJax.typesetClear([containerRef.current]);
                 window.MathJax.typesetPromise([containerRef.current]).catch(() => {});
             }
-            // स्टूडेंट ने Instruction में जो भाषा (HI या EN) चुनी थी, Solution में सिर्फ वही भाषा दिखाएँ
-            const studentChosenLang = String(currentItem.chosenLang || targetData.chosenLang || result.chosenLang || 'HI').toUpperCase();
-            const solContentEls = containerRef.current.querySelectorAll('.ug-solution-content');
-            solContentEls.forEach(solEl => {
-                const rawSolText = (solEl.innerText || solEl.textContent || '').trim();
-                if (rawSolText.includes(' / ') || (/हल\s*:/i.test(rawSolText) && /Solution\s*:/i.test(rawSolText))) {
-                    const parts = rawSolText.split(/\s+\/\s+(?=(?:Solution|Explanation|हल|व्याख्या)\s*[:\-])/i);
-                    if (parts.length >= 2) {
-                        const hiPart = parts.find(p => /[\u0900-\u097F]/.test(p));
-                        const enPart = parts.find(p => !/[\u0900-\u097F]/.test(p));
-                        if (studentChosenLang === 'EN' && enPart) {
-                            solEl.innerText = enPart.trim();
-                        } else if (studentChosenLang === 'HI' && hiPart) {
-                            solEl.innerText = hiPart.trim();
-                        }
-                    }
-                }
-            });
         }
     }, [currentQ, currentItem, isCorrect, isUnattempted]);
     return (React.createElement("div", { className: "flex h-full w-full font-sans overflow-hidden fixed inset-0 z-50 bg-white" },
@@ -9789,28 +9524,20 @@ const App = () => {
                     measurementId: "G-711VDHYL0G"
                 };
                 const dynamicImport = new Function('url', 'return import(url)');
-                // Keep the login-critical startup path lean: load Auth and Firestore first.
-                // Firebase Functions is loaded only when a payment callable is actually used.
-                const [{ initializeApp, getApps }, authModule, firestoreModule] = await Promise.all([
+                const [{ initializeApp, getApps }, authModule, firestoreModule, functionsModule] = await Promise.all([
                     dynamicImport("https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"),
                     dynamicImport("https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"),
-                    dynamicImport("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js")
+                    dynamicImport("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"),
+                    dynamicImport("https://www.gstatic.com/firebasejs/10.8.1/firebase-functions.js")
                 ]);
                 const { getFirestore, doc, setDoc, collection, getDocs, getDoc, runTransaction, deleteDoc, onSnapshot, serverTimestamp, enableIndexedDbPersistence } = firestoreModule;
                 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
                 const auth = authModule.getAuth(app);
                 const db = getFirestore(app);
-                let functionsModulePromise = null;
-                let functionsInstance = null;
+                const functionsInstance = functionsModule.getFunctions(app, "us-central1");
                 const callPaymentFunction = async (name, payload = {}) => {
                     if (!auth.currentUser)
                         throw new Error('कृपया पहले लॉगिन करें।');
-                    if (!functionsModulePromise) {
-                        functionsModulePromise = dynamicImport("https://www.gstatic.com/firebasejs/10.8.1/firebase-functions.js");
-                    }
-                    const functionsModule = await functionsModulePromise;
-                    if (!functionsInstance)
-                        functionsInstance = functionsModule.getFunctions(app, "us-central1");
                     const callable = functionsModule.httpsCallable(functionsInstance, name);
                     const result = await callable(payload);
                     return result.data;
@@ -9879,33 +9606,15 @@ const App = () => {
                         FastCache.setJSON('ug_cached_tests_lite', liteList);
                         FastCache.setIDB('ug_cached_tests_full', fetched);
                         // Pre-compile tests in idle time so launching any test is instant
-                        // Spread pre-compilation across separate idle slices so one large
-                        // batch cannot freeze scrolling or taps on lower-powered phones.
-                        const compileQueue = fetched.slice(0, 15);
-                        let compileIndex = 0;
-                        const compileNextWhenIdle = () => {
-                            if (compileIndex >= compileQueue.length)
-                                return;
-                            const testToCompile = compileQueue[compileIndex++];
-                            try {
-                                precompileSingleTestHtml(testToCompile);
-                            }
-                            catch (e) { }
-                            if (compileIndex < compileQueue.length) {
-                                if (window.requestIdleCallback) {
-                                    window.requestIdleCallback(compileNextWhenIdle, { timeout: 1200 });
+                        const idleRunner = window.requestIdleCallback || ((cb) => setTimeout(cb, 80));
+                        idleRunner(() => {
+                            fetched.slice(0, 15).forEach(t => {
+                                try {
+                                    precompileSingleTestHtml(t);
                                 }
-                                else {
-                                    setTimeout(compileNextWhenIdle, 120);
-                                }
-                            }
-                        };
-                        if (window.requestIdleCallback) {
-                            window.requestIdleCallback(compileNextWhenIdle, { timeout: 1200 });
-                        }
-                        else {
-                            setTimeout(compileNextWhenIdle, 250);
-                        }
+                                catch (e) { }
+                            });
+                        });
                     }, () => {
                         publicListenersAttached = false;
                     });
@@ -10104,34 +9813,14 @@ const App = () => {
             baseConfig = { ...targetTest, instructions: 'Follow the instructions inside the test. Save & Submit when done.' };
         }
         if (baseConfig) {
-            const isRrbPyqTest = currentView === TEST_TYPES.RRB_PYQ_SERIES ||
-                targetTest.category === 'RRB_PYQ' ||
-                String(targetTest.id || '').includes('rrb_pyq') ||
-                Boolean(targetTest.subCategory) ||
-                Boolean(targetTest.rawHtml && targetTest.rawHtml.includes('tb-header'));
-
-            const nextSelected = {
-                ...baseConfig,
-                title: targetTest.title,
-                id: targetTest.id,
-                category: isRrbPyqTest ? 'RRB_PYQ' : targetTest.category,
-                subCategory: targetTest.subCategory,
-                positiveMarks: targetTest.positiveMarks,
-                negativeMarks: targetTest.negativeMarks,
-                questions: targetTest.questions,
-                time: targetTest.time,
-                testTypeId: targetTest.testTypeId,
-                numParts: targetTest.numParts,
-                rawHtml: targetTest.rawHtml
-            };
+            const nextSelected = { ...baseConfig, title: targetTest.title, id: targetTest.id, testTypeId: targetTest.testTypeId, numParts: targetTest.numParts, rawHtml: targetTest.rawHtml };
             prewarmTest(nextSelected);
             setSelectedTest(nextSelected);
             if (actionType === 'ATTEMPT' || actionType === 'REATTEMPT') {
                 setIsReadyChecked(true);
-                // RRB PYQ TEST के सभी टेस्ट में Mock Test Series वाला बाहर का Instruction हटा दिया गया है;
-                // अब सीधे टेस्ट के अंदर वाला RRB PYQ CBT Instructions + Language Selection पेज ही खुलेगा।
-                if (isRrbPyqTest) {
-                    setCurrentView(nextSelected.testTypeId || TEST_TYPES.CUSTOM_HTML);
+                // RRB PYQ TEST के सभी टेस्ट में Attempt पर क्लिक करते ही सीधे अंदर वाला Bilingual Instructions + Language Selection पेज खुलेगा
+                if (targetTest.category === 'RRB_PYQ' || String(targetTest.id || '').includes('rrb_pyq')) {
+                    setCurrentView(nextSelected.testTypeId || nextSelected.id);
                 } else {
                     setCurrentView(TEST_TYPES.INSTRUCTIONS);
                 }
@@ -10157,19 +9846,16 @@ const App = () => {
         const accurateTScore = 50 + 10 * ((resultData.correct - mean) / sd);
         let newHistory = prevData.history ? [...prevData.history] : [];
         const nextAttemptIndex = newHistory.length > 0 ? newHistory[newHistory.length - 1].attemptIndex + 1 : 1;
-        const studentChosenLang = resultData.chosenLang || 'HI';
         newHistory.push({
             attemptIndex: nextAttemptIndex,
             totalAttempted: resultData.totalAttempted,
             correct: resultData.correct,
             tScore: accurateTScore,
-            chosenLang: studentChosenLang,
             details: resultData.details,
             completedAt: Date.now()
         });
         const newTestResult = {
             ...resultData,
-            chosenLang: studentChosenLang,
             tScore: accurateTScore,
             attemptCount: nextAttemptIndex,
             history: newHistory,
@@ -10183,7 +9869,8 @@ const App = () => {
             const docRef = firebaseMethods.docFunc(firebaseDb, FIRESTORE_ROOT, appIdRef.current, 'users', userAuth.uid, 'user_tests', selectedTest.id);
             await firebaseMethods.setDocFunc(docRef, newTestResult, { merge: true });
         }
-    };    const goHome = () => { setCurrentView(TEST_TYPES.MENU); setSelectedTest(null); setResults(null); };
+    };
+    const goHome = () => { setCurrentView(TEST_TYPES.MENU); setSelectedTest(null); setResults(null); };
     const isTesting = [TEST_TYPES.CONCENTRATION, TEST_TYPES.MEMORY, TEST_TYPES.TABLE, TEST_TYPES.PERCEPTUAL, TEST_TYPES.FIND_6, TEST_TYPES.CUSTOM_HTML].includes(currentView);
     return (React.createElement("div", { className: "flex h-screen bg-[#f8fafc] overflow-hidden font-sans" },
         !isTesting && currentView !== TEST_TYPES.RESULTS && currentView !== TEST_TYPES.SOLUTION && currentView !== TEST_TYPES.ANALYSIS && currentView !== TEST_TYPES.LOGIN && (React.createElement("aside", { className: `bg-slate-900 text-white w-64 flex-shrink-0 flex flex-col shadow-2xl sidebar ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full fixed h-full z-40'}` },
@@ -10864,379 +10551,5 @@ class ErrorBoundary extends React.Component {
 })();
 
 </script>
-
-    <!-- ==================== MOBILE INTERFACE JS (शुरू) ==================== -->
-<script id="ug-mobile-interface-js">
-(function () {
-    // 1. मोबाइल स्क्रीन की असली ऊँचाई (Address bar के साथ) सेट करें
-    function updateMobileHeight() {
-        var vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty('--ug-vh', vh + 'px');
-    }
-    updateMobileHeight();
-    window.addEventListener('resize', updateMobileHeight);
-    window.addEventListener('orientationchange', updateMobileHeight);
-
-    // पेज लोड होने के बाद मोबाइल इंटरफ़ेस के बटन और फ़ीचर जोड़ें
-    window.addEventListener('DOMContentLoaded', function () {
-
-        // 2. साइडबार के पीछे का काला पर्दा (Backdrop) बनाएं
-        var backdrop = document.createElement('div');
-        backdrop.id = 'ug-mobile-backdrop';
-        document.body.appendChild(backdrop);
-
-        // साइडबार खोलने और बंद करने का फ़ंक्शन
-        function toggleMobileSidebar(forceClose) {
-            var sidebar = document.querySelector('.sidebar, aside');
-            if (!sidebar) return;
-            if (forceClose) {
-                sidebar.classList.remove('ug-mobile-open');
-                backdrop.classList.remove('ug-show');
-            } else {
-                var isOpen = sidebar.classList.toggle('ug-mobile-open');
-                backdrop.classList.toggle('ug-show', isOpen);
-            }
-        }
-
-        // पर्दे पर टच करने से साइडबार बंद हो जाए
-        backdrop.addEventListener('click', function () {
-            toggleMobileSidebar(true);
-        });
-
-        // 3. मोबाइल के नीचे वाला ऐप बार (Bottom Navigation Bar) बनाएं
-        var bottomBar = document.createElement('nav');
-        bottomBar.id = 'ug-mobile-bottom-bar';
-        bottomBar.setAttribute('aria-label', 'Mobile Navigation');
-        bottomBar.innerHTML = '' +
-            '<button type="button" id="ug-btn-menu"><span class="ug-icon">&#9776;</span><span>मेनू</span></button>' +
-            '<button type="button" id="ug-btn-top"><span class="ug-icon">&#8593;</span><span>ऊपर जाएं</span></button>' +
-            '<button type="button" id="ug-btn-full"><span class="ug-icon">&#9974;</span><span>फुलस्क्रीन</span></button>' +
-            '<button type="button" id="ug-btn-reload"><span class="ug-icon">&#8635;</span><span>रिफ्रेश</span></button>';
-        document.body.appendChild(bottomBar);
-
-        // मेनू बटन क्लिक
-        document.getElementById('ug-btn-menu').addEventListener('click', function () {
-            toggleMobileSidebar(false);
-        });
-
-        // ऊपर जाएं (Scroll to Top) बटन क्लिक
-        document.getElementById('ug-btn-top').addEventListener('click', function () {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            var scrollBox = document.querySelector('.settings-scroll-wrapper, .test-fullscreen, main');
-            if (scrollBox) scrollBox.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-
-        // फुलस्क्रीन (App Mode) बटन क्लिक
-        document.getElementById('ug-btn-full').addEventListener('click', function () {
-            try {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen();
-                } else {
-                    document.exitFullscreen();
-                }
-            } catch (err) {
-                console.warn('Fullscreen उपलब्ध नहीं है:', err);
-            }
-        });
-
-        // रिफ्रेश बटन क्लिक
-        document.getElementById('ug-btn-reload').addEventListener('click', function () {
-            window.location.reload();
-        });
-
-        // 4. मोबाइल पर उंगली से दाएं स्वाइप (Swipe Right) करके मेनू खोलना
-        var touchStartX = 0;
-        var touchStartY = 0;
-        document.addEventListener('touchstart', function (e) {
-            if (e.touches.length === 1) {
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
-            }
-        }, { passive: true });
-
-        document.addEventListener('touchend', function (e) {
-            if (!e.changedTouches || !e.changedTouches.length) return;
-            var dx = e.changedTouches[0].clientX - touchStartX;
-            var dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
-            // बाएं किनारे से दाएं स्वाइप करने पर साइडबार खुलेगा
-            if (touchStartX < 35 && dx > 70 && dy < 50) {
-                var sidebar = document.querySelector('.sidebar, aside');
-                if (sidebar && !sidebar.classList.contains('ug-mobile-open')) {
-                    toggleMobileSidebar(false);
-                }
-            }
-            // बाएं स्वाइप करने पर साइडबार बंद होगा
-            if (dx < -70 && dy < 50) {
-                toggleMobileSidebar(true);
-            }
-        }, { passive: true });
-
-        // 5. बड़ी टेबल को अपने-आप मोबाइल स्क्रॉल बॉक्स में रखें
-        document.querySelectorAll('table').forEach(function (tbl) {
-            if (!tbl.parentElement.classList.contains('ug-table-scroll')) {
-                var wrapper = document.createElement('div');
-                wrapper.className = 'ug-table-scroll';
-                tbl.parentNode.insertBefore(wrapper, tbl);
-                wrapper.appendChild(tbl);
-            }
-        });
-    });
-})();
-</script>
-<!-- ==================== MOBILE INTERFACE JS (समाप्त) ==================== -->
-
-
-<!-- ==================== MOBILE SECURE LOGIN FIX (शुरू) ==================== -->
-<style id="ug-mobile-login-fix-css">
-    /* 1. मोबाइल में टाइप करते समय या लॉगिन पेज पर नीचे का बार छिपा दें ताकि Login बटन न दबे */
-    body.ug-keyboard-open #ug-mobile-bottom-bar,
-    body.ug-login-screen-active #ug-mobile-bottom-bar {
-        display: none !important;
-    }
-
-    body.ug-login-screen-active {
-        padding-bottom: 0 !important;
-    }
-
-    /* 2. लॉगिन बॉक्स/मॉडल हमेशा मोबाइल स्क्रीन में सही फिट रहे */
-    #loginModal, .login-modal, .login-box, .login-container, .login-glass-card, [id*="login" i], [class*="login" i] {
-        max-width: 100%;
-        box-sizing: border-box;
-    }
-
-    /* 3. मोबाइल पर लॉगिन एरर / सहायता संदेश दिखाने का सुंदर बैनर */
-    #ug-login-status-banner {
-        position: fixed;
-        top: 12px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: calc(100% - 24px);
-        max-width: 440px;
-        background: #1e293b;
-        color: #f8fafc;
-        border: 1px solid #f43f5e;
-        border-radius: 14px;
-        padding: 12px 14px;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-        z-index: 100001;
-        font-family: 'Noto Sans Devanagari', sans-serif;
-        font-size: 13px;
-        line-height: 1.45;
-        display: none;
-    }
-    #ug-login-status-banner .ug-lb-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-weight: 700;
-        color: #fda4af;
-        margin-bottom: 4px;
-    }
-    #ug-login-status-banner .ug-lb-close {
-        background: rgba(255, 255, 255, 0.12);
-        border: none;
-        color: #fff;
-        border-radius: 8px;
-        padding: 2px 8px;
-        font-size: 12px;
-        cursor: pointer;
-    }
-    #ug-login-status-banner .ug-lb-actions {
-        margin-top: 8px;
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-    #ug-login-status-banner .ug-lb-btn {
-        background: #f43f5e;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        padding: 6px 12px;
-        font-size: 12px;
-        font-weight: 700;
-        cursor: pointer;
-    }
-</style>
-
-<script id="ug-mobile-login-fix-js">
-(function () {
-    // 0. मोबाइल पर Login पेज के दौरान ऑटो-Fullscreen को रोकें (वरना कीबोर्ड और Secure Login अटक जाते हैं)
-    var isSmallTouchDevice = window.innerWidth <= 900 || ('ontouchstart' in window);
-    if (isSmallTouchDevice && Element.prototype.requestFullscreen) {
-        var origReqFs = Element.prototype.requestFullscreen;
-        Element.prototype.requestFullscreen = function () {
-            if (document.querySelector('.login-glass-wrapper')) {
-                return Promise.resolve();
-            }
-            return origReqFs.apply(this, arguments);
-        };
-    }
-
-    // 1. Mobile Private Mode / Safari में localStorage ब्लॉक होने पर साइट को क्रैश होने से बचाएं
-    try {
-        localStorage.setItem('__ug_test__', '1');
-        localStorage.removeItem('__ug_test__');
-    } catch (storageErr) {
-        console.warn('Mobile Storage ब्लॉक है, मेमोरी बैकअप चालू किया गया।');
-        window.__ugMemoryStore = {};
-    }
-
-    // 2. हिंदी में साफ संदेश (Banner) दिखाने का फ़ंक्शन
-    function showLoginHelpBanner(title, message, showReloadBtn) {
-        var banner = document.getElementById('ug-login-status-banner');
-        if (!banner) {
-            banner = document.createElement('div');
-            banner.id = 'ug-login-status-banner';
-            document.body.appendChild(banner);
-        }
-        var btnHtml = showReloadBtn
-            ? '<div class="ug-lb-actions"><button type="button" class="ug-lb-btn" id="ug-lb-retry">पेज रिफ्रेश करके फिर से कोशिश करें</button></div>'
-            : '';
-        banner.innerHTML =
-            '<div class="ug-lb-head"><span>&#9888; ' + title + '</span>' +
-            '<button type="button" class="ug-lb-close" id="ug-lb-close-btn">बंद करें &#10005;</button></div>' +
-            '<div>' + message + '</div>' + btnHtml;
-        banner.style.display = 'block';
-
-        var closeBtn = document.getElementById('ug-lb-close-btn');
-        if (closeBtn) closeBtn.onclick = function () { banner.style.display = 'none'; };
-
-        var retryBtn = document.getElementById('ug-lb-retry');
-        if (retryBtn) retryBtn.onclick = function () { window.location.reload(); };
-    }
-
-    // तकनीकी Error को सरल हिंदी में बदलना ताकि पता चले लॉगिन क्यों रुका
-    function translateAuthError(errText) {
-        var msg = String(errText || '').toLowerCase();
-        if (msg.indexOf('popup-blocked') !== -1 || msg.indexOf('popup-closed') !== -1) {
-            return 'मोबाइल ब्राउज़र ने लॉगिन Popup को रोक दिया है। कृपया Popup Allow करें या Chrome ब्राउज़र में खोलें।';
-        }
-        if (msg.indexOf('unauthorized-domain') !== -1) {
-            return 'यह वेबसाइट लिंक/IP आपके Firebase Authorized Domains में जुड़ा नहीं है।';
-        }
-        if (msg.indexOf('network') !== -1 || msg.indexOf('failed to fetch') !== -1 || msg.indexOf('timeout') !== -1) {
-            return 'सर्वर से संपर्क नहीं हो पा रहा है। इंटरनेट चेक करें या जांचें कि कोड में localhost तो नहीं लिखा है।';
-        }
-        if (msg.indexOf('storage') !== -1 || msg.indexOf('cookie') !== -1) {
-            return 'मोबाइल में Cookies/Storage ब्लॉक है। कृपया Incognito मोड बंद करके सामान्य Chrome में खोलें।';
-        }
-        return 'लॉगिन प्रक्रिया में तकनीकी रुकावट आई: ' + String(errText || 'अज्ञात त्रुटि');
-    }
-
-    // अटके हुए "Secure Login" बटन और स्पिनर को अनलॉक करने का फ़ंक्शन
-    var activeLoginBtn = null;
-    var activeBtnOriginalHTML = '';
-    var loginWatchdogTimer = null;
-
-    function unlockStuckLoginButton() {
-        if (loginWatchdogTimer) {
-            clearTimeout(loginWatchdogTimer);
-            loginWatchdogTimer = null;
-        }
-        if (activeLoginBtn) {
-            activeLoginBtn.disabled = false;
-            activeLoginBtn.style.pointerEvents = 'auto';
-            activeLoginBtn.style.opacity = '1';
-            if (activeBtnOriginalHTML) {
-                activeLoginBtn.innerHTML = activeBtnOriginalHTML;
-            }
-            activeLoginBtn = null;
-        }
-        document.querySelectorAll('.login-loader, .auth-spinner, #secureLoginLoader').forEach(function (el) {
-            el.style.display = 'none';
-        });
-    }
-
-    window.addEventListener('DOMContentLoaded', function () {
-        // Login स्क्रीन खुली रहने पर Bottom Bar को अपने-आप छिपाएँ
-        function syncLoginScreenClass() {
-            var isOnLogin = !!document.querySelector('.login-glass-wrapper');
-            document.body.classList.toggle('ug-login-screen-active', isOnLogin);
-        }
-        syncLoginScreenClass();
-        var domObserver = new MutationObserver(syncLoginScreenClass);
-        domObserver.observe(document.body, { childList: true, subtree: true });
-
-        // 3. WhatsApp / Facebook / Instagram के अंदर वेबसाइट खुलने पर चेतावनी दें
-        var ua = navigator.userAgent || '';
-        if (/FBAN|FBAV|Instagram|WhatsApp|Line\\//i.test(ua)) {
-            showLoginHelpBanner(
-                'इन-ऐप ब्राउज़र में लॉगिन रुक सकता है',
-                'आप यह वेबसाइट WhatsApp/Social App के अंदर चला रहे हैं। सही "Secure Login" के लिए ऊपर दाईं ओर 3 डॉट (⋮) दबाकर <b>"Open in Chrome"</b> चुनें।',
-                false
-            );
-        }
-
-        // 4. मोबाइल कीबोर्ड खुलने पर Bottom Bar छिपाएं ताकि Login बटन आसानी से दबे
-        document.addEventListener('focusin', function (e) {
-            if (e.target && /^(INPUT|TEXTAREA|SELECT)$/i.test(e.target.tagName)) {
-                document.body.classList.add('ug-keyboard-open');
-            }
-        });
-        document.addEventListener('focusout', function () {
-            setTimeout(function () {
-                if (!document.activeElement || !/^(INPUT|TEXTAREA|SELECT)$/i.test(document.activeElement.tagName)) {
-                    document.body.classList.remove('ug-keyboard-open');
-                }
-            }, 150);
-        });
-
-        // 5. लॉगिन से पहले मोबाइल कीबोर्ड द्वारा जोड़ा गया फालतू Space अपने-आप हटाएं
-        function trimLoginInputs(container) {
-            var scope = container || document;
-            scope.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]').forEach(function (inp) {
-                if (typeof inp.value === 'string') {
-                    inp.value = inp.value.trim();
-                }
-            });
-        }
-
-        // फॉर्म सबमिट या लॉगिन बटन क्लिक पर निगरानी (12 सेकंड Anti-Hang Watchdog)
-        document.addEventListener('click', function (e) {
-            var btn = e.target.closest('button, input[type="submit"], a');
-            if (!btn) return;
-            var txt = (btn.innerText || btn.value || '').toLowerCase();
-            if (/login|sign in|secure|लॉगिन|प्रवेश/i.test(txt)) {
-                trimLoginInputs(btn.closest('form') || document);
-
-                if (activeLoginBtn !== btn) {
-                    activeLoginBtn = btn;
-                    activeBtnOriginalHTML = btn.innerHTML;
-                }
-
-                if (loginWatchdogTimer) clearTimeout(loginWatchdogTimer);
-                loginWatchdogTimer = setTimeout(function () {
-                    if (!document.body.contains(btn)) return;
-                    var currentTxt = (btn.innerText || '').toLowerCase();
-                    var hasSpinner = btn.querySelector('.fa-spin, .spinner, .animate-spin');
-                    if (btn.disabled || hasSpinner || /securing|loading|checking|wait|connecting/i.test(currentTxt)) {
-                        unlockStuckLoginButton();
-                        showLoginHelpBanner(
-                            'Secure Login में अधिक समय लग रहा है',
-                            'मोबाइल नेटवर्क धीमा है या Firebase से जुड़ने में समय लग रहा है। कृपया इंटरनेट जांचें और <b>Chrome ब्राउज़र</b> में दोबारा कोशिश करें।',
-                            true
-                        );
-                    }
-                }, 12000);
-            }
-        }, true);
-
-        document.addEventListener('submit', function (e) {
-            trimLoginInputs(e.target);
-        }, true);
-    });
-
-    // 6. मोबाइल पर छिपे हुए JS / Promise Error को पकड़ें और लॉगिन अटकने से बचाएं
-    window.addEventListener('unhandledrejection', function (event) {
-        if (activeLoginBtn) {
-            var reason = event.reason && (event.reason.message || event.reason.code || event.reason);
-            unlockStuckLoginButton();
-            showLoginHelpBanner('लॉगिन पूरा नहीं हो सका', translateAuthError(reason), true);
-        }
-    });
-})();
-</script>
-<!-- ==================== MOBILE SECURE LOGIN FIX (समाप्त) ==================== -->
 </body>
 </html>
