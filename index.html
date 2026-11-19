@@ -11206,660 +11206,57 @@ class ErrorBoundary extends React.Component {
 })();
 </script>
 <!-- ==================== MOBILE SECURE LOGIN FIX (समाप्त) ==================== -->
-<!-- ==================== SMART SIDEBAR HIDE & COMPACT MOBILE MANAGER (शुरू) ==================== -->
-<style id="ug-smart-sidebar-css">
-    /* 1. दोनों (Laptop और Mobile) पर साइडबार को स्मूद तरीके से खोलने/छिपाने का एनिमेशन */
-    aside.sidebar,
-    aside {
-        transition: width 0.24s ease, min-width 0.24s ease, transform 0.24s ease, opacity 0.2s ease !important;
-    }
-
-    /* पुराने React वाले सिर्फ़ मोबाइल हैमबर्गर बटन को छिपा दें ताकि दो बटन न दिखें */
-    header button.lg\:hidden {
-        display: none !important;
-    }
-
-    /* हेडर में जुड़ने वाला नया स्मार्ट मेनू टॉगल बटन (Laptop + Mobile दोनों पर दिखेगा) */
-    #ug-smart-menu-toggle {
-        display: inline-flex !important;
-        align-items: center;
-        gap: 6px;
-        background: #0f172a;
-        color: #ffffff;
-        border: 1px solid #334155;
-        border-radius: 10px;
-        padding: 6px 11px;
-        font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
-        font-size: 12.5px;
-        font-weight: 700;
-        cursor: pointer;
-        white-space: nowrap;
-        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.16);
-        transition: background 0.18s ease, transform 0.12s ease;
-    }
-    #ug-smart-menu-toggle:hover {
-        background: #1e293b;
-    }
-    #ug-smart-menu-toggle:active {
-        transform: scale(0.96);
-    }
-
-    /* मोबाइल स्क्रीन मैनेजर खोलने का छोटा बटन (सिर्फ़ मोबाइल पर दिखेगा) */
-    #ug-screen-mgr-btn {
-        display: none;
-        align-items: center;
-        gap: 4px;
-        background: #eef2ff;
-        color: #3730a3;
-        border: 1px solid #c7d2fe;
-        border-radius: 9px;
-        padding: 5px 9px;
-        font-family: 'Noto Sans Devanagari', sans-serif;
-        font-size: 11.5px;
-        font-weight: 800;
-        cursor: pointer;
-        white-space: nowrap;
-    }
-
-    /* साइडबार के अंदर लगा छोटा कंट्रोल बार (Hide / Mini / Compact) */
-    #ug-sidebar-manager-box {
-        padding: 8px 8px;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-        background: rgba(15, 23, 42, 0.75);
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        flex-shrink: 0;
-    }
-    #ug-sidebar-manager-box .ug-mgr-row {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        width: 100%;
-    }
-    #ug-sidebar-manager-box button {
-        flex: 1;
-        border: 1px solid rgba(148, 163, 184, 0.3);
-        background: rgba(30, 41, 59, 0.9);
-        color: #e2e8f0;
-        border-radius: 7px;
-        padding: 5px 4px;
-        font-family: 'Noto Sans Devanagari', sans-serif;
-        font-size: 10.5px;
-        font-weight: 700;
-        cursor: pointer;
-        text-align: center;
-        white-space: nowrap;
-    }
-    #ug-sidebar-manager-box button.ug-active-pill {
-        background: #2563eb;
-        border-color: #60a5fa;
-        color: #ffffff;
-    }
-    #ug-sidebar-manager-box .ug-mgr-mini-expand {
-        display: none;
-        width: 100%;
-        justify-content: center;
-        align-items: center;
-        font-size: 13px;
-        padding: 6px 2px;
-        background: #2563eb;
-        color: #ffffff;
-        border-color: #60a5fa;
-    }
-
-    /* साइडबार के पीछे का हल्का काला पर्दा (मोबाइल कॉम्पैक्ट मोड में) */
-    #ug-smart-backdrop {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(15, 23, 42, 0.5);
-        backdrop-filter: blur(2px);
-        z-index: 9996;
-    }
-    #ug-smart-backdrop.ug-show {
-        display: block !important;
-    }
-
-    /* मोबाइल स्क्रीन मैनेजर पॉपअप (मेनू मोड + स्क्रीन साइज़ चुनने के लिए) */
-    #ug-screen-mgr-popover {
-        display: none;
-        position: fixed;
-        top: 56px;
-        right: 10px;
-        width: 265px;
-        max-width: calc(100vw - 20px);
-        background: #0f172a;
-        color: #f8fafc;
-        border: 1px solid #334155;
-        border-radius: 16px;
-        padding: 13px;
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
-        z-index: 100005;
-        font-family: 'Noto Sans Devanagari', sans-serif;
-    }
-    #ug-screen-mgr-popover.ug-open {
-        display: block !important;
-    }
-    #ug-screen-mgr-popover .ug-pop-title {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-size: 13px;
-        font-weight: 800;
-        color: #38bdf8;
-        margin-bottom: 10px;
-    }
-    #ug-screen-mgr-popover .ug-pop-label {
-        font-size: 11px;
-        font-weight: 700;
-        color: #cbd5e1;
-        margin: 8px 0 5px;
-    }
-    #ug-screen-mgr-popover .ug-pop-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6px;
-    }
-    #ug-screen-mgr-popover .ug-pop-btn {
-        background: #1e293b;
-        color: #e2e8f0;
-        border: 1px solid #334155;
-        border-radius: 9px;
-        padding: 7px 4px;
-        font-size: 11px;
-        font-weight: 700;
-        cursor: pointer;
-        text-align: center;
-    }
-    #ug-screen-mgr-popover .ug-pop-btn.ug-active-pill {
-        background: #10b981;
-        border-color: #34d399;
-        color: #022c22;
-        font-weight: 800;
-    }
-
-    /* ==================== LAPTOP / DESKTOP (769px से बड़ी स्क्रीन) ==================== */
-    @media (min-width: 769px) {
-        /* लैपटॉप पर जब यूज़र लेफ्ट मेनू Hide करे */
-        body.ug-desktop-sidebar-hidden aside.sidebar,
-        body.ug-desktop-sidebar-hidden aside {
-            width: 0 !important;
-            min-width: 0 !important;
-            max-width: 0 !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            border: none !important;
-            opacity: 0 !important;
-            overflow: hidden !important;
-            transform: translateX(-100%) !important;
-            pointer-events: none !important;
-        }
-        /* लैपटॉप पर मोबाइल वाले मिनी/कॉम्पैक्ट बटन छिपाएं, सिर्फ़ 'छिपाएँ' बटन रखें */
-        #ug-sidebar-manager-box .ug-mobile-only-btn {
-            display: none !important;
-        }
-    }
-
-    /* ==================== MOBILE (768px या उससे छोटी स्क्रीन) ==================== */
-    @media (max-width: 768px) {
-        #ug-screen-mgr-btn {
-            display: inline-flex !important;
-        }
-        #ug-smart-menu-toggle {
-            padding: 5px 9px;
-            font-size: 11.5px;
-        }
-        header {
-            height: 52px !important;
-            padding-left: 10px !important;
-            padding-right: 10px !important;
-            gap: 6px !important;
-        }
-        main {
-            padding: 10px !important;
-        }
-
-        /* ----- मोड 1: HIDDEN (मोबाइल पर बायां मेनू पूरी तरह छिपा हुआ - 100% स्क्रीन खुली) ----- */
-        body.ug-mobile-mode-hidden aside.sidebar,
-        body.ug-mobile-mode-hidden aside {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 196px !important;
-            max-width: 60vw !important;
-            height: 100dvh !important;
-            z-index: 9998 !important;
-            transform: translateX(-115%) !important;
-            pointer-events: none !important;
-        }
-        body.ug-mobile-mode-hidden aside.sidebar + div,
-        body.ug-mobile-mode-hidden aside + div {
-            margin-left: 0 !important;
-            width: 100% !important;
-        }
-
-        /* ----- मोड 2: COMPACT (बहुत छोटा स्लाइड मेनू - सिर्फ़ 196px चौड़ा, छोटे अक्षर व आइकन) ----- */
-        body.ug-mobile-mode-compact aside.sidebar,
-        body.ug-mobile-mode-compact aside {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 196px !important;
-            min-width: 175px !important;
-            max-width: 60vw !important;
-            height: 100dvh !important;
-            z-index: 9998 !important;
-            transform: translateX(0) !important;
-            pointer-events: auto !important;
-            overflow-y: auto !important;
-            box-shadow: 6px 0 26px rgba(0, 0, 0, 0.45) !important;
-        }
-        body.ug-mobile-mode-compact aside > div:first-child {
-            padding: 10px 10px !important;
-            gap: 8px !important;
-        }
-        body.ug-mobile-mode-compact aside .ug-logo-frame {
-            width: 30px !important;
-            height: 30px !important;
-        }
-        body.ug-mobile-mode-compact aside h1 {
-            font-size: 11.5px !important;
-            line-height: 1.2 !important;
-        }
-        body.ug-mobile-mode-compact aside p {
-            font-size: 8px !important;
-        }
-        body.ug-mobile-mode-compact aside > div.flex-1 {
-            padding-top: 6px !important;
-            padding-bottom: 64px !important;
-        }
-        body.ug-mobile-mode-compact aside nav button,
-        body.ug-mobile-mode-compact aside > div.flex-1 > div button {
-            padding: 7px 10px !important;
-            gap: 8px !important;
-            font-size: 11.5px !important;
-            line-height: 1.25 !important;
-        }
-        body.ug-mobile-mode-compact aside nav button i,
-        body.ug-mobile-mode-compact aside > div.flex-1 > div button i {
-            font-size: 13px !important;
-            width: 16px !important;
-            text-align: center !important;
-        }
-
-        /* ----- मोड 3: MINI RAIL (अति-सूक्ष्म बायां मेनू - सिर्फ़ 54px चौड़ी पट्टी, बाकी स्क्रीन खुली) ----- */
-        body.ug-mobile-mode-mini aside.sidebar,
-        body.ug-mobile-mode-mini aside {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 54px !important;
-            min-width: 54px !important;
-            max-width: 54px !important;
-            height: 100dvh !important;
-            z-index: 9998 !important;
-            transform: translateX(0) !important;
-            pointer-events: auto !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.28) !important;
-        }
-        body.ug-mobile-mode-mini aside.sidebar + div,
-        body.ug-mobile-mode-mini aside + div {
-            margin-left: 54px !important;
-            width: calc(100% - 54px) !important;
-        }
-        body.ug-mobile-mode-mini aside > div:first-child {
-            padding: 8px 4px !important;
-            justify-content: center !important;
-        }
-        body.ug-mobile-mode-mini aside > div:first-child > div:not(.ug-logo-frame),
-        body.ug-mobile-mode-mini aside h1,
-        body.ug-mobile-mode-mini aside p {
-            display: none !important;
-        }
-        body.ug-mobile-mode-mini aside .ug-logo-frame {
-            width: 30px !important;
-            height: 30px !important;
-        }
-        body.ug-mobile-mode-mini aside > div.flex-1 {
-            padding-top: 6px !important;
-            padding-bottom: 64px !important;
-        }
-        body.ug-mobile-mode-mini aside nav button,
-        body.ug-mobile-mode-mini aside > div.flex-1 > div button {
-            padding: 7px 2px !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 3px !important;
-            text-align: center !important;
-        }
-        body.ug-mobile-mode-mini aside nav button i,
-        body.ug-mobile-mode-mini aside > div.flex-1 > div button i {
-            font-size: 14px !important;
-            width: auto !important;
-            margin: 0 !important;
-        }
-        body.ug-mobile-mode-mini aside nav button span,
-        body.ug-mobile-mode-mini aside > div.flex-1 > div button span {
-            font-size: 7.5px !important;
-            line-height: 1.1 !important;
-            max-width: 48px !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            white-space: nowrap !important;
-            display: block !important;
-        }
-        body.ug-mobile-mode-mini #ug-sidebar-manager-box {
-            padding: 4px 3px !important;
-        }
-        body.ug-mobile-mode-mini #ug-sidebar-manager-box .ug-mgr-full-only {
-            display: none !important;
-        }
-        body.ug-mobile-mode-mini #ug-sidebar-manager-box .ug-mgr-mini-expand {
-            display: flex !important;
-        }
-
-        /* ----- मोबाइल स्क्रीन साइज़ मैनेजर (85% छोटा / 100% सामान्य / 110% बड़ा) ----- */
-        html[data-ug-mobile-scale="85"] main {
-            font-size: 12.5px !important;
-            padding: 8px !important;
-        }
-        html[data-ug-mobile-scale="85"] main h2,
-        html[data-ug-mobile-scale="85"] main h3 {
-            font-size: 14.5px !important;
-        }
-        html[data-ug-mobile-scale="85"] main button {
-            padding-top: 6px !important;
-            padding-bottom: 6px !important;
-            font-size: 11.5px !important;
-        }
-        html[data-ug-mobile-scale="110"] main {
-            font-size: 15.5px !important;
-        }
-    }
-</style>
-
-<script id="ug-smart-sidebar-js">
-(function () {
-    // 1. सुरक्षित स्टोरेज (यूज़र की पसंद याद रखने के लिए)
-    function savePref(key, val) {
-        try { localStorage.setItem(key, val); } catch (e) {}
-    }
-    function readPref(key, fallback) {
-        try {
-            var v = localStorage.getItem(key);
-            return v !== null ? v : fallback;
-        } catch (e) {
-            return fallback;
-        }
-    }
-
-    var isMobileWidth = function () { return window.innerWidth <= 768; };
-
-    // शुरुआती स्टेट: लैपटॉप पर खुला (या पिछली पसंद), मोबाइल पर छिपा (या पिछली पसंद)
-    var desktopHidden = readPref('ug_desktop_sidebar_hidden', '0') === '1';
-    var mobileMode = readPref('ug_mobile_menu_mode', 'hidden'); // 'hidden' | 'mini' | 'compact'
-    var mobileScale = readPref('ug_mobile_scale', '100');       // '85' | '100' | '110'
-    var autoCloseOnNav = readPref('ug_mobile_autoclose', '1') === '1';
-
-    function getOrCreateBackdrop() {
-        var bd = document.getElementById('ug-smart-backdrop');
-        if (!bd) {
-            bd = document.createElement('div');
-            bd.id = 'ug-smart-backdrop';
-            bd.addEventListener('click', function () {
-                setMobileMode('hidden');
-            });
-            document.body.appendChild(bd);
-        }
-        return bd;
-    }
-
-    function applySidebarState() {
-        // पुराने ug-mobile-open क्लास को हटाकर नए सिस्टम से टकराव रोकें
-        var sb = document.querySelector('aside.sidebar, aside');
-        if (sb) sb.classList.remove('ug-mobile-open');
-        var oldBd = document.getElementById('ug-mobile-backdrop');
-        if (oldBd) oldBd.classList.remove('ug-show');
-
-        document.body.classList.toggle('ug-desktop-sidebar-hidden', desktopHidden);
-        document.body.classList.remove('ug-mobile-mode-hidden', 'ug-mobile-mode-mini', 'ug-mobile-mode-compact');
-        document.body.classList.add('ug-mobile-mode-' + mobileMode);
-        document.documentElement.setAttribute('data-ug-mobile-scale', mobileScale);
-
-        var bd = getOrCreateBackdrop();
-        if (isMobileWidth() && mobileMode === 'compact' && sb) {
-            bd.classList.add('ug-show');
-        } else {
-            bd.classList.remove('ug-show');
-        }
-
-        // हेडर के मेनू बटन का टेक्स्ट अपडेट करें
-        var toggleBtn = document.getElementById('ug-smart-menu-toggle');
-        if (toggleBtn) {
-            if (isMobileWidth()) {
-                toggleBtn.innerHTML = mobileMode === 'hidden'
-                    ? '&#9776; <span>मेनू</span>'
-                    : (mobileMode === 'mini' ? '&#9776; <span>बड़ा</span>' : '&#10005; <span>छिपाएँ</span>');
-            } else {
-                toggleBtn.innerHTML = desktopHidden
-                    ? '&#9776; <span>मेनू दिखाएँ</span>'
-                    : '&#171; <span>मेनू छिपाएँ</span>';
-            }
-        }
-
-        // सक्रिय बटन हाइलाइट करें
-        document.querySelectorAll('[data-ug-set-mode]').forEach(function (btn) {
-            btn.classList.toggle('ug-active-pill', btn.getAttribute('data-ug-set-mode') === mobileMode);
-        });
-        document.querySelectorAll('[data-ug-set-scale]').forEach(function (btn) {
-            btn.classList.toggle('ug-active-pill', btn.getAttribute('data-ug-set-scale') === mobileScale);
-        });
-    }
-
-    function setMobileMode(mode) {
-        mobileMode = mode;
-        savePref('ug_mobile_menu_mode', mode);
-        applySidebarState();
-    }
-
-    function setMobileScale(scale) {
-        mobileScale = scale;
-        savePref('ug_mobile_scale', scale);
-        applySidebarState();
-    }
-
-    function toggleDesktopSidebar() {
-        desktopHidden = !desktopHidden;
-        savePref('ug_desktop_sidebar_hidden', desktopHidden ? '1' : '0');
-        applySidebarState();
-    }
-
-    function handleMainMenuToggle() {
-        if (isMobileWidth()) {
-            // मोबाइल पर: hidden -> compact -> hidden (या mini से compact)
-            if (mobileMode === 'compact') {
-                setMobileMode('hidden');
-            } else {
-                setMobileMode('compact');
-            }
-        } else {
-            toggleDesktopSidebar();
-        }
-    }
-
-    // मोबाइल स्क्रीन मैनेजर पॉपअप बनाएं
-    function ensureScreenManagerPopover() {
-        var pop = document.getElementById('ug-screen-mgr-popover');
-        if (pop) return pop;
-        pop = document.createElement('div');
-        pop.id = 'ug-screen-mgr-popover';
-        pop.innerHTML =
-            '<div class="ug-pop-title">' +
-                '<span>&#9881; मोबाइल स्क्रीन मैनेजर</span>' +
-                '<button type="button" id="ug-pop-close" style="background:#334155;color:#fff;border:none;border-radius:6px;padding:2px 7px;font-size:11px;cursor:pointer;">&#10005;</button>' +
-            '</div>' +
-            '<div class="ug-pop-label">1. बायां मेनू (Left Menu) कैसा दिखे?</div>' +
-            '<div class="ug-pop-grid">' +
-                '<button type="button" class="ug-pop-btn" data-ug-set-mode="hidden">छिपाएँ<br>(0px)</button>' +
-                '<button type="button" class="ug-pop-btn" data-ug-set-mode="mini">मिनी बार<br>(54px)</button>' +
-                '<button type="button" class="ug-pop-btn" data-ug-set-mode="compact">कॉम्पैक्ट<br>(196px)</button>' +
-            '</div>' +
-            '<div class="ug-pop-label">2. मोबाइल स्क्रीन के हिसाब से साइज़:</div>' +
-            '<div class="ug-pop-grid">' +
-                '<button type="button" class="ug-pop-btn" data-ug-set-scale="85">छोटा<br>85%</button>' +
-                '<button type="button" class="ug-pop-btn" data-ug-set-scale="100">सामान्य<br>100%</button>' +
-                '<button type="button" class="ug-pop-btn" data-ug-set-scale="110">बड़ा<br>110%</button>' +
-            '</div>';
-        document.body.appendChild(pop);
-
-        pop.addEventListener('click', function (e) {
-            var modeBtn = e.target.closest('[data-ug-set-mode]');
-            if (modeBtn) {
-                setMobileMode(modeBtn.getAttribute('data-ug-set-mode'));
-                return;
-            }
-            var scaleBtn = e.target.closest('[data-ug-set-scale]');
-            if (scaleBtn) {
-                setMobileScale(scaleBtn.getAttribute('data-ug-set-scale'));
-                return;
-            }
-            if (e.target.id === 'ug-pop-close') {
-                pop.classList.remove('ug-open');
-            }
-        });
-        return pop;
-    }
-
-    // हेडर और साइडबार में कंट्रोल बटन सुरक्षित रूप से जोड़ें (React री-रेंडर के बाद भी बना रहेगा)
-    function injectControls() {
-        var sidebar = document.querySelector('aside.sidebar, aside');
-        var header = document.querySelector('header');
-
-        // यदि टेस्ट फुलस्क्रीन या लॉगिन पेज खुला है (साइडबार नहीं है) तो पॉपअप बंद रखें
-        if (!sidebar) {
-            var p = document.getElementById('ug-screen-mgr-popover');
-            if (p) p.classList.remove('ug-open');
-            return;
-        }
-
-        // A. साइडबार के ऊपर Hide / Mini / Compact पट्टी जोड़ें
-        if (!document.getElementById('ug-sidebar-manager-box')) {
-            var mgr = document.createElement('div');
-            mgr.id = 'ug-sidebar-manager-box';
-            mgr.innerHTML =
-                '<div class="ug-mgr-row ug-mgr-full-only">' +
-                    '<button type="button" id="ug-sb-hide-btn" title="मेनू छिपाएँ">&#171; छिपाएँ</button>' +
-                    '<button type="button" class="ug-mobile-only-btn" data-ug-set-mode="mini" title="छोटा आइकन बार">मिनी</button>' +
-                    '<button type="button" class="ug-mobile-only-btn" data-ug-set-mode="compact" title="कॉम्पैक्ट मेनू">छोटा</button>' +
-                '</div>' +
-                '<button type="button" class="ug-mgr-mini-expand" id="ug-sb-expand-btn" title="मेनू बड़ा या छिपाएँ">&#187;</button>';
-
-            if (sidebar.children.length > 1) {
-                sidebar.insertBefore(mgr, sidebar.children[1]);
-            } else {
-                sidebar.appendChild(mgr);
-            }
-
-            mgr.addEventListener('click', function (e) {
-                var hideBtn = e.target.closest('#ug-sb-hide-btn');
-                if (hideBtn) {
-                    if (isMobileWidth()) setMobileMode('hidden');
-                    else toggleDesktopSidebar();
-                    return;
-                }
-                var expBtn = e.target.closest('#ug-sb-expand-btn');
-                if (expBtn) {
-                    setMobileMode('compact');
-                    return;
-                }
-                var mBtn = e.target.closest('[data-ug-set-mode]');
-                if (mBtn) {
-                    setMobileMode(mBtn.getAttribute('data-ug-set-mode'));
-                }
-            });
-        }
-
-        // B. हेडर में 'मेनू छिपाएँ/दिखाएँ' और मोबाइल 'स्क्रीन मैनेजर' बटन जोड़ें
-        if (header && !document.getElementById('ug-smart-menu-toggle')) {
-            var leftBox = header.firstElementChild || header;
-
-            var toggleBtn = document.createElement('button');
-            toggleBtn.type = 'button';
-            toggleBtn.id = 'ug-smart-menu-toggle';
-            toggleBtn.title = 'Left Menu Hide / Show (Alt + M)';
-            toggleBtn.addEventListener('click', handleMainMenuToggle);
-            leftBox.insertBefore(toggleBtn, leftBox.firstChild);
-
-            var scrBtn = document.createElement('button');
-            scrBtn.type = 'button';
-            scrBtn.id = 'ug-screen-mgr-btn';
-            scrBtn.innerHTML = '&#9881; <span>स्क्रीन</span>';
-            scrBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                var pop = ensureScreenManagerPopover();
-                pop.classList.toggle('ug-open');
-                applySidebarState();
-            });
-            leftBox.appendChild(scrBtn);
-        }
-
-        applySidebarState();
-    }
-
-    window.addEventListener('DOMContentLoaded', function () {
-        ensureScreenManagerPopover();
-        injectControls();
-
-        // React पेज बदलने पर कंट्रोल दोबारा लगाएं
-        var obs = new MutationObserver(function () {
-            injectControls();
-        });
-        obs.observe(document.body, { childList: true, subtree: true });
-
-        // मोबाइल में किसी भी मेनू आइटम पर क्लिक करते ही कॉम्पैक्ट मेनू अपने-आप बंद हो जाए
-        document.addEventListener('click', function (e) {
-            var pop = document.getElementById('ug-screen-mgr-popover');
-            if (pop && pop.classList.contains('ug-open') && !e.target.closest('#ug-screen-mgr-popover') && !e.target.closest('#ug-screen-mgr-btn')) {
-                pop.classList.remove('ug-open');
-            }
-
-            // पुराने बॉटम बार के 'मेनू' बटन (#ug-btn-menu) को नए स्मार्ट मेनू से जोड़ें
-            if (e.target.closest('#ug-btn-menu')) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                handleMainMenuToggle();
-                return;
-            }
-
-            if (isMobileWidth() && autoCloseOnNav && mobileMode === 'compact') {
-                var navBtn = e.target.closest('aside nav button, aside > div.flex-1 > div button');
-                if (navBtn && !navBtn.closest('#ug-sidebar-manager-box')) {
-                    setTimeout(function () { setMobileMode('hidden'); }, 120);
-                }
-            }
-        }, true);
-
-        // लैपटॉप कीबोर्ड शॉर्टकट: Alt + M से लेफ्ट मेनू Hide / Show करें
-        window.addEventListener('keydown', function (e) {
-            if (e.altKey && (e.key === 'm' || e.key === 'M')) {
-                e.preventDefault();
-                handleMainMenuToggle();
-            }
-        });
-
-        window.addEventListener('resize', applySidebarState);
-    });
-})();
-</script>
-<!-- ==================== SMART SIDEBAR HIDE & COMPACT MOBILE MANAGER (समाप्त) ==================== -->
-<!-- ==================== AUTO-HIDE SIDEBAR + BOTTOM-LEFT MENU + FULL DESKTOP DATA (शुरू) ==================== -->
+<!-- ==================== AUTO-HIDE SIDEBAR + LOGIN TYPING FIX + BOTTOM-LEFT MENU (शुरू) ==================== -->
 <style id="ug-auto-hide-desktop-mobile-css">
     :root {
         --ug-fit-zoom: 1;
+    }
+
+    /* 0. LOGIN TYPING FIX: Email और Password बॉक्स में हमेशा आसानी से टाइप हो */
+    input,
+    textarea,
+    select,
+    .login-input {
+        pointer-events: auto !important;
+        -webkit-user-select: text !important;
+        user-select: text !important;
+        touch-action: manipulation !important;
+    }
+
+    /* लॉगिन बॉक्स के अंदर बने Envelope / Lock आइकन पर टैप अटकने न दें */
+    .login-glass-wrapper i.fa-solid,
+    .login-glass-wrapper i.fa-regular,
+    .login-glass-wrapper i.fas {
+        pointer-events: none !important;
+    }
+
+    /* हिलने वाले एनिमेशन (.anim-float) को बंद करें ताकि मोबाइल कीबोर्ड और कर्सर बिल्कुल न अटके */
+    .login-glass-card,
+    .login-glass-card.anim-float {
+        animation: none !important;
+        transform: none !important;
+    }
+
+    /* लॉगिन पेज पर कीबोर्ड खुलने पर स्मूद स्क्रॉल हो और कोई ओवरले ऊपर न आए */
+    .login-glass-wrapper .settings-scroll-wrapper {
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    body.ug-login-screen-active #ug-smart-backdrop,
+    body.ug-login-screen-active #ug-mobile-backdrop,
+    body.ug-login-screen-active #ug-mobile-bottom-bar,
+    body.ug-login-screen-active #ug-bottom-left-menu-btn,
+    body.ug-keyboard-open #ug-bottom-left-menu-btn,
+    body.ug-keyboard-open #ug-mobile-bottom-bar {
+        display: none !important;
+        pointer-events: none !important;
+    }
+
+    body.ug-login-screen-active {
+        padding-bottom: 0 !important;
     }
 
     /* 1. साइडबार का स्मूद स्लाइड एनिमेशन */
@@ -11934,7 +11331,7 @@ class ErrorBoundary extends React.Component {
         display: block !important;
     }
 
-    /* साइडबार के अंदर लगा छोटा कंट्रोल बार (बंद करें + डेस्कटॉप/मोबाइल व्यू स्विच) */
+    /* साइडबार के अंदर लगा छोटा कंट्रोल बार */
     #ug-sidebar-top-ctrl {
         padding: 8px;
         border-bottom: 1px solid rgba(148, 163, 184, 0.22);
@@ -11992,7 +11389,6 @@ class ErrorBoundary extends React.Component {
 
     /* ==================== MOBILE (768px या उससे छोटी स्क्रीन) ==================== */
     @media (max-width: 768px) {
-        /* पुराने पूरे बॉटम बार को हटाएं ताकि पूरी स्क्रीन का डेटा दिखे और नीचे बाएँ कोने में सिर्फ़ Menu बटन रहे */
         #ug-mobile-bottom-bar,
         #ug-mobile-backdrop {
             display: none !important;
@@ -12033,7 +11429,6 @@ class ErrorBoundary extends React.Component {
             box-shadow: 6px 0 28px rgba(0, 0, 0, 0.48) !important;
         }
 
-        /* मोबाइल पर खुला हुआ साइडबार छोटा व साफ दिखे */
         aside > div:first-child {
             padding: 12px 10px !important;
             gap: 8px !important;
@@ -12060,12 +11455,10 @@ class ErrorBoundary extends React.Component {
             font-size: 12px !important;
         }
 
-        /* लॉगिन होने पर (जब साइडबार मौजूद हो) तभी नीचे बाएँ कोने का Menu बटन दिखाएं */
-        body.ug-has-sidebar #ug-bottom-left-menu-btn {
+        body.ug-has-sidebar:not(.ug-login-screen-active):not(.ug-keyboard-open) #ug-bottom-left-menu-btn {
             display: inline-flex !important;
         }
 
-        /* मुख्य कंटेंट को 100% चौड़ाई दें */
         aside + div {
             margin-left: 0 !important;
             width: 100% !important;
@@ -12078,7 +11471,6 @@ class ErrorBoundary extends React.Component {
             padding: 0 10px !important;
             gap: 6px !important;
         }
-        /* डेस्कटॉप हेडर का नाम जो मोबाइल पर hidden sm:block था, उसे भी दिखाएं */
         body.ug-desktop-all-data header h2.hidden,
         body.ug-desktop-all-data main .hidden.sm\\:block,
         body.ug-desktop-all-data main .hidden.md\\:block {
@@ -12095,7 +11487,6 @@ class ErrorBoundary extends React.Component {
             padding: 4px 8px !important;
         }
 
-        /* मुख्य पेज में डेस्कटॉप जैसा पूरा लेआउट ऑटो-फिट ज़ूम के साथ (बिना साइड-स्क्रॉल के) */
         body.ug-desktop-all-data main:not(.test-fullscreen) {
             padding: 8px 6px 70px 6px !important;
             overflow-x: hidden !important;
@@ -12109,7 +11500,6 @@ class ErrorBoundary extends React.Component {
             zoom: var(--ug-fit-zoom, 0.46) !important;
         }
 
-        /* डेस्कटॉप की सभी मल्टी-कॉलम रो और ग्रिड मोबाइल में भी एक साथ दिखें */
         body.ug-desktop-all-data main:not(.test-fullscreen) .lg\\:flex-row,
         body.ug-desktop-all-data main:not(.test-fullscreen) .md\\:flex-row,
         body.ug-desktop-all-data main:not(.test-fullscreen) .sm\\:flex-row {
@@ -12147,23 +11537,56 @@ class ErrorBoundary extends React.Component {
 
 <script id="ug-auto-hide-desktop-mobile-js">
 (function () {
+    // ==================== 1. LOGIN TYPING & FULLSCREEN PROTECT (तुरंत चालू) ====================
+    // किसी भी इनपुट बॉक्स या Login पेज पर टैप करते समय Auto-Fullscreen को रोकें ताकि कीबोर्ड/कर्सर कभी न कटे
+    var lastInputTapTime = 0;
+    ['touchstart', 'pointerdown', 'mousedown'].forEach(function (evName) {
+        document.addEventListener(evName, function (e) {
+            if (e.target && e.target.closest && e.target.closest('input, textarea, select, label, form, .login-glass-wrapper, [contenteditable="true"]')) {
+                lastInputTapTime = Date.now();
+                window._userExitedFullscreen = true;
+            }
+        }, { passive: true, capture: true });
+    });
+
+    function shouldBlockFullscreenNow() {
+        if (document.querySelector('.login-glass-wrapper')) return true;
+        if (Date.now() - lastInputTapTime < 2500) return true;
+        var ae = document.activeElement;
+        if (ae && /^(INPUT|TEXTAREA|SELECT)$/i.test(ae.tagName)) return true;
+        return false;
+    }
+
+    ['requestFullscreen', 'webkitRequestFullscreen', 'mozRequestFullScreen', 'msRequestFullscreen'].forEach(function (fnName) {
+        if (Element.prototype && typeof Element.prototype[fnName] === 'function') {
+            var origFs = Element.prototype[fnName];
+            Element.prototype[fnName] = function () {
+                if (shouldBlockFullscreenNow()) {
+                    return Promise.resolve();
+                }
+                return origFs.apply(this, arguments);
+            };
+        }
+    });
+
+    // ==================== 2. AUTO-HIDE SIDEBAR + BOTTOM-LEFT MENU (लूप-फ्री) ====================
     function savePref(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
     function readPref(k, fb) { try { var v = localStorage.getItem(k); return v !== null ? v : fb; } catch (e) { return fb; } }
 
     var isMobile = function () { return window.innerWidth <= 768; };
-
-    // मोबाइल पर लॉगिन के बाद Left Sidebar हमेशा शुरुआत में Hide (false) रहेगा
     var mobileMenuOpen = false;
     var desktopHidden = readPref('ug_desktop_sidebar_hidden', '0') === '1';
-    // 'desktop-fit' = मोबाइल में डेस्कटॉप जैसा सारा डेटा एक साथ दिखे (डिफ़ॉल्ट)
     var mobileViewMode = readPref('ug_mobile_view_mode', 'desktop-fit');
     var wasOnLoginScreen = true;
+    var syncTimer = null;
 
-    // मोबाइल स्क्रीन की चौड़ाई के अनुसार ऑटो-फिट ज़ूम निकालें (ताकि डेस्कटॉप का 820px लेआउट बिना कटे फिट हो)
     function updateDesktopFitZoom() {
         var vw = Math.max(300, window.innerWidth || 360);
-        var zoomVal = Math.max(0.38, Math.min(1, (vw - 12) / 820));
-        document.documentElement.style.setProperty('--ug-fit-zoom', zoomVal.toFixed(4));
+        var zoomVal = Math.max(0.38, Math.min(1, (vw - 12) / 820)).toFixed(4);
+        if (document.documentElement.dataset.ugZoom !== zoomVal) {
+            document.documentElement.dataset.ugZoom = zoomVal;
+            document.documentElement.style.setProperty('--ug-fit-zoom', zoomVal);
+        }
     }
 
     function ensureBackdrop() {
@@ -12171,9 +11594,7 @@ class ErrorBoundary extends React.Component {
         if (!bd) {
             bd = document.createElement('div');
             bd.id = 'ug-smart-backdrop';
-            bd.addEventListener('click', function () {
-                setMobileMenu(false);
-            });
+            bd.addEventListener('click', function () { setMobileMenu(false); });
             document.body.appendChild(bd);
         }
         return bd;
@@ -12203,7 +11624,7 @@ class ErrorBoundary extends React.Component {
         var isTestRunning = !!document.querySelector('main.test-fullscreen');
         var hasSidebar = !!sidebar && !isLoginVisible && !isTestRunning;
 
-        // जैसे ही स्टूडेंट Login पेज से डैशबोर्ड पर आए, मोबाइल में Left Sidebar अपने-आप Hide हो जाए
+        // लॉगिन करते ही मोबाइल में Left Sidebar अपने-आप Hide हो जाए
         if (wasOnLoginScreen && hasSidebar) {
             mobileMenuOpen = false;
             wasOnLoginScreen = false;
@@ -12213,9 +11634,11 @@ class ErrorBoundary extends React.Component {
             mobileMenuOpen = false;
         }
 
-        // पुराने क्लास साफ रखें ताकि टकराव न हो
-        if (sidebar) sidebar.classList.remove('ug-mobile-open');
+        if (sidebar && sidebar.classList.contains('ug-mobile-open')) {
+            sidebar.classList.remove('ug-mobile-open');
+        }
 
+        document.body.classList.toggle('ug-login-screen-active', isLoginVisible);
         document.body.classList.toggle('ug-has-sidebar', hasSidebar);
         document.body.classList.toggle('ug-mobile-menu-open', hasSidebar && mobileMenuOpen);
         document.body.classList.toggle('ug-desktop-sidebar-hidden', desktopHidden);
@@ -12224,14 +11647,21 @@ class ErrorBoundary extends React.Component {
         var bd = ensureBackdrop();
         bd.classList.toggle('ug-show', isMobile() && hasSidebar && mobileMenuOpen);
 
+        // केवल स्टेट बदलने पर ही innerHTML अपडेट करें (इससे कभी Infinite Loop नहीं बनेगा!)
         var blBtn = ensureBottomLeftMenuBtn();
-        blBtn.classList.toggle('ug-menu-is-open', mobileMenuOpen);
-        blBtn.innerHTML = mobileMenuOpen
-            ? '<span>&#10005;</span><span>बंद करें</span>'
-            : '<span>&#9776;</span><span>मेनू</span>';
+        var blState = mobileMenuOpen ? 'open' : 'closed';
+        if (blBtn.dataset.state !== blState) {
+            blBtn.dataset.state = blState;
+            blBtn.classList.toggle('ug-menu-is-open', mobileMenuOpen);
+            blBtn.innerHTML = mobileMenuOpen
+                ? '<span>&#10005;</span><span>बंद करें</span>'
+                : '<span>&#9776;</span><span>मेनू</span>';
+        }
 
         var lapBtn = document.getElementById('ug-laptop-menu-toggle');
-        if (lapBtn) {
+        var lapState = desktopHidden ? 'hidden' : 'shown';
+        if (lapBtn && lapBtn.dataset.state !== lapState) {
+            lapBtn.dataset.state = lapState;
             lapBtn.innerHTML = desktopHidden
                 ? '&#9776; <span>मेनू दिखाएँ</span>'
                 : '&#171; <span>मेनू छिपाएँ</span>';
@@ -12257,7 +11687,6 @@ class ErrorBoundary extends React.Component {
         var sidebar = document.querySelector('aside.sidebar, aside');
         var header = document.querySelector('header');
 
-        // 1. साइडबार के अंदर छोटा कंट्रोल बार (मेनू बंद करें + डेस्कटॉप/सामान्य व्यू विकल्प)
         if (sidebar && !document.getElementById('ug-sidebar-top-ctrl')) {
             var ctrl = document.createElement('div');
             ctrl.id = 'ug-sidebar-top-ctrl';
@@ -12287,7 +11716,6 @@ class ErrorBoundary extends React.Component {
             });
         }
 
-        // 2. लैपटॉप हेडर के लिए Hide/Show बटन
         if (header && !document.getElementById('ug-laptop-menu-toggle')) {
             var leftBox = header.firstElementChild || header;
             var lapBtn = document.createElement('button');
@@ -12301,16 +11729,39 @@ class ErrorBoundary extends React.Component {
         applyAllStates();
     }
 
+    function scheduleSync() {
+        if (syncTimer) return;
+        syncTimer = setTimeout(function () {
+            syncTimer = null;
+            injectControls();
+        }, 80);
+    }
+
     window.addEventListener('DOMContentLoaded', function () {
         ensureBackdrop();
         ensureBottomLeftMenuBtn();
         injectControls();
 
-        // React पेज/लॉगिन बदलते ही ऑटो-हाइड और कंट्रोल तुरंत सिंक करें
-        var obs = new MutationObserver(function () {
-            injectControls();
+        // केवल #root पर हल्का Debounced Observer लगाएं (body पर नहीं, ताकि कभी हैंग न हो)
+        var rootEl = document.getElementById('root');
+        if (rootEl) {
+            var obs = new MutationObserver(scheduleSync);
+            obs.observe(rootEl, { childList: true, subtree: true });
+        }
+
+        // मोबाइल कीबोर्ड खुलने पर फ्लोटिंग बटन छिपाएं ताकि टाइपिंग में कोई बाधा न हो
+        document.addEventListener('focusin', function (e) {
+            if (e.target && /^(INPUT|TEXTAREA|SELECT)$/i.test(e.target.tagName)) {
+                document.body.classList.add('ug-keyboard-open');
+            }
         });
-        obs.observe(document.body, { childList: true, subtree: true });
+        document.addEventListener('focusout', function () {
+            setTimeout(function () {
+                if (!document.activeElement || !/^(INPUT|TEXTAREA|SELECT)$/i.test(document.activeElement.tagName)) {
+                    document.body.classList.remove('ug-keyboard-open');
+                }
+            }, 150);
+        });
 
         // मोबाइल में मेनू के किसी भी विकल्प पर क्लिक करते ही Left Sidebar अपने-आप छिप जाए
         document.addEventListener('click', function (e) {
@@ -12322,7 +11773,6 @@ class ErrorBoundary extends React.Component {
             }
         }, true);
 
-        // लैपटॉप कीबोर्ड शॉर्टकट: Alt + M
         window.addEventListener('keydown', function (e) {
             if (e.altKey && (e.key === 'm' || e.key === 'M')) {
                 e.preventDefault();
@@ -12331,11 +11781,11 @@ class ErrorBoundary extends React.Component {
             }
         });
 
-        window.addEventListener('resize', applyAllStates);
-        window.addEventListener('orientationchange', applyAllStates);
+        window.addEventListener('resize', scheduleSync);
+        window.addEventListener('orientationchange', scheduleSync);
     });
 })();
 </script>
-<!-- ==================== AUTO-HIDE SIDEBAR + BOTTOM-LEFT MENU + FULL DESKTOP DATA (समाप्त) ==================== -->
+<!-- ==================== AUTO-HIDE SIDEBAR + LOGIN TYPING FIX + BOTTOM-LEFT MENU (समाप्त) ==================== -->
 </body>
 </html>
