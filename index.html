@@ -11473,587 +11473,9 @@ class ErrorBoundary extends React.Component {
 })();
 </script>
 <!-- ==================== MOBILE SECURE LOGIN FIX (समाप्त) ==================== -->
-<!-- ==================== AUTO-HIDE SIDEBAR + LOGIN TYPING FIX + BOTTOM-LEFT MENU (शुरू) ==================== -->
-<style id="ug-auto-hide-desktop-mobile-css">
-    :root {
-        --ug-fit-zoom: 1;
-    }
 
-    /* 0. LOGIN TYPING FIX: Email और Password बॉक्स में हमेशा आसानी से टाइप हो */
-    input,
-    textarea,
-    select,
-    .login-input {
-        pointer-events: auto !important;
-        -webkit-user-select: text !important;
-        user-select: text !important;
-        touch-action: manipulation !important;
-    }
 
-    /* लॉगिन बॉक्स के अंदर बने Envelope / Lock आइकन पर टैप अटकने न दें */
-    .login-glass-wrapper i.fa-solid,
-    .login-glass-wrapper i.fa-regular,
-    .login-glass-wrapper i.fas {
-        pointer-events: none !important;
-    }
 
-    /* हिलने वाले एनिमेशन (.anim-float) को बंद करें ताकि मोबाइल कीबोर्ड और कर्सर बिल्कुल न अटके */
-    .login-glass-card,
-    .login-glass-card.anim-float {
-        animation: none !important;
-        transform: none !important;
-    }
-
-    /* लॉगिन पेज पर कीबोर्ड खुलने पर स्मूद स्क्रॉल हो और कोई ओवरले ऊपर न आए */
-    .login-glass-wrapper .settings-scroll-wrapper {
-        height: 100dvh !important;
-        max-height: 100dvh !important;
-        overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-    }
-
-    body.ug-login-screen-active #ug-smart-backdrop,
-    body.ug-login-screen-active #ug-mobile-backdrop,
-    body.ug-login-screen-active #ug-mobile-bottom-bar,
-    body.ug-login-screen-active #ug-bottom-left-menu-btn,
-    body.ug-keyboard-open #ug-bottom-left-menu-btn,
-    body.ug-keyboard-open #ug-mobile-bottom-bar {
-        display: none !important;
-        pointer-events: none !important;
-    }
-
-    body.ug-login-screen-active {
-        padding-bottom: 0 !important;
-    }
-
-    /* 1. साइडबार का स्मूद स्लाइड एनिमेशन */
-    aside.sidebar,
-    aside {
-        transition: width 0.24s ease, min-width 0.24s ease, transform 0.24s ease, opacity 0.2s ease !important;
-    }
-
-    /* पुराने React वाले हैमबर्गर बटन को छिपाएं */
-    header button.lg\\:hidden {
-        display: none !important;
-    }
-
-    /* लैपटॉप के लिए ऊपर हेडर का Hide/Show बटन */
-    #ug-laptop-menu-toggle {
-        display: none;
-        align-items: center;
-        gap: 6px;
-        background: #0f172a;
-        color: #ffffff;
-        border: 1px solid #334155;
-        border-radius: 10px;
-        padding: 6px 11px;
-        font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
-        font-size: 12.5px;
-        font-weight: 700;
-        cursor: pointer;
-        white-space: nowrap;
-        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.16);
-    }
-
-    /* मोबाइल के नीचे बाएँ कोने (Bottom-Left Corner) का फ्लोटिंग Menu बटन */
-    #ug-bottom-left-menu-btn {
-        display: none;
-        position: fixed;
-        left: 12px;
-        bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-        z-index: 100002;
-        background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
-        color: #ffffff;
-        border: 1.5px solid rgba(125, 211, 252, 0.85);
-        border-radius: 9999px;
-        padding: 9px 14px;
-        font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
-        font-size: 12.5px;
-        font-weight: 800;
-        align-items: center;
-        gap: 6px;
-        cursor: pointer;
-        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.45);
-        touch-action: manipulation;
-        transition: transform 0.15s ease, background 0.2s ease;
-    }
-    #ug-bottom-left-menu-btn:active {
-        transform: scale(0.94);
-    }
-    #ug-bottom-left-menu-btn.ug-menu-is-open {
-        background: linear-gradient(135deg, #be123c 0%, #e11d48 100%);
-        border-color: #fda4af;
-    }
-
-    /* मेनू खुलने पर पीछे का हल्का काला पर्दा */
-    #ug-smart-backdrop {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(15, 23, 42, 0.52);
-        backdrop-filter: blur(2px);
-        z-index: 99995;
-    }
-    #ug-smart-backdrop.ug-show {
-        display: block !important;
-    }
-
-    /* साइडबार के अंदर लगा छोटा कंट्रोल बार */
-    #ug-sidebar-top-ctrl {
-        padding: 8px;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.22);
-        background: rgba(15, 23, 42, 0.8);
-        display: flex;
-        flex-wrap: wrap;
-        gap: 5px;
-        flex-shrink: 0;
-    }
-    #ug-sidebar-top-ctrl button {
-        flex: 1;
-        border: 1px solid rgba(148, 163, 184, 0.35);
-        background: #1e293b;
-        color: #f1f5f9;
-        border-radius: 8px;
-        padding: 5px 6px;
-        font-family: 'Noto Sans Devanagari', sans-serif;
-        font-size: 10.5px;
-        font-weight: 700;
-        cursor: pointer;
-        white-space: nowrap;
-    }
-    #ug-sidebar-top-ctrl button.ug-active-view {
-        background: #10b981;
-        border-color: #34d399;
-        color: #022c22;
-        font-weight: 800;
-    }
-
-    /* ==================== LAPTOP / DESKTOP (769px से बड़ी स्क्रीन) ==================== */
-    @media (min-width: 769px) {
-        #ug-laptop-menu-toggle {
-            display: inline-flex !important;
-        }
-        #ug-bottom-left-menu-btn {
-            display: none !important;
-        }
-        #ug-sidebar-top-ctrl .ug-mobile-only-ctrl {
-            display: none !important;
-        }
-        body.ug-desktop-sidebar-hidden aside.sidebar,
-        body.ug-desktop-sidebar-hidden aside {
-            width: 0 !important;
-            min-width: 0 !important;
-            max-width: 0 !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            border: none !important;
-            opacity: 0 !important;
-            overflow: hidden !important;
-            transform: translateX(-100%) !important;
-            pointer-events: none !important;
-        }
-    }
-
-    /* ==================== MOBILE (768px या उससे छोटी स्क्रीन) ==================== */
-    @media (max-width: 768px) {
-        #ug-mobile-bottom-bar,
-        #ug-mobile-backdrop {
-            display: none !important;
-        }
-        body {
-            padding-bottom: 0 !important;
-            max-width: 100vw !important;
-            overflow-x: hidden !important;
-        }
-
-        /* 1. लॉगिन के बाद Left Sidebar हमेशा ऑटोमैटिक Hide रहेगा */
-        body:not(.ug-mobile-menu-open) aside.sidebar,
-        body:not(.ug-mobile-menu-open) aside {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 210px !important;
-            max-width: 68vw !important;
-            height: 100dvh !important;
-            z-index: 99998 !important;
-            transform: translateX(-115%) !important;
-            pointer-events: none !important;
-        }
-
-        /* 2. जब स्टूडेंट नीचे बाएँ कोने के Menu बटन पर क्लिक करे तभी Left Sidebar दिखे */
-        body.ug-mobile-menu-open aside.sidebar,
-        body.ug-mobile-menu-open aside {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 210px !important;
-            max-width: 68vw !important;
-            height: 100dvh !important;
-            z-index: 99998 !important;
-            transform: translateX(0) !important;
-            pointer-events: auto !important;
-            overflow-y: auto !important;
-            box-shadow: 6px 0 28px rgba(0, 0, 0, 0.48) !important;
-        }
-
-        aside > div:first-child {
-            padding: 12px 10px !important;
-            gap: 8px !important;
-        }
-        aside .ug-logo-frame {
-            width: 32px !important;
-            height: 32px !important;
-        }
-        aside h1 {
-            font-size: 12px !important;
-            line-height: 1.2 !important;
-        }
-        aside p {
-            font-size: 8.5px !important;
-        }
-        aside > div.flex-1 {
-            padding-top: 6px !important;
-            padding-bottom: 68px !important;
-        }
-        aside nav button,
-        aside > div.flex-1 > div button {
-            padding: 8px 12px !important;
-            gap: 9px !important;
-            font-size: 12px !important;
-        }
-
-        body.ug-has-sidebar:not(.ug-login-screen-active):not(.ug-keyboard-open) #ug-bottom-left-menu-btn {
-            display: inline-flex !important;
-        }
-
-        aside + div {
-            margin-left: 0 !important;
-            width: 100% !important;
-            max-width: 100vw !important;
-        }
-
-        /* ==================== DESKTOP का पूरा डेटा एक साथ मोबाइल पर दिखाएँ ==================== */
-        body.ug-desktop-all-data header {
-            height: 46px !important;
-            padding: 0 10px !important;
-            gap: 6px !important;
-        }
-        body.ug-desktop-all-data header h2.hidden,
-        body.ug-desktop-all-data main .hidden.sm\\:block,
-        body.ug-desktop-all-data main .hidden.md\\:block {
-            display: block !important;
-        }
-        body.ug-desktop-all-data header h2 {
-            font-size: 12.5px !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-        }
-        body.ug-desktop-all-data header button {
-            font-size: 10.5px !important;
-            padding: 4px 8px !important;
-        }
-
-        body.ug-desktop-all-data main:not(.test-fullscreen) {
-            padding: 8px 6px 70px 6px !important;
-            overflow-x: hidden !important;
-            overflow-y: auto !important;
-        }
-        body.ug-desktop-all-data main:not(.test-fullscreen) > div {
-            width: 820px !important;
-            max-width: none !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-            zoom: var(--ug-fit-zoom, 0.46) !important;
-        }
-
-        body.ug-desktop-all-data main:not(.test-fullscreen) .lg\\:flex-row,
-        body.ug-desktop-all-data main:not(.test-fullscreen) .md\\:flex-row,
-        body.ug-desktop-all-data main:not(.test-fullscreen) .sm\\:flex-row {
-            flex-direction: row !important;
-            align-items: center !important;
-        }
-        body.ug-desktop-all-data main:not(.test-fullscreen) .lg\\:w-auto,
-        body.ug-desktop-all-data main:not(.test-fullscreen) .sm\\:w-auto {
-            width: auto !important;
-        }
-        body.ug-desktop-all-data main:not(.test-fullscreen) .lg\\:flex-nowrap {
-            flex-wrap: nowrap !important;
-        }
-        body.ug-desktop-all-data main:not(.test-fullscreen) .sm\\:grid-cols-2,
-        body.ug-desktop-all-data main:not(.test-fullscreen) .md\\:grid-cols-2 {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        }
-        body.ug-desktop-all-data main:not(.test-fullscreen) .sm\\:grid-cols-3,
-        body.ug-desktop-all-data main:not(.test-fullscreen) .md\\:grid-cols-3,
-        body.ug-desktop-all-data main:not(.test-fullscreen) .lg\\:grid-cols-3 {
-            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-        }
-        body.ug-desktop-all-data main:not(.test-fullscreen) .lg\\:grid-cols-4 {
-            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-        }
-        body.ug-desktop-all-data main:not(.test-fullscreen) .sm\\:grid-cols-5,
-        body.ug-desktop-all-data main:not(.test-fullscreen) .lg\\:grid-cols-5 {
-            grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-        }
-        body.ug-desktop-all-data main:not(.test-fullscreen) .lg\\:col-span-2 {
-            grid-column: span 2 / span 2 !important;
-        }
-    }
-</style>
-
-<script id="ug-auto-hide-desktop-mobile-js">
-(function () {
-    // ==================== 1. LOGIN TYPING & FULLSCREEN PROTECT (तुरंत चालू) ====================
-    // किसी भी इनपुट बॉक्स या Login पेज पर टैप करते समय Auto-Fullscreen को रोकें ताकि कीबोर्ड/कर्सर कभी न कटे
-    var lastInputTapTime = 0;
-    ['touchstart', 'pointerdown', 'mousedown'].forEach(function (evName) {
-        document.addEventListener(evName, function (e) {
-            if (e.target && e.target.closest && e.target.closest('input, textarea, select, label, form, .login-glass-wrapper, [contenteditable="true"]')) {
-                lastInputTapTime = Date.now();
-                window._userExitedFullscreen = true;
-            }
-        }, { passive: true, capture: true });
-    });
-
-    function shouldBlockFullscreenNow() {
-        if (document.querySelector('.login-glass-wrapper')) return true;
-        if (Date.now() - lastInputTapTime < 2500) return true;
-        var ae = document.activeElement;
-        if (ae && /^(INPUT|TEXTAREA|SELECT)$/i.test(ae.tagName)) return true;
-        return false;
-    }
-
-    ['requestFullscreen', 'webkitRequestFullscreen', 'mozRequestFullScreen', 'msRequestFullscreen'].forEach(function (fnName) {
-        if (Element.prototype && typeof Element.prototype[fnName] === 'function') {
-            var origFs = Element.prototype[fnName];
-            Element.prototype[fnName] = function () {
-                if (shouldBlockFullscreenNow()) {
-                    return Promise.resolve();
-                }
-                return origFs.apply(this, arguments);
-            };
-        }
-    });
-
-    // ==================== 2. AUTO-HIDE SIDEBAR + BOTTOM-LEFT MENU (लूप-फ्री) ====================
-    function savePref(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
-    function readPref(k, fb) { try { var v = localStorage.getItem(k); return v !== null ? v : fb; } catch (e) { return fb; } }
-
-    var isMobile = function () { return window.innerWidth <= 768; };
-    var mobileMenuOpen = false;
-    var desktopHidden = readPref('ug_desktop_sidebar_hidden', '0') === '1';
-    var mobileViewMode = readPref('ug_mobile_view_mode', 'desktop-fit');
-    var wasOnLoginScreen = true;
-    var syncTimer = null;
-
-    function updateDesktopFitZoom() {
-        var vw = Math.max(300, window.innerWidth || 360);
-        var zoomVal = Math.max(0.38, Math.min(1, (vw - 12) / 820)).toFixed(4);
-        if (document.documentElement.dataset.ugZoom !== zoomVal) {
-            document.documentElement.dataset.ugZoom = zoomVal;
-            document.documentElement.style.setProperty('--ug-fit-zoom', zoomVal);
-        }
-    }
-
-    function ensureBackdrop() {
-        var bd = document.getElementById('ug-smart-backdrop');
-        if (!bd) {
-            bd = document.createElement('div');
-            bd.id = 'ug-smart-backdrop';
-            bd.addEventListener('click', function () { setMobileMenu(false); });
-            document.body.appendChild(bd);
-        }
-        return bd;
-    }
-
-    function ensureBottomLeftMenuBtn() {
-        var btn = document.getElementById('ug-bottom-left-menu-btn');
-        if (!btn) {
-            btn = document.createElement('button');
-            btn.type = 'button';
-            btn.id = 'ug-bottom-left-menu-btn';
-            btn.setAttribute('aria-label', 'Open Left Menu');
-            btn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                setMobileMenu(!mobileMenuOpen);
-            });
-            document.body.appendChild(btn);
-        }
-        return btn;
-    }
-
-    function applyAllStates() {
-        updateDesktopFitZoom();
-
-        var sidebar = document.querySelector('aside.sidebar, aside');
-        var isLoginVisible = !!document.querySelector('.login-glass-wrapper');
-        var isTestRunning = !!document.querySelector('main.test-fullscreen');
-        var hasSidebar = !!sidebar && !isLoginVisible && !isTestRunning;
-
-        // लॉगिन करते ही मोबाइल में Left Sidebar अपने-आप Hide हो जाए
-        if (wasOnLoginScreen && hasSidebar) {
-            mobileMenuOpen = false;
-            wasOnLoginScreen = false;
-        }
-        if (isLoginVisible || !sidebar) {
-            wasOnLoginScreen = true;
-            mobileMenuOpen = false;
-        }
-
-        if (sidebar && sidebar.classList.contains('ug-mobile-open')) {
-            sidebar.classList.remove('ug-mobile-open');
-        }
-
-        document.body.classList.toggle('ug-login-screen-active', isLoginVisible);
-        document.body.classList.toggle('ug-has-sidebar', hasSidebar);
-        document.body.classList.toggle('ug-mobile-menu-open', hasSidebar && mobileMenuOpen);
-        document.body.classList.toggle('ug-desktop-sidebar-hidden', desktopHidden);
-        document.body.classList.toggle('ug-desktop-all-data', !isLoginVisible && !isTestRunning && mobileViewMode === 'desktop-fit');
-
-        var bd = ensureBackdrop();
-        bd.classList.toggle('ug-show', isMobile() && hasSidebar && mobileMenuOpen);
-
-        // केवल स्टेट बदलने पर ही innerHTML अपडेट करें (इससे कभी Infinite Loop नहीं बनेगा!)
-        var blBtn = ensureBottomLeftMenuBtn();
-        var blState = mobileMenuOpen ? 'open' : 'closed';
-        if (blBtn.dataset.state !== blState) {
-            blBtn.dataset.state = blState;
-            blBtn.classList.toggle('ug-menu-is-open', mobileMenuOpen);
-            blBtn.innerHTML = mobileMenuOpen
-                ? '<span>&#10005;</span><span>बंद करें</span>'
-                : '<span>&#9776;</span><span>मेनू</span>';
-        }
-
-        var lapBtn = document.getElementById('ug-laptop-menu-toggle');
-        var lapState = desktopHidden ? 'hidden' : 'shown';
-        if (lapBtn && lapBtn.dataset.state !== lapState) {
-            lapBtn.dataset.state = lapState;
-            lapBtn.innerHTML = desktopHidden
-                ? '&#9776; <span>मेनू दिखाएँ</span>'
-                : '&#171; <span>मेनू छिपाएँ</span>';
-        }
-
-        document.querySelectorAll('[data-ug-view-mode]').forEach(function (b) {
-            b.classList.toggle('ug-active-view', b.getAttribute('data-ug-view-mode') === mobileViewMode);
-        });
-    }
-
-    function setMobileMenu(open) {
-        mobileMenuOpen = !!open;
-        applyAllStates();
-    }
-
-    function toggleDesktopSidebar() {
-        desktopHidden = !desktopHidden;
-        savePref('ug_desktop_sidebar_hidden', desktopHidden ? '1' : '0');
-        applyAllStates();
-    }
-
-    function injectControls() {
-        var sidebar = document.querySelector('aside.sidebar, aside');
-        var header = document.querySelector('header');
-
-        if (sidebar && !document.getElementById('ug-sidebar-top-ctrl')) {
-            var ctrl = document.createElement('div');
-            ctrl.id = 'ug-sidebar-top-ctrl';
-            ctrl.innerHTML =
-                '<button type="button" id="ug-sb-close-now">&#171; मेनू छिपाएँ</button>' +
-                '<button type="button" class="ug-mobile-only-ctrl" data-ug-view-mode="desktop-fit">डेस्कटॉप फुल</button>' +
-                '<button type="button" class="ug-mobile-only-ctrl" data-ug-view-mode="normal">सामान्य</button>';
-
-            if (sidebar.children.length > 1) {
-                sidebar.insertBefore(ctrl, sidebar.children[1]);
-            } else {
-                sidebar.appendChild(ctrl);
-            }
-
-            ctrl.addEventListener('click', function (e) {
-                if (e.target.closest('#ug-sb-close-now')) {
-                    if (isMobile()) setMobileMenu(false);
-                    else toggleDesktopSidebar();
-                    return;
-                }
-                var vBtn = e.target.closest('[data-ug-view-mode]');
-                if (vBtn) {
-                    mobileViewMode = vBtn.getAttribute('data-ug-view-mode');
-                    savePref('ug_mobile_view_mode', mobileViewMode);
-                    applyAllStates();
-                }
-            });
-        }
-
-        if (header && !document.getElementById('ug-laptop-menu-toggle')) {
-            var leftBox = header.firstElementChild || header;
-            var lapBtn = document.createElement('button');
-            lapBtn.type = 'button';
-            lapBtn.id = 'ug-laptop-menu-toggle';
-            lapBtn.title = 'Left Menu Hide / Show (Alt + M)';
-            lapBtn.addEventListener('click', toggleDesktopSidebar);
-            leftBox.insertBefore(lapBtn, leftBox.firstChild);
-        }
-
-        applyAllStates();
-    }
-
-    function scheduleSync() {
-        if (syncTimer) return;
-        syncTimer = setTimeout(function () {
-            syncTimer = null;
-            injectControls();
-        }, 80);
-    }
-
-    window.addEventListener('DOMContentLoaded', function () {
-        ensureBackdrop();
-        ensureBottomLeftMenuBtn();
-        injectControls();
-
-        // केवल #root पर हल्का Debounced Observer लगाएं (body पर नहीं, ताकि कभी हैंग न हो)
-        var rootEl = document.getElementById('root');
-        if (rootEl) {
-            var obs = new MutationObserver(scheduleSync);
-            obs.observe(rootEl, { childList: true, subtree: true });
-        }
-
-        // मोबाइल कीबोर्ड खुलने पर फ्लोटिंग बटन छिपाएं ताकि टाइपिंग में कोई बाधा न हो
-        document.addEventListener('focusin', function (e) {
-            if (e.target && /^(INPUT|TEXTAREA|SELECT)$/i.test(e.target.tagName)) {
-                document.body.classList.add('ug-keyboard-open');
-            }
-        });
-        document.addEventListener('focusout', function () {
-            setTimeout(function () {
-                if (!document.activeElement || !/^(INPUT|TEXTAREA|SELECT)$/i.test(document.activeElement.tagName)) {
-                    document.body.classList.remove('ug-keyboard-open');
-                }
-            }, 150);
-        });
-
-        // मोबाइल में मेनू के किसी भी विकल्प पर क्लिक करते ही Left Sidebar अपने-आप छिप जाए
-        document.addEventListener('click', function (e) {
-            if (isMobile() && mobileMenuOpen) {
-                var navBtn = e.target.closest('aside nav button, aside > div.flex-1 > div button');
-                if (navBtn && !navBtn.closest('#ug-sidebar-top-ctrl')) {
-                    setTimeout(function () { setMobileMenu(false); }, 100);
-                }
-            }
-        }, true);
-
-        window.addEventListener('keydown', function (e) {
-            if (e.altKey && (e.key === 'm' || e.key === 'M')) {
-                e.preventDefault();
-                if (isMobile()) setMobileMenu(!mobileMenuOpen);
-                else toggleDesktopSidebar();
-            }
-        });
-
-        window.addEventListener('resize', scheduleSync);
-        window.addEventListener('orientationchange', scheduleSync);
-    });
-})();
-</script>
-<!-- ==================== AUTO-HIDE SIDEBAR + LOGIN TYPING FIX + BOTTOM-LEFT MENU (समाप्त) ==================== -->
 <!-- ==================== AUTO-HIDE SIDEBAR + LOGIN TYPING FIX + BOTTOM-LEFT MENU (शुरू) ==================== -->
 <style id="ug-auto-hide-desktop-mobile-css">
     :root { --ug-fit-zoom: 1; }
@@ -12247,5 +11669,454 @@ class ErrorBoundary extends React.Component {
 })();
 </script>
 <!-- ==================== AUTO-HIDE SIDEBAR + LOGIN TYPING FIX + BOTTOM-LEFT MENU (समाप्त) ==================== -->
+
+<!-- ==================== ALL TESTS MOBILE EXAM INTERFACE (शुरू) ==================== -->
+<style id="ug-all-tests-mobile-parent-css">
+    /* 1. टेस्ट चलते समय बाहरी मोबाइल बटन छिपाएं ताकि टेस्ट के बटन न ढकें */
+    body.ug-exam-running #ug-bottom-left-menu-btn,
+    body.ug-exam-running #ug-mobile-bottom-bar {
+        display: none !important;
+        pointer-events: none !important;
+    }
+
+    /* 2. मोबाइल पर React वाले TableTest, Instructions और SolutionViewer को Mobile-App जैसा बनाएं */
+    @media (max-width: 768px) {
+        /* टेस्ट फुलस्क्रीन कंटेनर मोबाइल व्यूपोर्ट के अनुसार फिट हो */
+        .test-fullscreen {
+            height: 100dvh !important;
+            width: 100vw !important;
+            max-width: 100vw !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+
+        /* Built-in React TableTest (5x5 Grid + Form) को मोबाइल स्क्रीन में फिट करें */
+        .test-fullscreen .max-w-5xl {
+            margin-top: 0 !important;
+            padding: 12px !important;
+            border-radius: 0 !important;
+            border: none !important;
+        }
+        .test-fullscreen .w-16.h-16 {
+            width: 44px !important;
+            height: 44px !important;
+            font-size: 1.35rem !important;
+            margin-left: 3px !important;
+            margin-right: 3px !important;
+        }
+        .test-fullscreen .w-16.text-center {
+            width: 44px !important;
+            font-size: 0.9rem !important;
+            margin-left: 3px !important;
+            margin-right: 3px !important;
+        }
+        .test-fullscreen .ml-12 {
+            margin-left: 28px !important;
+        }
+        .test-fullscreen .w-12 {
+            width: 28px !important;
+            font-size: 0.9rem !important;
+        }
+        .test-fullscreen .min-h-\\[400px\\] {
+            min-height: 230px !important;
+            padding: 16px !important;
+        }
+
+        /* SolutionViewer का दायाँ 380px पैलेट मोबाइल में Slide-in Drawer बने */
+        .ug-sol-root {
+            flex-direction: column !important;
+        }
+        .ug-sol-header {
+            height: auto !important;
+            padding: 8px 10px !important;
+            flex-wrap: wrap !important;
+            gap: 8px !important;
+        }
+        .ug-sol-header button {
+            padding: 6px 10px !important;
+            font-size: 11px !important;
+        }
+        .ug-sol-body {
+            padding: 14px 10px 76px 10px !important;
+        }
+        .ug-sol-palette {
+            position: fixed !important;
+            top: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 84vw !important;
+            max-width: 320px !important;
+            z-index: 100020 !important;
+            transform: translateX(105%) !important;
+            transition: transform 0.25s ease !important;
+            box-shadow: -8px 0 28px rgba(15, 23, 42, 0.45) !important;
+        }
+        .ug-sol-palette.ug-sol-open {
+            transform: translateX(0) !important;
+        }
+        #ug-sol-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            z-index: 100015;
+        }
+        #ug-sol-backdrop.ug-show {
+            display: block !important;
+        }
+        #ug-sol-palette-toggle {
+            display: inline-flex !important;
+            position: fixed;
+            right: 12px;
+            bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+            z-index: 100025;
+            background: linear-gradient(135deg, #0f172a, #0284c7);
+            color: #fff;
+            border: 1.5px solid #7dd3fc;
+            border-radius: 9999px;
+            padding: 9px 14px;
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            font-size: 12px;
+            font-weight: 800;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.4);
+            cursor: pointer;
+        }
+    }
+    @media (min-width: 769px) {
+        #ug-sol-palette-toggle, #ug-sol-backdrop {
+            display: none !important;
+        }
+    }
+</style>
+
+<script id="ug-all-tests-mobile-engine-js">
+(function () {
+    // 1. हर Iframe टेस्ट (RRB PYQ CBT, RDSO Observation, Find 6, Memory, Perceptual, Table/Direction, Brick) के अंदर लगने वाली Mobile CSS
+    var IFRAME_MOBILE_EXAM_CSS = [
+        '@media (max-width: 768px) {',
+        '  html, body { max-width: 100vw !important; overflow-x: hidden !important; -webkit-text-size-adjust: 100% !important; touch-action: pan-y !important; }',
+        '  body { height: 100dvh !important; }',
+        '  img, svg, canvas { max-width: 100% !important; height: auto !important; }',
+        '  button, label, select, input { touch-action: manipulation !important; }',
+
+        /* ---------- A. RRB PYQ CBT TEST (Testbook Format) ---------- */
+        '  .tb-header { padding: 6px 10px !important; gap: 6px !important; min-height: auto !important; }',
+        '  .tb-brand { font-size: 0.82rem !important; gap: 6px !important; width: 100% !important; justify-content: flex-start !important; }',
+        '  .tb-badge { font-size: 0.68rem !important; padding: 3px 7px !important; flex-shrink: 0 !important; }',
+        '  .tb-header > div:last-child { width: 100% !important; justify-content: space-between !important; gap: 6px !important; }',
+        '  .tb-lang-wrap { padding: 2px 6px !important; gap: 4px !important; }',
+        '  .tb-lang-label { display: none !important; }',
+        '  .tb-lang-select { font-size: 0.75rem !important; padding: 3px 5px !important; }',
+        '  .tb-timer { font-size: 0.78rem !important; padding: 4px 8px !important; }',
+        '  #tb-fullscreen-btn { display: none !important; }',
+        '  #tb-pause-btn, .tb-header button { padding: 5px 9px !important; font-size: 0.74rem !important; }',
+
+        '  .tb-section-bar { height: auto !important; min-height: 38px !important; padding: 4px 10px !important; gap: 8px !important; }',
+        '  .tb-sec-tab { padding: 5px 10px !important; font-size: 0.76rem !important; }',
+        '  .tb-section-bar > div:last-child { display: none !important; }',
+
+        '  .tb-main { position: relative !important; width: 100% !important; }',
+        '  .tb-left { width: 100% !important; border-right: none !important; }',
+        '  .tb-q-meta { height: auto !important; min-height: 42px !important; padding: 6px 10px !important; flex-wrap: wrap !important; gap: 6px !important; }',
+        '  #q-number-label { font-size: 0.88rem !important; }',
+        '  #q-sec-badge { font-size: 0.68rem !important; padding: 2px 7px !important; }',
+        '  .tb-q-body { padding: 14px 12px 22px 12px !important; -webkit-overflow-scrolling: touch !important; }',
+        '  .tb-q-text-hi, .tb-q-text-en, #tb-injected-en-box { font-size: 1.02rem !important; line-height: 1.62 !important; margin-bottom: 14px !important; word-break: break-word !important; }',
+        '  .tb-opt-card { padding: 11px 12px !important; gap: 10px !important; margin-bottom: 9px !important; border-radius: 10px !important; min-height: 46px !important; }',
+        '  .tb-opt-circle { width: 28px !important; height: 28px !important; font-size: 0.8rem !important; }',
+        '  .tb-opt-text, .tb-opt-card > div:nth-child(2) { font-size: 0.94rem !important; line-height: 1.45 !important; }',
+
+        '  .tb-footer { height: auto !important; padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px)) 8px !important; flex-direction: column !important; gap: 6px !important; }',
+        '  .tb-footer > div { width: 100% !important; display: flex !important; gap: 6px !important; }',
+        '  .tb-footer button { flex: 1 !important; padding: 9px 8px !important; font-size: 0.78rem !important; border-radius: 8px !important; white-space: nowrap !important; }',
+
+        /* RRB PYQ Question Palette Slide-in Drawer */
+        '  .tb-right { position: fixed !important; top: 0 !important; right: 0 !important; bottom: 0 !important; width: 84vw !important; max-width: 310px !important; z-index: 9800 !important; transform: translateX(108%) !important; transition: transform 0.25s ease !important; box-shadow: -8px 0 28px rgba(15,23,42,0.45) !important; }',
+        '  .tb-right.ug-tb-palette-open { transform: translateX(0) !important; }',
+        '  #ug-tb-palette-backdrop { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 9790; }',
+        '  #ug-tb-palette-backdrop.ug-show { display: block !important; }',
+        '  #ug-tb-palette-btn { display: inline-flex !important; align-items: center; gap: 5px; background: #0f172a; color: #fff; border: 1px solid #38bdf8; border-radius: 7px; padding: 5px 10px; font-size: 0.74rem; font-weight: 800; cursor: pointer; }',
+        '  #ug-tb-palette-close { display: inline-flex !important; align-items: center; justify-content: center; background: #ef4444; color: #fff; border: none; border-radius: 6px; padding: 4px 10px; font-size: 0.74rem; font-weight: 800; cursor: pointer; }',
+
+        /* RRB Instructions Overlay on Mobile */
+        '  .inst-header { padding: 10px 12px !important; gap: 8px !important; }',
+        '  .inst-header h2 { font-size: 0.92rem !important; line-height: 1.3 !important; }',
+        '  .inst-body { padding: 12px !important; }',
+        '  .inst-card { padding: 14px !important; margin-bottom: 12px !important; border-radius: 12px !important; }',
+        '  .inst-card ol { font-size: 0.86rem !important; line-height: 1.6 !important; padding-left: 18px !important; }',
+        '  .inst-footer { padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px)) 12px !important; }',
+        '  .inst-footer button { width: 100% !important; padding: 11px 16px !important; font-size: 0.92rem !important; }',
+
+        /* ---------- B. RDSO UNIFIED / OBSERVATION / FIND 6 / MEMORY / PERCEPTUAL / DIRECTION / BRICK ---------- */
+        '  .header { padding: 7px 10px !important; }',
+        '  .header-left { font-size: 0.85rem !important; gap: 8px !important; }',
+        '  .sub-header { padding: 7px 10px !important; flex-direction: column !important; align-items: stretch !important; gap: 6px !important; }',
+        '  .sub-header > div:first-child { font-size: 0.88rem !important; justify-content: space-between !important; flex-wrap: wrap !important; }',
+        '  .sub-header > div:last-child { flex-wrap: wrap !important; gap: 5px !important; justify-content: space-between !important; }',
+        '  .sub-header span[style*="Screen Zoom"], .sub-header button[onclick*="zoom"], .sub-header button[onclick*="enforceTestFullscreen"] { display: none !important; }',
+        '  .timer-box { font-size: 0.84rem !important; padding: 4px 10px !important; margin: 0 !important; border-radius: 6px !important; }',
+        '  .sub-header button { padding: 5px 10px !important; font-size: 0.76rem !important; }',
+
+        '  .tab-area, .mem-tab-area { padding: 6px 8px !important; gap: 6px !important; overflow-x: auto !important; flex-wrap: nowrap !important; }',
+        '  .part-tab { padding: 6px 12px !important; font-size: 0.78rem !important; white-space: nowrap !important; flex-shrink: 0 !important; }',
+
+        /* Split-screen tests (Table / Direction / Watch) -> Stack vertically with collapsible top reference */
+        '  .content { flex-direction: column !important; margin-bottom: 58px !important; width: 100% !important; max-width: 100vw !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; }',
+        '  .left-fixed-panel { width: 100% !important; height: auto !important; max-height: 35vh !important; border-right: none !important; border-bottom: 2px solid #94a3b8 !important; padding: 8px !important; flex-shrink: 0 !important; overflow: auto !important; }',
+        '  .left-fixed-panel.ug-panel-collapsed { display: none !important; }',
+        '  .left-fixed-panel table th, .left-fixed-panel table td { padding: 6px 4px !important; font-size: 0.82rem !important; }',
+        '  .right-scroll-panel { width: 100% !important; flex: 1 !important; padding: 8px 8px 72px 8px !important; overflow-x: hidden !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; }',
+        '  #ug-toggle-ref-panel { display: flex !important; width: 100%; justify-content: center; align-items: center; gap: 6px; background: #1e293b; color: #fde047; border: none; padding: 7px 10px; font-size: 0.78rem; font-weight: 800; cursor: pointer; flex-shrink: 0; }',
+
+        /* Direction / Table Questions: remove 1650px forced width & nowrap */
+        '  .direction-test-mode .q-row { min-width: 0 !important; width: 100% !important; padding: 14px 12px !important; }',
+        '  .direction-test-mode .q-top-header { flex-direction: column !important; gap: 6px !important; }',
+        '  .direction-test-mode .q-num { width: auto !important; font-size: 0.88rem !important; padding-top: 0 !important; color: #2563eb !important; }',
+        '  .direction-test-mode .q-main-col { width: 100% !important; }',
+        '  .direction-test-mode .q-num-text { width: 100% !important; white-space: normal !important; padding-right: 0 !important; font-size: 0.96rem !important; line-height: 1.5 !important; }',
+        '  .direction-test-mode .q-lang-en, .direction-test-mode .q-lang-hi, .direction-test-mode .q-num-text > div { font-size: 0.95rem !important; white-space: normal !important; word-break: break-word !important; line-height: 1.5 !important; }',
+
+        /* Brick Test (Depth_Brick) 50/50 split -> Stack vertically on Mobile */
+        '  .part-container > div[style*="display: flex"] { flex-direction: column !important; height: auto !important; }',
+        '  .part-container > div[style*="display: flex"] > div[style*="width: 50%"] { width: 100% !important; position: static !important; height: auto !important; border-right: none !important; border-bottom: 2px solid #cbd5e1 !important; padding: 12px !important; box-sizing: border-box !important; }',
+
+        /* Observation (Yes/No), Find Digit 6/9, Perceptual, Memory Question Cards */
+        '  .q-row { flex-direction: column !important; align-items: stretch !important; padding: 14px 12px !important; margin: 10px 8px !important; gap: 10px !important; border-radius: 12px !important; border: 1.5px solid #cbd5e1 !important; box-sizing: border-box !important; width: auto !important; }',
+        '  .q-row > div[style*="display: flex"] { flex-wrap: wrap !important; justify-content: center !important; gap: 8px !important; width: 100% !important; }',
+        '  .q-num { width: auto !important; font-size: 0.9rem !important; text-align: left !important; margin: 0 !important; color: #2563eb !important; }',
+        '  .q-num-text { width: 100% !important; font-size: 1.55rem !important; letter-spacing: 3px !important; text-align: center !important; word-break: break-all !important; line-height: 1.35 !important; }',
+        '  .q-eq { width: 100% !important; font-size: 1.4rem !important; margin: -4px 0 !important; }',
+        '  .q-images { flex-direction: column !important; align-items: center !important; gap: 8px !important; }',
+        '  .q-images > div:first-child { width: 100% !important; text-align: left !important; margin-right: 0 !important; font-size: 0.95rem !important; }',
+
+        /* Touch-friendly Pill Radio Options (Y/N, 1-5, A-E) */
+        '  .q-opts, .q-row > div:last-child[style*="gap:"] { width: 100% !important; margin: 4px 0 0 0 !important; gap: 8px !important; display: flex !important; flex-wrap: wrap !important; justify-content: center !important; }',
+        '  .q-opts label, .q-row label { font-size: 1.05rem !important; font-weight: 800 !important; padding: 9px 14px !important; border: 1.5px solid #cbd5e1 !important; border-radius: 10px !important; background: #f8fafc !important; gap: 8px !important; flex: 1 1 56px !important; justify-content: center !important; min-height: 44px !important; box-sizing: border-box !important; }',
+        '  .q-opts input[type="radio"], .q-row input[type="radio"] { transform: scale(1.25) !important; margin: 0 !important; }',
+
+        /* Memory Study Grid on Mobile */
+        '  .memory-grid-container { padding: 12px !important; gap: 10px !important; border-width: 3px !important; grid-template-columns: repeat(3, 1fr) !important; }',
+        '  .memory-grid-container > div { width: 100% !important; height: auto !important; aspect-ratio: 1 / 1 !important; }',
+        '  .phase-container { padding: 10px !important; }',
+
+        /* Bottom Bar on RDSO Tests */
+        '  .bottom-bar { height: auto !important; min-height: 54px !important; padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px)) 10px !important; gap: 8px !important; justify-content: space-between !important; }',
+        '  .bottom-bar button { padding: 9px 12px !important; font-size: 0.82rem !important; border-radius: 8px !important; }',
+        '}',
+        '@media (min-width: 769px) {',
+        '  #ug-tb-palette-btn, #ug-tb-palette-close, #ug-tb-palette-backdrop, #ug-toggle-ref-panel { display: none !important; }',
+        '}'
+    ].join('\\n');
+
+    // 2. हर Iframe के अंदर Mobile CSS + Interactive Controls (Palette Drawer, Swipe, Table Toggle) इंजेक्ट करें
+    function injectMobileIntoIframeDoc(iframe) {
+        try {
+            var doc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document);
+            if (!doc || !doc.head || !doc.body) return;
+            if (doc.getElementById('ug-mobile-exam-style')) return;
+
+            // Viewport Meta सुनिश्चित करें
+            if (!doc.querySelector('meta[name="viewport"]')) {
+                var meta = doc.createElement('meta');
+                meta.name = 'viewport';
+                meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover';
+                doc.head.appendChild(meta);
+            }
+
+            // Mobile Exam CSS जोड़ें
+            var style = doc.createElement('style');
+            style.id = 'ug-mobile-exam-style';
+            style.textContent = IFRAME_MOBILE_EXAM_CSS;
+            doc.head.appendChild(style);
+
+            // A) यदि यह RRB PYQ CBT टेस्ट है (.tb-right पैलेट मौजूद है)
+            var tbRight = doc.querySelector('.tb-right');
+            var tbMeta = doc.querySelector('.tb-q-meta');
+            if (tbRight && tbMeta) {
+                var bd = doc.createElement('div');
+                bd.id = 'ug-tb-palette-backdrop';
+                doc.body.appendChild(bd);
+
+                function toggleTbPalette(forceClose) {
+                    var open = forceClose ? false : !tbRight.classList.contains('ug-tb-palette-open');
+                    tbRight.classList.toggle('ug-tb-palette-open', open);
+                    bd.classList.toggle('ug-show', open);
+                }
+
+                bd.addEventListener('click', function () { toggleTbPalette(true); });
+
+                // प्रश्न बार में "☰ पैलेट" बटन जोड़ें
+                var openBtn = doc.createElement('button');
+                openBtn.type = 'button';
+                openBtn.id = 'ug-tb-palette-btn';
+                openBtn.innerHTML = '&#9776; पैलेट';
+                openBtn.addEventListener('click', function () { toggleTbPalette(false); });
+                tbMeta.appendChild(openBtn);
+
+                // पैलेट के अंदर ऊपर "✕ बंद करें" बटन जोड़ें
+                var palTitle = tbRight.children[1];
+                if (palTitle) {
+                    palTitle.style.display = 'flex';
+                    palTitle.style.alignItems = 'center';
+                    palTitle.style.justifyContent = 'space-between';
+                    var closeBtn = doc.createElement('button');
+                    closeBtn.type = 'button';
+                    closeBtn.id = 'ug-tb-palette-close';
+                    closeBtn.textContent = '✕ बंद करें';
+                    closeBtn.addEventListener('click', function () { toggleTbPalette(true); });
+                    palTitle.appendChild(closeBtn);
+                }
+
+                // पैलेट में किसी प्रश्न नंबर पर टैप करने पर ड्रॉअर अपने-आप बंद हो जाए
+                tbRight.addEventListener('click', function (e) {
+                    if (e.target && e.target.closest && e.target.closest('.tb-p-btn')) {
+                        setTimeout(function () { toggleTbPalette(true); }, 90);
+                    }
+                });
+
+                // मोबाइल पर उंगली से दाएँ/बाएँ स्वाइप करके अगले-पिछले प्रश्न पर जाना
+                var sx = 0, sy = 0;
+                var qBody = doc.getElementById('q-body-container');
+                if (qBody) {
+                    qBody.addEventListener('touchstart', function (e) {
+                        if (e.touches && e.touches.length === 1) {
+                            sx = e.touches[0].clientX;
+                            sy = e.touches[0].clientY;
+                        }
+                    }, { passive: true });
+                    qBody.addEventListener('touchend', function (e) {
+                        if (!e.changedTouches || !e.changedTouches.length) return;
+                        var dx = e.changedTouches[0].clientX - sx;
+                        var dy = Math.abs(e.changedTouches[0].clientY - sy);
+                        if (Math.abs(dx) > 75 && dy < 45 && iframe.contentWindow) {
+                            if (dx < 0 && typeof iframe.contentWindow.saveAndNext === 'function') {
+                                iframe.contentWindow.saveAndNext();
+                            } else if (dx > 0 && typeof iframe.contentWindow.prevQuestion === 'function') {
+                                iframe.contentWindow.prevQuestion();
+                            }
+                        }
+                    }, { passive: true });
+                }
+            }
+
+            // B) यदि यह Table / Direction / Watch टेस्ट है (.left-fixed-panel मौजूद है)
+            var leftPanel = doc.querySelector('.left-fixed-panel');
+            if (leftPanel && leftPanel.parentNode) {
+                var toggleRefBtn = doc.createElement('button');
+                toggleRefBtn.type = 'button';
+                toggleRefBtn.id = 'ug-toggle-ref-panel';
+                toggleRefBtn.textContent = '▲ तालिका / चित्र छिपाएँ (पूरे पेज पर प्रश्न देखें)';
+                toggleRefBtn.addEventListener('click', function () {
+                    var collapsed = leftPanel.classList.toggle('ug-panel-collapsed');
+                    toggleRefBtn.textContent = collapsed
+                        ? '▼ तालिका / चित्र दिखाएँ (Table / Image Open करें)'
+                        : '▲ तालिका / चित्र छिपाएँ (पूरे पेज पर प्रश्न देखें)';
+                });
+                leftPanel.parentNode.insertBefore(toggleRefBtn, leftPanel);
+            }
+        } catch (err) {
+            console.warn('Mobile Exam Iframe Injector warning:', err);
+        }
+    }
+
+    function bindAllIframes() {
+        var iframes = document.querySelectorAll('iframe');
+        for (var i = 0; i < iframes.length; i++) {
+            var fr = iframes[i];
+            if (!fr.dataset.ugMobileExamBound) {
+                fr.dataset.ugMobileExamBound = '1';
+                (function (targetFrame) {
+                    targetFrame.addEventListener('load', function () {
+                        injectMobileIntoIframeDoc(targetFrame);
+                    });
+                })(fr);
+            }
+            injectMobileIntoIframeDoc(fr);
+        }
+    }
+
+    // 3. SolutionViewer को मोबाइल के लिए स्लाइड-ड्रॉअर पैलेट देना
+    function enhanceSolutionViewerForMobile() {
+        var solPalette = document.querySelector('div[class*="bg-[#91d5cd]"]');
+        var isTestFullscreen = !!document.querySelector('main.test-fullscreen') || !!solPalette;
+        document.body.classList.toggle('ug-exam-running', isTestFullscreen);
+
+        var oldBtn = document.getElementById('ug-sol-palette-toggle');
+        var oldBd = document.getElementById('ug-sol-backdrop');
+
+        if (!solPalette) {
+            if (oldBtn) oldBtn.remove();
+            if (oldBd) oldBd.remove();
+            return;
+        }
+
+        var solRoot = solPalette.parentElement;
+        if (solRoot && !solRoot.classList.contains('ug-sol-root')) {
+            solRoot.classList.add('ug-sol-root');
+            solPalette.classList.add('ug-sol-palette');
+            var leftArea = solRoot.firstElementChild;
+            if (leftArea) {
+                if (leftArea.children[0]) leftArea.children[0].classList.add('ug-sol-header');
+                if (leftArea.children[1]) leftArea.children[1].classList.add('ug-sol-body');
+            }
+        }
+
+        if (!oldBd) {
+            oldBd = document.createElement('div');
+            oldBd.id = 'ug-sol-backdrop';
+            oldBd.addEventListener('click', function () {
+                solPalette.classList.remove('ug-sol-open');
+                oldBd.classList.remove('ug-show');
+            });
+            document.body.appendChild(oldBd);
+        }
+
+        if (!oldBtn) {
+            oldBtn = document.createElement('button');
+            oldBtn.type = 'button';
+            oldBtn.id = 'ug-sol-palette-toggle';
+            oldBtn.innerHTML = '&#9776; प्रश्न सूची';
+            oldBtn.addEventListener('click', function () {
+                var open = solPalette.classList.toggle('ug-sol-open');
+                oldBd.classList.toggle('ug-show', open);
+                oldBtn.innerHTML = open ? '&#10005; बंद करें' : '&#9776; प्रश्न सूची';
+            });
+            document.body.appendChild(oldBtn);
+        }
+
+        if (!solPalette.dataset.ugSolClickBound) {
+            solPalette.dataset.ugSolClickBound = '1';
+            solPalette.addEventListener('click', function (e) {
+                if (e.target && e.target.closest && e.target.closest('button')) {
+                    solPalette.classList.remove('ug-sol-open');
+                    if (oldBd) oldBd.classList.remove('ug-show');
+                    if (oldBtn) oldBtn.innerHTML = '&#9776; प्रश्न सूची';
+                }
+            });
+        }
+    }
+
+    var examSyncTimer = null;
+    function scheduleExamMobileSync() {
+        if (examSyncTimer) return;
+        examSyncTimer = setTimeout(function () {
+            examSyncTimer = null;
+            bindAllIframes();
+            enhanceSolutionViewerForMobile();
+        }, 70);
+    }
+
+    window.addEventListener('DOMContentLoaded', function () {
+        scheduleExamMobileSync();
+        var rootEl = document.getElementById('root');
+        if (rootEl) {
+            new MutationObserver(scheduleExamMobileSync).observe(rootEl, { childList: true, subtree: true });
+        }
+    });
+})();
+</script>
+<!-- ==================== ALL TESTS MOBILE EXAM INTERFACE (समाप्त) ==================== -->
 </body>
 </html>
