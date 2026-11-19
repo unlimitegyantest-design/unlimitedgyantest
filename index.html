@@ -9642,6 +9642,230 @@ const MasterPaymentPanel = ({ firebaseMethods, firebaseDb, appId, userAuth }) =>
                             React.createElement("span", null, "\u092C\u0948\u0902\u0915 \u092E\u0947\u0902 \u0928\u0939\u0940\u0902 \u0906\u090F (Block Access)")))));
             }))))));
 };
+// ==================== ADMIN ID PROVIDER (Master Account Only) ====================
+const ADMIN_PROVIDER_VIEW = 'ADMIN_PROVIDER';
+const getAdminIdsDoc = (firebaseMethods, firebaseDb, appId) => {
+    return firebaseMethods.docFunc(firebaseDb, 'artifacts', appId, 'public', 'data', 'settings', 'admin_ids');
+};
+
+const AdminIdProviderPanel = ({ firebaseMethods, firebaseDb, appId, userAuth }) => {
+    const [admins, setAdmins] = useState([]);
+    const [adminName, setAdminName] = useState('');
+    const [adminEmail, setAdminEmail] = useState('');
+    const [adminPassword, setAdminPassword] = useState('');
+    const [busy, setBusy] = useState(false);
+    const [msg, setMsg] = useState({ text: '', type: 'info' });
+
+    useEffect(() => {
+        if (!firebaseMethods || !firebaseDb || !appId) return;
+        const ref = getAdminIdsDoc(firebaseMethods, firebaseDb, appId);
+        const unsub = firebaseMethods.onSnapshot(ref, (snap) => {
+            if (snap.exists() && Array.isArray(snap.data().admins)) {
+                setAdmins(snap.data().admins);
+            } else {
+                setAdmins([]);
+            }
+        });
+        return () => { if (typeof unsub === 'function') unsub(); };
+    }, [firebaseMethods, firebaseDb, appId]);
+
+    const saveAdminsList = async (nextList, successText) => {
+        const ref = getAdminIdsDoc(firebaseMethods, firebaseDb, appId);
+        await firebaseMethods.setDocFunc(ref, {
+            admins: nextList,
+            updatedAt: firebaseMethods.serverTimestamp(),
+            updatedBy: userAuth?.email || ''
+        }, { merge: true });
+        setMsg({ text: successText, type: 'success' });
+    };
+
+    const handleAddAdmin = async (e) => {
+        e.preventDefault();
+        const cleanEmail = adminEmail.trim().toLowerCase();
+        const cleanName = adminName.trim() || 'Admin';
+        const cleanPass = adminPassword.trim();
+
+        if (!cleanEmail || !cleanEmail.includes('@')) {
+            setMsg({ text: 'कृपया सही Email ID दर्ज करें।', type: 'error' });
+            return;
+        }
+        if (cleanEmail === 'unlimitedgyantest@gmail.com') {
+            setMsg({ text: 'यह Master Account है, इसे अलग से Admin ID में जोड़ने की आवश्यकता नहीं है।', type: 'error' });
+            return;
+        }
+        if (cleanPass && cleanPass.length < 6) {
+            setMsg({ text: 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।', type: 'error' });
+            return;
+        }
+
+        setBusy(true);
+        setMsg({ text: 'Admin ID तैयार की जा रही है...', type: 'info' });
+        try {
+            let accountNote = '';
+            // यदि Master ने Password भी दिया है, तो Secondary App से नया Login Account बनाएं (Master Logout नहीं होगा)
+            if (cleanPass) {
+                const fbCfg = firebaseMethods.authInstance?.app?.options;
+                if (fbCfg) {
+                    const dynamicImport = new Function('url', 'return import(url)');
+                    const [appMod, authMod] = await Promise.all([
+                        dynamicImport("https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"),
+                        dynamicImport("https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js")
+                    ]);
+                    const tempApp = appMod.initializeApp(fbCfg, 'ug_admin_creator_' + Date.now());
+                    const tempAuth = authMod.getAuth(tempApp);
+                    try {
+                        await authMod.createUserWithEmailAndPassword(tempAuth, cleanEmail, cleanPass);
+                        accountNote = ' नया Login Account व Password भी बन गया है।';
+                    } catch (createErr) {
+                        const errStr = String(createErr.code || createErr.message || '');
+                        if (errStr.includes('email-already-in-use')) {
+                            accountNote = ' यह Email पहले से रजिस्टर्ड थी, इसे Admin अधिकार मिल गए हैं।';
+                        } else {
+                            throw createErr;
+                        }
+                    } finally {
+                        try { await authMod.signOut(tempAuth); } catch (er) {}
+                        try { await appMod.deleteApp(tempApp); } catch (er) {}
+                    }
+                }
+            }
+
+            const filtered = admins.filter(a => String(a.email || '').toLowerCase() !== cleanEmail);
+            const nextList = [
+                {
+                    email: cleanEmail,
+                    name: cleanName,
+                    active: true,
+                    createdAt: Date.now()
+                },
+                ...filtered
+            ];
+            await saveAdminsList(nextList, `✅ Admin ID "${cleanEmail}" सफलतापूर्वक जुड़ गई!${accountNote}`);
+            setAdminName('');
+            setAdminEmail('');
+            setAdminPassword('');
+        } catch (err) {
+            setMsg({ text: 'त्रुटि: ' + (err.message || err), type: 'error' });
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    const handleToggleAdmin = async (emailTarget) => {
+        setBusy(true);
+        try {
+            const nextList = admins.map(a =>
+                a.email === emailTarget ? { ...a, active: a.active === false } : a
+            );
+            await saveAdminsList(nextList, `Admin "${emailTarget}" का स्टेटस अपडेट कर दिया गया।`);
+        } catch (err) {
+            setMsg({ text: 'स्टेटस अपडेट नहीं हो सका: ' + err.message, type: 'error' });
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    const handleRemoveAdmin = async (emailTarget) => {
+        setBusy(true);
+        try {
+            const nextList = admins.filter(a => a.email !== emailTarget);
+            await saveAdminsList(nextList, `Admin ID "${emailTarget}" हटा दी गई है।`);
+        } catch (err) {
+            setMsg({ text: 'Admin हटाने में त्रुटि: ' + err.message, type: 'error' });
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    return React.createElement("div", { className: "max-w-5xl mx-auto mt-4 pb-24 space-y-6 animate-fade-in" },
+        React.createElement("div", { className: "bg-gradient-to-r from-[#0f172a] via-[#1e1b4b] to-[#4338ca] text-white p-6 rounded-2xl shadow-xl" },
+            React.createElement("div", { className: "flex items-center gap-3" },
+                React.createElement("div", { className: "w-12 h-12 rounded-xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-center text-2xl text-amber-300" },
+                    React.createElement("i", { className: "fa-solid fa-user-shield" })),
+                React.createElement("div", null,
+                    React.createElement("h2", { className: "text-2xl font-black" }, "Admin ID Provider (Master Control)"),
+                    React.createElement("p", { className: "text-xs text-indigo-200 font-semibold mt-1" },
+                        "यहाँ से बनाई गई Admin ID को लॉगिन करने पर केवल Dashboard, RRB PYQ TEST और Test Generator Simulator (PDF) ही दिखाई देंगे।")))),
+
+        msg.text && React.createElement("div", {
+            className: `p-4 rounded-xl text-sm font-bold border ${msg.type === 'error' ? 'bg-red-50 text-red-700 border-red-200' : msg.type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-blue-50 text-blue-800 border-blue-200'}`
+        }, msg.text),
+
+        React.createElement("form", { onSubmit: handleAddAdmin, className: "bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4" },
+            React.createElement("h3", { className: "font-black text-slate-800 text-base border-b pb-2" },
+                React.createElement("i", { className: "fa-solid fa-user-plus text-indigo-600 mr-2" }),
+                "नई Admin ID बनाएँ या अधिकार दें"),
+            React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-4" },
+                React.createElement("div", null,
+                    React.createElement("label", { className: "block text-xs font-bold text-slate-600 mb-1" }, "Admin का नाम"),
+                    React.createElement("input", {
+                        type: "text",
+                        value: adminName,
+                        onChange: e => setAdminName(e.target.value),
+                        placeholder: "जैसे: Rahul Sir",
+                        className: "w-full border-2 border-slate-200 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-sm font-bold outline-none"
+                    })),
+                React.createElement("div", null,
+                    React.createElement("label", { className: "block text-xs font-bold text-slate-600 mb-1" }, "Admin Email ID (अनिवार्य)"),
+                    React.createElement("input", {
+                        type: "email",
+                        required: true,
+                        value: adminEmail,
+                        onChange: e => setAdminEmail(e.target.value),
+                        placeholder: "admin@gmail.com",
+                        className: "w-full border-2 border-slate-200 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-sm font-bold outline-none"
+                    })),
+                React.createElement("div", null,
+                    React.createElement("label", { className: "block text-xs font-bold text-slate-600 mb-1" }, "Password (नया अकाउंट बनाने हेतु - Optional)"),
+                    React.createElement("input", {
+                        type: "text",
+                        value: adminPassword,
+                        onChange: e => setAdminPassword(e.target.value),
+                        placeholder: "कम से कम 6 अक्षर (या खाली छोड़ें)",
+                        className: "w-full border-2 border-slate-200 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-sm font-bold outline-none"
+                    }))),
+            React.createElement("div", { className: "flex flex-wrap items-center justify-between gap-3 pt-1" },
+                React.createElement("div", { className: "text-xs font-bold text-slate-500" },
+                    "Allowed Menu: ",
+                    React.createElement("span", { className: "bg-blue-50 text-blue-700 px-2 py-0.5 rounded mx-1" }, "Dashboard"),
+                    React.createElement("span", { className: "bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded mx-1" }, "RRB PYQ TEST"),
+                    React.createElement("span", { className: "bg-sky-50 text-sky-700 px-2 py-0.5 rounded mx-1" }, "Test Generator Simulator (PDF)")),
+                React.createElement("button", {
+                    type: "submit",
+                    disabled: busy,
+                    className: "bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-black px-6 py-2.5 rounded-xl shadow-md text-sm"
+                }, busy ? "Saving..." : "+ Create & Grant Admin ID"))),
+
+        React.createElement("div", { className: "bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4" },
+            React.createElement("h3", { className: "font-black text-slate-800 text-base border-b pb-2" },
+                "रजिस्टर्ड Admin IDs (", admins.length, ")"),
+            admins.length === 0
+                ? React.createElement("div", { className: "text-center py-8 text-slate-500 text-sm font-bold bg-slate-50 rounded-xl border border-dashed border-slate-300" },
+                    "अभी कोई Admin ID नहीं जोड़ी गई है। ऊपर फॉर्म से नई Admin ID बनाएँ।")
+                : React.createElement("div", { className: "space-y-3" }, admins.map((adm, i) =>
+                    React.createElement("div", { key: adm.email || i, className: "flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50" },
+                        React.createElement("div", null,
+                            React.createElement("div", { className: "flex items-center gap-2" },
+                                React.createElement("span", { className: "font-black text-slate-900 text-sm" }, adm.name || "Admin"),
+                                React.createElement("span", {
+                                    className: `text-[10px] font-black px-2 py-0.5 rounded-full ${adm.active !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`
+                                }, adm.active !== false ? "ACTIVE" : "PAUSED")),
+                            React.createElement("div", { className: "text-xs font-bold text-slate-600 mt-0.5" }, adm.email)),
+                        React.createElement("div", { className: "flex items-center gap-2" },
+                            React.createElement("button", {
+                                type: "button",
+                                disabled: busy,
+                                onClick: () => handleToggleAdmin(adm.email),
+                                className: "px-3.5 py-2 rounded-lg text-xs font-black border border-slate-300 bg-white hover:bg-slate-100 text-slate-800"
+                            }, adm.active !== false ? "Pause करें" : "Active करें"),
+                            React.createElement("button", {
+                                type: "button",
+                                disabled: busy,
+                                onClick: () => handleRemoveAdmin(adm.email),
+                                className: "px-3.5 py-2 rounded-lg text-xs font-black bg-red-50 hover:bg-red-600 text-red-600 hover:text-white border border-red-200 transition-colors"
+                            }, "Remove Admin")))))));
+};
+
 const App = () => {
     const cachedUserBoot = useMemo(() => FastCache.getJSON('ug_cached_user', null), []);
     const [currentView, setCurrentView] = useState(() => cachedUserBoot ? TEST_TYPES.MOCK_SERIES : TEST_TYPES.LOGIN);
@@ -9668,6 +9892,45 @@ const App = () => {
     const [firebaseCallFunction, setFirebaseCallFunction] = useState(null);
     const appIdRef = useRef('unlimited-gyan-secure-app');
     const isMaster = userEmail === 'unlimitedgyantest@gmail.com';
+    // ==================== ADMIN ID ROLE SYNC & ACCESS GUARD ====================
+    const [adminEmails, setAdminEmails] = useState(() => FastCache.getJSON('ug_cached_admin_emails', []));
+    const isSubAdmin = !isMaster && !!userEmail && userEmail !== 'Not Logged In' && adminEmails.includes(String(userEmail).trim().toLowerCase());
+    const canUsePdfSimulator = isMaster || isSubAdmin;
+
+    useEffect(() => {
+        if (!firebaseReady || !firebaseMethods || !firebaseDb) return;
+        const adminDocRef = getAdminIdsDoc(firebaseMethods, firebaseDb, appIdRef.current);
+        const unsub = firebaseMethods.onSnapshot(adminDocRef, (snap) => {
+            if (snap.exists() && Array.isArray(snap.data().admins)) {
+                const activeEmails = snap.data().admins
+                    .filter(a => a && a.email && a.active !== false)
+                    .map(a => String(a.email).trim().toLowerCase());
+                setAdminEmails(activeEmails);
+                FastCache.setJSON('ug_cached_admin_emails', activeEmails);
+            } else {
+                setAdminEmails([]);
+                FastCache.setJSON('ug_cached_admin_emails', []);
+            }
+        }, () => {});
+        return () => { if (typeof unsub === 'function') unsub(); };
+    }, [firebaseReady, firebaseMethods, firebaseDb]);
+
+    // Admin ID लॉगिन करने पर केवल Dashboard, RRB PYQ TEST और PDF Simulator में ही रह सके
+    useEffect(() => {
+        if (!isSubAdmin) return;
+        const allowedForAdmin = [
+            TEST_TYPES.MENU,
+            TEST_TYPES.RRB_PYQ_SERIES,
+            TEST_TYPES.PDF_SIMULATOR,
+            TEST_TYPES.LOGIN,
+            TEST_TYPES.CUSTOM_HTML,
+            TEST_TYPES.SOLUTION,
+            TEST_TYPES.ANALYSIS
+        ];
+        if (!allowedForAdmin.includes(currentView)) {
+            setCurrentView(TEST_TYPES.MENU);
+        }
+    }, [isSubAdmin, currentView]);
     const globalLogo = PERMANENT_ENHANCED_LOGO;
     // Hydrate Full Tests & Completed Results from Ultra-Fast IndexedDB on Mount (<15ms, 0 wait time)
     useEffect(() => {
@@ -9785,11 +10048,10 @@ const App = () => {
                     dynamicImport("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js")
                 ]);
                 const { getFirestore, doc, setDoc, collection, getDocs, getDoc, runTransaction, deleteDoc, onSnapshot, serverTimestamp, enableIndexedDbPersistence } = firestoreModule;
+                // ==================== FIREBASE MOBILE & CONTENT:// FIX (शुरू) ====================
                 const isWebHttpProtocol = window.location.protocol === 'http:' || window.location.protocol === 'https:';
                 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
-                // 1. यदि फ़ाइल content:// या file:// से खुली है तो IndexedDB की जगह In-Memory Auth इस्तेमाल करें
-                //    ताकि मोबाइल में Firebase 25 सेकंड तक लटके नहीं
                 let auth;
                 try {
                     if (authModule.initializeAuth && authModule.inMemoryPersistence) {
@@ -9804,24 +10066,18 @@ const App = () => {
                     auth = authModule.getAuth(app);
                 }
 
-                // 2. मोबाइल नेटवर्क और VPN पर Firestore को अटकने से बचाने के लिए Long Polling चालू करें
                 let db;
                 try {
-                    if (firestoreModule.initializeFirestore) {
-                        db = firestoreModule.initializeFirestore(app, {
-                            experimentalAutoDetectLongPolling: true
-                        });
-                    } else {
-                        db = getFirestore(app);
-                    }
+                    db = firestoreModule.initializeFirestore
+                        ? firestoreModule.initializeFirestore(app, { experimentalAutoDetectLongPolling: true })
+                        : getFirestore(app);
                 } catch (dbInitErr) {
                     db = getFirestore(app);
                 }
-
-                // 3. Offline Persistence केवल असली https:// या http:// वेबसाइट पर ही चालू करें
                 if (isWebHttpProtocol && enableIndexedDbPersistence) {
                     enableIndexedDbPersistence(db).catch(() => {});
                 }
+                // ==================== FIREBASE MOBILE & CONTENT:// FIX (समाप्त) ====================
                 let functionsModulePromise = null;
                 let functionsInstance = null;
                 const callPaymentFunction = async (name, payload = {}) => {
@@ -10216,16 +10472,16 @@ const App = () => {
                     React.createElement("button", { onClick: goHome, className: `w-full flex items-center gap-4 px-6 py-3 text-left ${currentView === TEST_TYPES.MENU ? 'bg-blue-600 text-white border-r-4 border-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors'}` },
                         React.createElement("i", { className: "fa-solid fa-chart-pie w-5" }),
                         React.createElement("span", { className: "font-semibold" }, "Dashboard")),
-                    React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.MOCK_SERIES), className: `w-full flex items-center gap-4 px-6 py-3 text-left ${currentView === TEST_TYPES.MOCK_SERIES ? 'bg-blue-600 text-white border-r-4 border-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors'}` },
+                    !isSubAdmin && (React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.MOCK_SERIES), className: `w-full flex items-center gap-4 px-6 py-3 text-left ${currentView === TEST_TYPES.MOCK_SERIES ? 'bg-blue-600 text-white border-r-4 border-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors'}` },
                         React.createElement("i", { className: "fa-solid fa-list-check w-5" }),
-                        React.createElement("span", { className: "font-semibold" }, "Mock Test Series")),
+                        React.createElement("span", { className: "font-semibold" }, "Mock Test Series"))),
                     React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.RRB_PYQ_SERIES), className: `w-full flex items-center gap-4 px-6 py-3 text-left ${currentView === TEST_TYPES.RRB_PYQ_SERIES ? 'bg-blue-600 text-white border-r-4 border-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors'}` },
                         React.createElement("i", { className: "fa-solid fa-book-bookmark w-5" }),
                         React.createElement("span", { className: "font-semibold" }, "RRB PYQ TEST")),
+                    canUsePdfSimulator && (React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.PDF_SIMULATOR), className: `w-full flex items-center gap-4 px-6 py-3 text-left ${currentView === TEST_TYPES.PDF_SIMULATOR ? 'bg-sky-600 text-white border-r-4 border-amber-300' : 'text-sky-300 hover:bg-slate-800 hover:text-white transition-colors'}` },
+                        React.createElement("i", { className: "fa-solid fa-file-pdf w-5" }),
+                        React.createElement("span", { className: "font-bold" }, "Test Generator Simulator (PDF)"))),
                     isMaster && (React.createElement(React.Fragment, null,
-                        React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.PDF_SIMULATOR), className: `w-full flex items-center gap-4 px-6 py-3 text-left ${currentView === TEST_TYPES.PDF_SIMULATOR ? 'bg-sky-600 text-white border-r-4 border-amber-300' : 'text-sky-300 hover:bg-slate-800 hover:text-white transition-colors'}` },
-                            React.createElement("i", { className: "fa-solid fa-file-pdf w-5" }),
-                            React.createElement("span", { className: "font-bold" }, "Test Generator Simulator (PDF)")),
                         React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.TEST_GENERATOR), className: `w-full flex items-center gap-4 px-6 py-3 text-left ${currentView === TEST_TYPES.TEST_GENERATOR ? 'bg-blue-600 text-white border-r-4 border-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors'}` },
                             React.createElement("i", { className: "fa-solid fa-microchip w-5" }),
                             React.createElement("span", { className: "font-semibold" }, "RDSO ALP Test Generator")),
@@ -10237,11 +10493,14 @@ const App = () => {
                             React.createElement("span", { className: "font-semibold" }, "Manage & Remove Tests")),
                         React.createElement("button", { onClick: () => setCurrentView(PAYMENT_ADMIN_VIEW), className: `w-full flex items-center gap-4 px-6 py-3 text-left ${currentView === PAYMENT_ADMIN_VIEW ? 'bg-emerald-600 text-white border-r-4 border-white' : 'text-emerald-300 hover:bg-slate-800 hover:text-white transition-colors'}` },
                             React.createElement("i", { className: "fa-solid fa-money-check-dollar w-5" }),
-                            React.createElement("span", { className: "font-semibold" }, "Payment Settings & Records"))))),
-                React.createElement("div", { className: "mb-4" },
+                            React.createElement("span", { className: "font-semibold" }, "Payment Settings & Records")),
+                        React.createElement("button", { onClick: () => setCurrentView(ADMIN_PROVIDER_VIEW), className: `w-full flex items-center gap-4 px-6 py-3 text-left ${currentView === ADMIN_PROVIDER_VIEW ? 'bg-amber-500 text-slate-950 border-r-4 border-white' : 'text-amber-300 hover:bg-slate-800 hover:text-white transition-colors'}` },
+                            React.createElement("i", { className: "fa-solid fa-user-shield w-5" }),
+                            React.createElement("span", { className: "font-bold" }, "Admin ID Provider"))))),
+                !isSubAdmin && (React.createElement("div", { className: "mb-4" },
                     React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.LOGIN), className: `w-full flex items-center gap-4 px-6 py-3 text-left ${currentView === TEST_TYPES.LOGIN ? 'bg-blue-600 text-white border-r-4 border-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white transition-colors'}` },
                         React.createElement("i", { className: "fa-solid fa-gear w-5" }),
-                        React.createElement("span", { className: "font-semibold" }, "Settings / Login")))))),
+                        React.createElement("span", { className: "font-semibold" }, "Settings / Login"))))))),
         React.createElement("div", { className: "flex-1 flex flex-col h-full overflow-hidden" },
             !isTesting && currentView !== TEST_TYPES.RESULTS && currentView !== TEST_TYPES.SOLUTION && currentView !== TEST_TYPES.ANALYSIS && currentView !== TEST_TYPES.LOGIN && (React.createElement("header", { className: "bg-white h-16 shadow-sm border-b border-slate-200 flex items-center justify-between px-6 flex-shrink-0" },
                 React.createElement("div", { className: "flex items-center gap-4" },
@@ -10249,18 +10508,20 @@ const App = () => {
                         React.createElement("i", { className: "fa-solid fa-bars text-xl" })),
                     React.createElement("h2", { className: "text-lg font-bold text-slate-800 hidden sm:block" }, "Unlimited Gyan Test")),
                 userAuth && (React.createElement("div", { className: "flex items-center gap-3" },
-                    isMaster && (React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.PDF_SIMULATOR), className: "bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5" },
+                    canUsePdfSimulator && (React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.PDF_SIMULATOR), className: "bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5" },
                         React.createElement("i", { className: "fa-solid fa-file-pdf text-red-500" }),
                         " RRB ALP PDF Simulator")),
+                    isSubAdmin && (React.createElement("span", { className: "bg-indigo-100 text-indigo-800 border border-indigo-200 px-2.5 py-1 rounded-lg text-[11px] font-black" }, "Admin ID")),
                     React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.LOGIN), className: "flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700" },
                         React.createElement("i", { className: "fa-solid fa-user-check text-blue-600" }),
                         " ",
                         userProfileName || userEmail))))),
             React.createElement("main", { className: `flex-1 overflow-y-auto ${isTesting || currentView === TEST_TYPES.LOGIN ? 'test-fullscreen p-0' : 'p-6 md:p-10'}` },
-                currentView === TEST_TYPES.LOGIN && (React.createElement(LoginView, { authMethods: firebaseMethods, authInstance: firebaseMethods?.authInstance, user: userAuth, firebaseReady: firebaseReady, globalLogo: globalLogo, appId: appIdRef.current, unlockedTests: unlockedTests, subscriptionInfo: subscriptionInfo, onOpenExtendModal: () => setPaymentModalTest({ id: 'ALL', title: 'Limit & Validity Extension Pass', isExtend: true }), onGoToDashboard: () => setCurrentView(TEST_TYPES.MOCK_SERIES) })),
-                currentView === TEST_TYPES.PDF_SIMULATOR && isMaster && (React.createElement(PdfTestSimulatorView, { firebaseMethods: firebaseMethods, firebaseDb: firebaseDb, appId: appIdRef.current, firebaseReady: firebaseReady, onTestAdded: () => {
+                currentView === TEST_TYPES.LOGIN && (React.createElement(LoginView, { authMethods: firebaseMethods, authInstance: firebaseMethods?.authInstance, user: userAuth, firebaseReady: firebaseReady, globalLogo: globalLogo, appId: appIdRef.current, unlockedTests: unlockedTests, subscriptionInfo: subscriptionInfo, onOpenExtendModal: () => setPaymentModalTest({ id: 'ALL', title: 'Limit & Validity Extension Pass', isExtend: true }), onGoToDashboard: () => setCurrentView(isSubAdmin ? TEST_TYPES.MENU : TEST_TYPES.MOCK_SERIES) })),
+                                currentView === TEST_TYPES.PDF_SIMULATOR && canUsePdfSimulator && (React.createElement(PdfTestSimulatorView, { firebaseMethods: firebaseMethods, firebaseDb: firebaseDb, appId: appIdRef.current, firebaseReady: firebaseReady, onTestAdded: () => {
                         setCurrentView(TEST_TYPES.RRB_PYQ_SERIES);
                     } })),
+                currentView === ADMIN_PROVIDER_VIEW && isMaster && (React.createElement(AdminIdProviderPanel, { firebaseMethods: firebaseMethods, firebaseDb: firebaseDb, appId: appIdRef.current, userAuth: userAuth })),
                 currentView === TEST_TYPES.RRB_PYQ_SERIES && (React.createElement("div", { className: "max-w-7xl mx-auto animate-fade-in" },
                     React.createElement("div", { className: "bg-white border border-slate-200 rounded-2xl p-5 mb-5 shadow-sm" },
                         React.createElement("div", { className: "flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100" },
@@ -10273,7 +10534,7 @@ const App = () => {
                                         React.createElement("span", { className: "bg-blue-50 text-blue-700 border border-blue-200 text-xs font-black px-2.5 py-0.5 rounded-full" },
                                             "Total: ",
                                             rrbPyqTests.length)))),
-                            isMaster && (React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.PDF_SIMULATOR), className: "bg-sky-600 hover:bg-sky-700 text-white font-black text-xs px-4 py-2.5 rounded-xl shadow flex items-center gap-2 transition-all hover:scale-105" },
+                            canUsePdfSimulator && (React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.PDF_SIMULATOR), className: "bg-sky-600 hover:bg-sky-700 text-white font-black text-xs px-4 py-2.5 rounded-xl shadow flex items-center gap-2 transition-all hover:scale-105" },
                                 React.createElement("i", { className: "fa-solid fa-plus" }),
                                 " \u0928\u092F\u093E RRB PYQ PDF \u091F\u0947\u0938\u094D\u091F \u091C\u094B\u0921\u093C\u0947\u0902"))),
                         React.createElement("div", { className: "flex items-center gap-2.5 overflow-x-auto hide-scrollbar pt-4" }, rrbPyqSections.map((sec, sIdx) => {
@@ -10332,7 +10593,7 @@ const App = () => {
                         const remainingAttempts = maxAttemptsLimit - attemptCount;
                         const canAttempt = remainingAttempts > 0;
                         const isExpired = subscriptionInfo?.endDate ? Date.now() > subscriptionInfo.endDate : false;
-                        const isUnlocked = isMaster || (!isExpired && (isCompleted || unlockedTests.includes('ALL') || unlockedTests.includes('RRB_PYQ_ALL') || unlockedTests.includes(test.id)));
+                        const isUnlocked = canUsePdfSimulator || (!isExpired && (isCompleted || unlockedTests.includes('ALL') || unlockedTests.includes('RRB_PYQ_ALL') || unlockedTests.includes(test.id)));
                         const resolvedSection = resolveRrbPyqSectionName(test);
                         const resolvedCbtStage = isCbtPartitionSection(resolvedSection) ? resolveRrbPyqCbtStage(test) : null;
                         const testNumberInSection = index + 1;
@@ -10429,9 +10690,15 @@ const App = () => {
                     React.createElement("div", null,
                         React.createElement("h2", { className: "text-3xl font-black text-slate-800 mb-3" }, "Welcome to Unlimited Gyan Test"),
                         React.createElement("p", { className: "text-slate-500 mb-6 font-medium" }, "RDSO Psycho Battery & RRB ALP Testbook CBT Mock Series."),
-                        React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.MOCK_SERIES), className: "bg-blue-600 hover:bg-blue-700 text-white font-black px-8 py-4 rounded-2xl shadow-lg" },
+                        isSubAdmin ? (React.createElement("div", { className: "flex flex-wrap gap-3" },
+                            React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.RRB_PYQ_SERIES), className: "bg-blue-600 hover:bg-blue-700 text-white font-black px-7 py-4 rounded-2xl shadow-lg" },
+                                "Go to RRB PYQ TEST ",
+                                React.createElement("i", { className: "fa-solid fa-arrow-right ml-2" })),
+                            React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.PDF_SIMULATOR), className: "bg-sky-600 hover:bg-sky-700 text-white font-black px-7 py-4 rounded-2xl shadow-lg" },
+                                React.createElement("i", { className: "fa-solid fa-file-pdf mr-2" }),
+                                "Test Generator Simulator (PDF)"))) : (React.createElement("button", { onClick: () => setCurrentView(TEST_TYPES.MOCK_SERIES), className: "bg-blue-600 hover:bg-blue-700 text-white font-black px-8 py-4 rounded-2xl shadow-lg" },
                             "Go to Mock Test Series ",
-                            React.createElement("i", { className: "fa-solid fa-arrow-right ml-2" }))))),
+                            React.createElement("i", { className: "fa-solid fa-arrow-right ml-2" })))))),
                 currentView === TEST_TYPES.MOCK_SERIES && (React.createElement("div", { className: "max-w-7xl mx-auto animate-fade-in" },
                     React.createElement("div", { className: "flex flex-wrap items-center justify-between gap-4 mb-5 w-full pt-1 border-b border-slate-200 pb-3" },
                         React.createElement("div", { className: "flex overflow-x-auto hide-scrollbar gap-3" }, dynamicCategories.map(cat => (React.createElement("button", { key: cat.id, onClick: () => setActiveFilter(cat.id), className: `px-4 py-2 whitespace-nowrap text-sm font-semibold rounded ${activeFilter === cat.id ? 'bg-[#789ca4] text-white' : 'text-slate-500 hover:text-slate-800'}` },
@@ -11783,6 +12050,199 @@ class ErrorBoundary extends React.Component {
 
         window.addEventListener('resize', scheduleSync);
         window.addEventListener('orientationchange', scheduleSync);
+    });
+})();
+</script>
+<!-- ==================== AUTO-HIDE SIDEBAR + LOGIN TYPING FIX + BOTTOM-LEFT MENU (समाप्त) ==================== -->
+<!-- ==================== AUTO-HIDE SIDEBAR + LOGIN TYPING FIX + BOTTOM-LEFT MENU (शुरू) ==================== -->
+<style id="ug-auto-hide-desktop-mobile-css">
+    :root { --ug-fit-zoom: 1; }
+    input, textarea, select, .login-input {
+        pointer-events: auto !important;
+        -webkit-user-select: text !important;
+        user-select: text !important;
+        touch-action: manipulation !important;
+    }
+    .login-glass-wrapper i.fa-solid,
+    .login-glass-wrapper i.fa-regular,
+    .login-glass-wrapper i.fas { pointer-events: none !important; }
+    .login-glass-card, .login-glass-card.anim-float { animation: none !important; transform: none !important; }
+    .login-glass-wrapper .settings-scroll-wrapper {
+        height: 100dvh !important; max-height: 100dvh !important;
+        overflow-y: auto !important; -webkit-overflow-scrolling: touch !important;
+    }
+    body.ug-login-screen-active #ug-smart-backdrop,
+    body.ug-login-screen-active #ug-mobile-backdrop,
+    body.ug-login-screen-active #ug-mobile-bottom-bar,
+    body.ug-login-screen-active #ug-bottom-left-menu-btn,
+    body.ug-keyboard-open #ug-bottom-left-menu-btn,
+    body.ug-keyboard-open #ug-mobile-bottom-bar { display: none !important; pointer-events: none !important; }
+    body.ug-login-screen-active { padding-bottom: 0 !important; }
+    aside.sidebar, aside { transition: width 0.24s ease, min-width 0.24s ease, transform 0.24s ease, opacity 0.2s ease !important; }
+    header button.lg\\:hidden { display: none !important; }
+    #ug-laptop-menu-toggle {
+        display: none; align-items: center; gap: 6px; background: #0f172a; color: #fff;
+        border: 1px solid #334155; border-radius: 10px; padding: 6px 11px;
+        font-family: 'Noto Sans Devanagari', 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; cursor: pointer;
+    }
+    #ug-bottom-left-menu-btn {
+        display: none; position: fixed; left: 12px; bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+        z-index: 100002; background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%); color: #fff;
+        border: 1.5px solid rgba(125, 211, 252, 0.85); border-radius: 9999px; padding: 9px 14px;
+        font-family: 'Noto Sans Devanagari', 'Inter', sans-serif; font-size: 12.5px; font-weight: 800;
+        align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 8px 22px rgba(15, 23, 42, 0.45);
+    }
+    #ug-bottom-left-menu-btn.ug-menu-is-open { background: linear-gradient(135deg, #be123c 0%, #e11d48 100%); border-color: #fda4af; }
+    #ug-smart-backdrop { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.52); backdrop-filter: blur(2px); z-index: 99995; }
+    #ug-smart-backdrop.ug-show { display: block !important; }
+    #ug-sidebar-top-ctrl { padding: 8px; border-bottom: 1px solid rgba(148, 163, 184, 0.22); background: rgba(15, 23, 42, 0.8); display: flex; flex-wrap: wrap; gap: 5px; }
+    #ug-sidebar-top-ctrl button { flex: 1; border: 1px solid rgba(148, 163, 184, 0.35); background: #1e293b; color: #f1f5f9; border-radius: 8px; padding: 5px 6px; font-size: 10.5px; font-weight: 700; cursor: pointer; }
+    #ug-sidebar-top-ctrl button.ug-active-view { background: #10b981; border-color: #34d399; color: #022c22; font-weight: 800; }
+    @media (min-width: 769px) {
+        #ug-laptop-menu-toggle { display: inline-flex !important; }
+        #ug-bottom-left-menu-btn, #ug-sidebar-top-ctrl .ug-mobile-only-ctrl { display: none !important; }
+        body.ug-desktop-sidebar-hidden aside.sidebar, body.ug-desktop-sidebar-hidden aside {
+            width: 0 !important; min-width: 0 !important; max-width: 0 !important; padding: 0 !important;
+            border: none !important; opacity: 0 !important; overflow: hidden !important; transform: translateX(-100%) !important; pointer-events: none !important;
+        }
+    }
+    @media (max-width: 768px) {
+        #ug-mobile-bottom-bar, #ug-mobile-backdrop { display: none !important; }
+        body { padding-bottom: 0 !important; max-width: 100vw !important; overflow-x: hidden !important; }
+        body:not(.ug-mobile-menu-open) aside.sidebar, body:not(.ug-mobile-menu-open) aside {
+            position: fixed !important; top: 0 !important; left: 0 !important; width: 210px !important; max-width: 68vw !important;
+            height: 100dvh !important; z-index: 99998 !important; transform: translateX(-115%) !important; pointer-events: none !important;
+        }
+        body.ug-mobile-menu-open aside.sidebar, body.ug-mobile-menu-open aside {
+            position: fixed !important; top: 0 !important; left: 0 !important; width: 210px !important; max-width: 68vw !important;
+            height: 100dvh !important; z-index: 99998 !important; transform: translateX(0) !important; pointer-events: auto !important;
+            overflow-y: auto !important; box-shadow: 6px 0 28px rgba(0, 0, 0, 0.48) !important;
+        }
+        body.ug-has-sidebar:not(.ug-login-screen-active):not(.ug-keyboard-open) #ug-bottom-left-menu-btn { display: inline-flex !important; }
+        aside + div { margin-left: 0 !important; width: 100% !important; max-width: 100vw !important; }
+        body.ug-desktop-all-data main:not(.test-fullscreen) { padding: 8px 6px 70px 6px !important; overflow-x: hidden !important; overflow-y: auto !important; }
+        body.ug-desktop-all-data main:not(.test-fullscreen) > div { width: 820px !important; max-width: none !important; margin: 0 auto !important; zoom: var(--ug-fit-zoom, 0.46) !important; }
+    }
+</style>
+<script id="ug-auto-hide-desktop-mobile-js">
+(function () {
+    var lastInputTapTime = 0;
+    ['touchstart', 'pointerdown', 'mousedown'].forEach(function (evName) {
+        document.addEventListener(evName, function (e) {
+            if (e.target && e.target.closest && e.target.closest('input, textarea, select, label, form, .login-glass-wrapper, [contenteditable="true"]')) {
+                lastInputTapTime = Date.now();
+                window._userExitedFullscreen = true;
+            }
+        }, { passive: true, capture: true });
+    });
+    function shouldBlockFullscreenNow() {
+        if (document.querySelector('.login-glass-wrapper')) return true;
+        if (Date.now() - lastInputTapTime < 2500) return true;
+        var ae = document.activeElement;
+        return !!(ae && /^(INPUT|TEXTAREA|SELECT)$/i.test(ae.tagName));
+    }
+    ['requestFullscreen', 'webkitRequestFullscreen', 'mozRequestFullScreen', 'msRequestFullscreen'].forEach(function (fnName) {
+        if (Element.prototype && typeof Element.prototype[fnName] === 'function') {
+            var origFs = Element.prototype[fnName];
+            Element.prototype[fnName] = function () {
+                if (shouldBlockFullscreenNow()) return Promise.resolve();
+                return origFs.apply(this, arguments);
+            };
+        }
+    });
+    function savePref(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+    function readPref(k, fb) { try { var v = localStorage.getItem(k); return v !== null ? v : fb; } catch (e) { return fb; } }
+    var isMobile = function () { return window.innerWidth <= 768; };
+    var mobileMenuOpen = false;
+    var desktopHidden = readPref('ug_desktop_sidebar_hidden', '0') === '1';
+    var mobileViewMode = readPref('ug_mobile_view_mode', 'desktop-fit');
+    var wasOnLoginScreen = true;
+    var syncTimer = null;
+
+    function updateDesktopFitZoom() {
+        var vw = Math.max(300, window.innerWidth || 360);
+        var zoomVal = Math.max(0.38, Math.min(1, (vw - 12) / 820)).toFixed(4);
+        if (document.documentElement.dataset.ugZoom !== zoomVal) {
+            document.documentElement.dataset.ugZoom = zoomVal;
+            document.documentElement.style.setProperty('--ug-fit-zoom', zoomVal);
+        }
+    }
+    function ensureBackdrop() {
+        var bd = document.getElementById('ug-smart-backdrop');
+        if (!bd) {
+            bd = document.createElement('div');
+            bd.id = 'ug-smart-backdrop';
+            bd.addEventListener('click', function () { setMobileMenu(false); });
+            document.body.appendChild(bd);
+        }
+        return bd;
+    }
+    function ensureBottomLeftMenuBtn() {
+        var btn = document.getElementById('ug-bottom-left-menu-btn');
+        if (!btn) {
+            btn = document.createElement('button');
+            btn.type = 'button';
+            btn.id = 'ug-bottom-left-menu-btn';
+            btn.addEventListener('click', function (e) { e.stopPropagation(); setMobileMenu(!mobileMenuOpen); });
+            document.body.appendChild(btn);
+        }
+        return btn;
+    }
+    function applyAllStates() {
+        updateDesktopFitZoom();
+        var sidebar = document.querySelector('aside.sidebar, aside');
+        var isLoginVisible = !!document.querySelector('.login-glass-wrapper');
+        var isTestRunning = !!document.querySelector('main.test-fullscreen');
+        var hasSidebar = !!sidebar && !isLoginVisible && !isTestRunning;
+        if (wasOnLoginScreen && hasSidebar) { mobileMenuOpen = false; wasOnLoginScreen = false; }
+        if (isLoginVisible || !sidebar) { wasOnLoginScreen = true; mobileMenuOpen = false; }
+        document.body.classList.toggle('ug-login-screen-active', isLoginVisible);
+        document.body.classList.toggle('ug-has-sidebar', hasSidebar);
+        document.body.classList.toggle('ug-mobile-menu-open', hasSidebar && mobileMenuOpen);
+        document.body.classList.toggle('ug-desktop-sidebar-hidden', desktopHidden);
+        document.body.classList.toggle('ug-desktop-all-data', !isLoginVisible && !isTestRunning && mobileViewMode === 'desktop-fit');
+        ensureBackdrop().classList.toggle('ug-show', isMobile() && hasSidebar && mobileMenuOpen);
+        var blBtn = ensureBottomLeftMenuBtn();
+        var blState = mobileMenuOpen ? 'open' : 'closed';
+        if (blBtn.dataset.state !== blState) {
+            blBtn.dataset.state = blState;
+            blBtn.classList.toggle('ug-menu-is-open', mobileMenuOpen);
+            blBtn.innerHTML = mobileMenuOpen ? '<span>&#10005;</span><span>बंद करें</span>' : '<span>&#9776;</span><span>मेनू</span>';
+        }
+        var lapBtn = document.getElementById('ug-laptop-menu-toggle');
+        var lapState = desktopHidden ? 'hidden' : 'shown';
+        if (lapBtn && lapBtn.dataset.state !== lapState) {
+            lapBtn.dataset.state = lapState;
+            lapBtn.innerHTML = desktopHidden ? '&#9776; <span>मेनू दिखाएँ</span>' : '&#171; <span>मेनू छिपाएँ</span>';
+        }
+    }
+    function setMobileMenu(open) { mobileMenuOpen = !!open; applyAllStates(); }
+    function toggleDesktopSidebar() { desktopHidden = !desktopHidden; savePref('ug_desktop_sidebar_hidden', desktopHidden ? '1' : '0'); applyAllStates(); }
+    function injectControls() {
+        var header = document.querySelector('header');
+        if (header && !document.getElementById('ug-laptop-menu-toggle')) {
+            var leftBox = header.firstElementChild || header;
+            var lapBtn = document.createElement('button');
+            lapBtn.type = 'button'; lapBtn.id = 'ug-laptop-menu-toggle';
+            lapBtn.addEventListener('click', toggleDesktopSidebar);
+            leftBox.insertBefore(lapBtn, leftBox.firstChild);
+        }
+        applyAllStates();
+    }
+    function scheduleSync() {
+        if (syncTimer) return;
+        syncTimer = setTimeout(function () { syncTimer = null; injectControls(); }, 80);
+    }
+    window.addEventListener('DOMContentLoaded', function () {
+        ensureBackdrop(); ensureBottomLeftMenuBtn(); injectControls();
+        var rootEl = document.getElementById('root');
+        if (rootEl) new MutationObserver(scheduleSync).observe(rootEl, { childList: true, subtree: true });
+        document.addEventListener('focusin', function (e) { if (e.target && /^(INPUT|TEXTAREA|SELECT)$/i.test(e.target.tagName)) document.body.classList.add('ug-keyboard-open'); });
+        document.addEventListener('focusout', function () { setTimeout(function () { if (!document.activeElement || !/^(INPUT|TEXTAREA|SELECT)$/i.test(document.activeElement.tagName)) document.body.classList.remove('ug-keyboard-open'); }, 150); });
+        document.addEventListener('click', function (e) {
+            if (isMobile() && mobileMenuOpen && e.target.closest('aside nav button')) setTimeout(function () { setMobileMenu(false); }, 100);
+        }, true);
+        window.addEventListener('resize', scheduleSync);
     });
 })();
 </script>
