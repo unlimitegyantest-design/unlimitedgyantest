@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta id="ug-viewport-meta" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -10,6 +11,8 @@
     <title>Unlimited Gyan Test</title>
     <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://checkout.razorpay.com" crossorigin>
+    <link rel="preconnect" href="https://api.razorpay.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
@@ -26,7 +29,6 @@
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script defer src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         (function () {
             "use strict";
@@ -90,7 +92,7 @@
 
         function bindSafeGlobalFallback(varName) {
             if (!varName || !/^[a-zA-Z_$][\w$]*$/.test(varName)) return;
-            var blocked = { React: 1, ReactDOM: 1, firebase: 1, MathJax: 1, Razorpay: 1, tailwind: 1, document: 1, window: 1, console: 1, fetch: 1 };
+            var blocked = { React: 1, ReactDOM: 1, firebase: 1, MathJax: 1, Razorpay: 1, RazorpayCheckout: 1, CheckoutBridge: 1, webkit: 1, tailwind: 1, document: 1, window: 1, console: 1, fetch: 1, postMessage: 1, localStorage: 1, sessionStorage: 1, XMLHttpRequest: 1, Promise: 1, Intl: 1, crypto: 1, URL: 1 };
             if (blocked[varName] || (varName in window)) return;
             var isCounter = /^(?:[ijkmnxy]|idx|index|count|len|pos|step)$/i.test(varName);
             try { Object.defineProperty(window, varName, { value: isCounter ? 0 : undefined, writable: true, enumerable: false, configurable: true }); } catch (e) {}
@@ -195,10 +197,153 @@
             if (/(?:^|\/)react(?:\.production|\.development)?\.min\.js|\/react@\d/i.test(s) && !/react-dom/i.test(s) && window.React) return true;
             if (/(?:^|\/)react-dom(?:\.production|\.development)?\.min\.js|\/react-dom@\d/i.test(s) && window.ReactDOM) return true;
             if (/mathjax/i.test(s) && (window.MathJax || document.querySelector('script[src*="mathjax" i]'))) return true;
-            if (/checkout\.razorpay\.com/i.test(s) && window.Razorpay) return true;
+            if (/checkout\.razorpay\.com/i.test(s) && window.Razorpay && document.querySelector('script[data-ug-rzp-mounted="1"]')) return true;
             return false;
         }
         function ensureHeadLinks(links) { (links || []).forEach(function (attrs) { if (!attrs || !attrs.href) return; if (document.querySelector('link[href="' + String(attrs.href).replace(/"/g, "") + '"]')) return; var lk = document.createElement("link"); Object.keys(attrs).forEach(function (k) { try { lk.setAttribute(k, attrs[k]); } catch (e) {} }); document.head.appendChild(lk); }); }
+        // डायनामिक क्लाउड स्क्रिप्ट्स (जैसे cloud_bundle_script_7.js) में करप्टेड Regex (/...\/.../i.test) को ठीक करता है
+        function sanitizeCorruptedRegexes(rawCode) {
+            var s = String(rawCode || "");
+            if (!s) return s;
+            var origValid = false;
+            try { new Function(s); origValid = true; } catch (e) {}
+            var out = s;
+            try {
+                // 1. /...\\//i.test( को /...\//i.test( में बदलें
+                out = out.replace(
+                    /([(\[,=?:!&|{};>\n]\s*|\breturn\s+)\/((?:\\.|\[(?:\\.|[^\]\\\r\n])*\]|[^\/\\\r\n])+?)\\\\\/\/([gimsuydv]{1,6})\.(test|exec)\(/g,
+                    "$1/$2\\//$3.$4("
+                );
+                // 2. /...//i.test( को /...\//i.test( में बदलें
+                out = out.replace(
+                    /([(\[,=?:!&|{};>\n]\s*|\breturn\s+)\/((?:\\.|\[(?:\\.|[^\]\\\r\n])*\]|[^\/\\\r\n])+?)\/\/([gimsuydv]{1,6})\.(test|exec)\(/g,
+                    "$1/$2\\//$3.$4("
+                );
+                // 3. /foo/id/i.test( या /foo/ /i.test( जैसे टूटे हुए Regex ठीक करें
+                out = out.replace(
+                    /([(\[,=?:!&|{};>\n]\s*|\breturn\s+)\/((?:\\.|\[(?:\\.|[^\]\\\r\n])*\]|[^\/\\\r\n])+?)\/(\s*[gimsuydv]{0,6}\s*)\/\s*([gimsuydv]{1,6})\.(test|exec)\(/g,
+                    "$1/$2\\/$3/$4.$5("
+                );
+                // 4. /pass/|fail/i.test( जैसे टूटे हुए alternation Regex ठीक करें
+                out = out.replace(
+                    /([(\[,=?:!&|{};>\n]\s*|\breturn\s+)\/((?:\\.|\[(?:\\.|[^\]\\\r\n])*\]|[^\/\\\r\n])+?)\/([gimsuydv]{0,6}\s*[|&^+\-][^;\r\n{}'"`,=:?]+?)\/\s*([gimsuydv]{1,6})\.(test|exec)\(/g,
+                    function (full, pfx, body1, mid, flags, fnName) {
+                        if (mid.indexOf("||") !== -1 || mid.indexOf("&&") !== -1 || /\.(?:test|exec)\s*\(/.test(mid)) return full;
+                        var escapedMid = mid.replace(/(\\.|\/)/g, function (m) { return m === "/" ? "\\/" : m; });
+                        return pfx + "/" + body1 + "\\/" + escapedMid + "/" + flags + "." + fnName + "(";
+                    }
+                );
+                // 5. split regex फिक्स
+                out = out.replace(/raw\.split\(\/\\?s\*\/\\?s\*\/\)/g, "raw.split(' / ')");
+                if (origValid && out !== s) {
+                    try { new Function(out); } catch (verifyErr) { return s; }
+                }
+            } catch (err) {
+                return s;
+            }
+            return out;
+        }
+        // क्लाउड से बाद में जुड़ने वाले किसी भी <script> टैग (cloud_bundle_script_*) को चलने से पहले सैनिटाइज़ करता है
+        function installDynamicScriptSanitizer() {
+            if (window.__UG_SCRIPT_SANITIZER__) return;
+            window.__UG_SCRIPT_SANITIZER__ = true;
+            function maybeSanitizeNode(node) {
+                try {
+                    if (!node || node.nodeType !== 1 || node.tagName !== "SCRIPT") return;
+                    if (node.getAttribute("src") || node.src) return;
+                    var t = String(node.type || "").trim().toLowerCase();
+                    if (t && t !== "text/javascript" && t !== "application/javascript" && t !== "module" && t !== "text/babel") return;
+                    var raw = node.textContent || "";
+                    if (!raw || (raw.indexOf(".test(") === -1 && raw.indexOf(".exec(") === -1 && raw.indexOf(".split(") === -1)) return;
+                    var fixed = sanitizeCorruptedRegexes(raw);
+                    if (fixed !== raw) node.textContent = fixed;
+                } catch (e) {}
+            }
+            var origAppendChild = Node.prototype.appendChild;
+            Node.prototype.appendChild = function (child) {
+                maybeSanitizeNode(child);
+                return origAppendChild.call(this, child);
+            };
+            var origInsertBefore = Node.prototype.insertBefore;
+            Node.prototype.insertBefore = function (newNode, refNode) {
+                maybeSanitizeNode(newNode);
+                return origInsertBefore.call(this, newNode, refNode);
+            };
+            if (typeof Element !== "undefined" && Element.prototype && Element.prototype.append) {
+                var origAppend = Element.prototype.append;
+                Element.prototype.append = function () {
+                    for (var i = 0; i < arguments.length; i++) maybeSanitizeNode(arguments[i]);
+                    return origAppend.apply(this, arguments);
+                };
+            }
+        }
+        // file:// प्रोटोकॉल पर कस्टम हिंदी संदेश बॉक्स दिखाता है (बिना alert के)
+        function showPaymentProtocolNotice() {
+            var existing = document.getElementById("ug-rzp-file-notice");
+            if (existing) existing.remove();
+            var overlay = document.createElement("div");
+            overlay.id = "ug-rzp-file-notice";
+            overlay.style.cssText = "position:fixed;inset:0;z-index:2147483647;background:rgba(15,23,42,0.72);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;font-family:'Noto Sans Devanagari','Inter',Arial,sans-serif;";
+            overlay.innerHTML = '<div style="width:100%;max-width:420px;background:#ffffff;color:#0f172a;border-radius:18px;padding:22px;box-shadow:0 20px 45px rgba(0,0,0,0.35);text-align:center;">' +
+                '<div style="width:48px;height:48px;margin:0 auto 12px;border-radius:50%;background:#fef2f2;color:#dc2626;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;">!</div>' +
+                '<h3 style="margin:0 0 8px;font-size:17px;font-weight:800;color:#0f172a;">फ़ाइल (file://) पर पेमेंट समर्थित नहीं है</h3>' +
+                '<p style="margin:0 0 16px;font-size:13.5px;line-height:1.6;color:#475569;">यह वेबसाइट सीधे कंप्यूटर फ़ाइल से खुली है। सुरक्षा कारणों से Razorpay पेमेंट केवल लाइव वेबसाइट (<strong>https://</strong>) या Local Server (<strong>http://localhost</strong>) पर ही खुलता है।</p>' +
+                '<button id="ug-rzp-notice-close" type="button" style="background:#2563eb;color:#ffffff;border:none;border-radius:12px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;">ठीक है</button>' +
+                '</div>';
+            document.body.appendChild(overlay);
+            var closeBtn = document.getElementById("ug-rzp-notice-close");
+            if (closeBtn) closeBtn.onclick = function () { overlay.remove(); };
+            overlay.onclick = function (ev) { if (ev.target === overlay) overlay.remove(); };
+        }
+        function ensureRazorpayReady() {
+            return new Promise(function (resolve) {
+                try {
+                    var stale = document.querySelectorAll(".razorpay-container");
+                    for (var i = 0; i < stale.length; i++) { try { stale[i].remove(); } catch (e) {} }
+                } catch (e) {}
+                function applyFileProtocolGuard() {
+                    if (window.location.protocol !== "file:") return;
+                    if (window.__UG_RZP_FILE_GUARD__) return;
+                    window.__UG_RZP_FILE_GUARD__ = true;
+                    var OrigRazorpay = window.Razorpay;
+                    if (typeof OrigRazorpay === "function") {
+                        var GuardedRazorpay = function () {
+                            return {
+                                open: function () { showPaymentProtocolNotice(); },
+                                on: function () {},
+                                close: function () {}
+                            };
+                        };
+                        try { Object.keys(OrigRazorpay).forEach(function (k) { GuardedRazorpay[k] = OrigRazorpay[k]; }); } catch (e) {}
+                        window.Razorpay = GuardedRazorpay;
+                    }
+                }
+                if (window.Razorpay && document.querySelector('script[data-ug-rzp-mounted="1"]')) {
+                    applyFileProtocolGuard();
+                    return resolve();
+                }
+                try {
+                    var oldScripts = document.querySelectorAll('script[src*="checkout.razorpay.com" i]');
+                    for (var j = 0; j < oldScripts.length; j++) { try { oldScripts[j].remove(); } catch (e) {} }
+                } catch (e) {}
+                var s = document.createElement("script");
+                s.src = "https://checkout.razorpay.com/v1/checkout.js";
+                s.async = false;
+                s.setAttribute("data-ug-rzp-mounted", "1");
+                var settled = false;
+                function done() {
+                    if (!settled) {
+                        settled = true;
+                        applyFileProtocolGuard();
+                        resolve();
+                    }
+                }
+                s.addEventListener("load", done, { once: true });
+                s.addEventListener("error", done, { once: true });
+                setTimeout(done, 10000);
+                (document.head || document.body).appendChild(s);
+            });
+        }
         function loadSingleExternalScript(sc) {
             return new Promise(function (resolve) {
                 if (!sc || !sc.src || isCoreCdnLoaded(sc.src)) return resolve();
@@ -227,7 +372,7 @@
                 if (!sc) return resolve();
                 if (sc.src || sc.kind === "external") { loadSingleExternalScript(sc).then(resolve); return; }
                 var code = String(sc.code || ""); if (!code.trim()) return resolve();
-                code = code.replace(/([(\[,=?:!&|]\s*\/[^\/\r\n'"]+?)\\\\\/\/([gimsuy]{1,6})\.(test|exec)\(/g, "$1\\//$2.$3(");
+                code = sanitizeCorruptedRegexes(code);
                 var t = String(sc.type || "").trim().toLowerCase(), isMod = t === "module", isCls = !t || t === "text/javascript" || t === "application/javascript";
                 if (isCls && !isMod) { try { new Function(code); } catch (synErr) { window.__UG_UPDATE_ERRORS__.push(tagName + " SyntaxError: " + synErr.message); if (!isolated && !capturedBaseErr) capturedBaseErr = synErr.message; return resolve(); } }
                 var jsEl = document.createElement("script"); if (sc.id) jsEl.id = sc.id; if (sc.type) jsEl.type = sc.type;
@@ -237,7 +382,7 @@
         }
 
         async function mountBaseBundle(p) {
-              if (!p || (!p.hasCustomBody && (!Array.isArray(p.scripts) || !p.scripts.length) && (!Array.isArray(p.externalScripts) || !p.externalScripts.length))) throw new Error("वेबसाइट का कोड खाली मिला।");
+            if (!p || (!p.hasCustomBody && (!Array.isArray(p.scripts) || !p.scripts.length) && (!Array.isArray(p.externalScripts) || !p.externalScripts.length))) throw new Error("वेबसाइट का कोड खाली मिला।");
             if (p.title) document.title = p.title;
             if (p.htmlClass) document.documentElement.className = p.htmlClass;
             ensureHeadLinks(p.headLinks);
@@ -245,6 +390,7 @@
             document.body.removeAttribute("style");
             if (p.bodyId) document.body.id = p.bodyId; if (p.bodyStyle) document.body.setAttribute("style", p.bodyStyle); if (p.bodyClass) document.body.className = p.bodyClass;
             if (p.hasCustomBody && p.bodyHtml) { document.body.innerHTML = p.bodyHtml; if (!document.getElementById("root")) { var r = document.createElement("div"); r.id = "root"; document.body.insertBefore(r, document.body.firstChild); } }
+            await ensureRazorpayReady();
             await loadExternalScripts(p.externalScripts || []);
             await ensureBabelIfNeeded(p.scripts || []);
             installReadyHooks(); isMountingBase = true; var prevOnload = window.onload;
@@ -255,8 +401,7 @@
         function adaptRuntimePatchCode(rawCode) {
             var s = String(rawCode || "");
             if (s.indexOf("bootFromFirebaseCloud") !== -1 && s.indexOf("UGT_AutoSync_DB_") !== -1 && s.indexOf("initModernHamburgerMenuSystem") === -1) return "";
-            s = s.replace(/([(\[,=?:!&|]\s*\/[^\/\r\n'"]+?)\\\\\/\/([gimsuy]{1,6})\.(test|exec)\(/g, "$1\\//$2.$3(");
-            s = s.replace(/raw\.split\(\/\\?s\*\/\\?s\*\/\)/g, "raw.split(' / ')");
+            s = sanitizeCorruptedRegexes(s);
             if (s.indexOf("__UG_FAST_ENGINE__") !== -1 && s.indexOf("startFastPipeline") !== -1) {
                 s = s.replace(/engine\.payloadPromise\s*=\s*\(async\s+function\s+startFastPipeline\(\)[\s\S]*?\}\)\(\);/, 'engine.payloadPromise = Promise.resolve({ mode: "patch-attached", version: 1, payloadStr: "", payloadObj: { scripts: [] }, speedKBps: 0 });');
             }
@@ -298,6 +443,7 @@
 
         async function bootFromFirebaseCloud() {
             initSafeGlobalsAndErrorWatcher();
+            installDynamicScriptSanitizer();
             setTimeout(function () { if (document.getElementById("ug-cloud-loader-ui") && capturedBaseErr) void showBootError("स्क्रिप्ट एरर: " + capturedBaseErr); }, 6500);
             try {
                 var reactWait = Promise.race([window.__UG_REACT_READY__ || Promise.resolve(false), new Promise(function (r) { setTimeout(function () { r(false); }, 11000); })]);
