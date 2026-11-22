@@ -53,26 +53,6 @@
         })();
     </script>
     <style id="ug-boot-loader-style">body{margin:0;font-family:'Noto Sans Devanagari','Inter',Arial,sans-serif;}@keyframes ugSpin{to{transform:rotate(360deg)}}</style>
-    <!-- Protective styles for hiding ALP PSYCHO TEST in Mobile Mode for non-Master accounts -->
-    <style id="ug-alp-psycho-guard-style">
-        html.ug-alp-mobile-hide [data-ug-alp-psycho-hidden="1"],
-        html.ug-alp-mobile-hide [data-ug-alp-psycho-hidden="1"] * {
-            display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-        }
-        html.ug-alp-mobile-hide [data-ug-alp-psycho-hidden="1"] {
-            width: 0 !important;
-            height: 0 !important;
-            min-width: 0 !important;
-            min-height: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            border: 0 !important;
-            overflow: hidden !important;
-        }
-    </style>
 </head>
 <body>
     <div id="root">
@@ -82,882 +62,6 @@
             <p id="ug-boot-status" style="margin:8px 0 0 0;font-size:13px;color:#cbd5e1;font-weight:600;">Cloud से वेबसाइट लोड हो रही है…</p>
         </div>
     </div>
-
-    <!-- ========================================================================= -->
-    <!-- ALP PSYCHO TEST RENAMER & MOBILE MASTER-ONLY VISIBILITY GUARD ENGINE      -->
-    <!-- Renames "Mock Test Series" -> "ALP PSYCHO TEST" across UI and hides it in -->
-    <!-- Mobile Mode for everyone EXCEPT strictly authenticated Master Accounts.   -->
-    <!-- ========================================================================= -->
-    <script id="ug-alp-psycho-guard-engine">
-    (function () {
-        "use strict";
-
-        var TARGET_LABEL = "ALP PSYCHO TEST";
-
-        // Patterns matching "Mock Test Series" (English + Hindi variants)
-        var RENAME_PATTERNS = [
-            /Mock[\s\-_]*Test[\s\-_]*Series/gi,
-            /मॉक\s*टेस्ट\s*(?:सीरीज|सीरीज़|श्रृंखला)/g
-        ];
-
-        // Pattern matching both old and renamed labels so elements stay tracked after rename
-        var MATCH_ANY_PATTERN = /(?:mock[\s\-_]*test[\s\-_]*series|मॉक\s*टेस्ट\s*(?:सीरीज|सीरीज़|श्रृंखला)|alp[\s\-_]*psycho[\s\-_]*test)/i;
-
-        // Excluded/placeholder emails that should never be mistaken for a master account
-        var IGNORED_EMAIL_RE = /(?:example\.com|firebaseapp\.com|noreply@|no-reply@|support@|placeholder@|demo@|student@|user@|test@test|your-?email)/i;
-
-        // State tracked by the guard
-        var extractedMasterEmails = new Set();
-        var extractedMasterUids = new Set();
-        var authSnapshot = {
-            email: "",
-            uid: "",
-            hasFirebaseSession: false,
-            hasStorageSession: false,
-            explicitMasterRole: false,
-            explicitNonMasterRole: false
-        };
-
-        var observer = null;
-        var scheduledFrame = null;
-        var isApplying = false;
-
-        /**
-         * Ensures the protective guard <style> element stays present at the end of <head>
-         * so it always overrides dynamically injected cloud bundle stylesheets.
-         */
-        function ensureGuardStyleAttached() {
-            try {
-                var st = document.getElementById("ug-alp-psycho-guard-style");
-                if (!st) {
-                    st = document.createElement("style");
-                    st.id = "ug-alp-psycho-guard-style";
-                    st.textContent =
-                        "html.ug-alp-mobile-hide [data-ug-alp-psycho-hidden=\"1\"]," +
-                        "html.ug-alp-mobile-hide [data-ug-alp-psycho-hidden=\"1\"] *{" +
-                        "display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;}" +
-                        "html.ug-alp-mobile-hide [data-ug-alp-psycho-hidden=\"1\"]{" +
-                        "width:0!important;height:0!important;min-width:0!important;min-height:0!important;" +
-                        "margin:0!important;padding:0!important;border:0!important;overflow:hidden!important;}";
-                    document.head.appendChild(st);
-                } else if (document.head && document.head.lastElementChild !== st) {
-                    document.head.appendChild(st);
-                }
-            } catch (e) {}
-        }
-
-        /**
-         * Safely scans downloaded cloud bundle scripts (read-only) to discover Master Account
-         * email addresses and UIDs defined inside the app code.
-         */
-        function scanTextForMasterHints(code) {
-            if (!code || typeof code !== "string") return;
-            try {
-                // 1. Direct email literals near master/superadmin/owner identifiers
-                var emailRe = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
-                var m;
-                while ((m = emailRe.exec(code)) !== null) {
-                    var email = String(m[0] || "").trim().toLowerCase();
-                    if (!email || IGNORED_EMAIL_RE.test(email)) continue;
-                    var start = Math.max(0, m.index - 220);
-                    var end = Math.min(code.length, m.index + email.length + 140);
-                    var ctx = code.slice(start, end);
-                    if (/(?:master|super[_\s\-]?admin|owner[_\s\-]?email|primary[_\s\-]?admin|root[_\s\-]?admin|initMasterAdmin)/i.test(ctx)) {
-                        // Exclude if context specifically says grantedAdmin / subAdmin only
-                        if (!/(?:granted[_\s\-]?admin[_\s\-]?email|demo[_\s\-]?email|student[_\s\-]?email)\s*[:=]\s*["']?[^"']*$/i.test(code.slice(start, m.index))) {
-                            extractedMasterEmails.add(email);
-                        }
-                    }
-                }
-
-                // 2. Base64-encoded strings via atob("...") near master keywords
-                var atobRe = /atob\s*\(\s*["']([A-Za-z0-9+/=]{8,120})["']\s*\)/g;
-                while ((m = atobRe.exec(code)) !== null) {
-                    var aStart = Math.max(0, m.index - 180);
-                    var aEnd = Math.min(code.length, m.index + m[0].length + 120);
-                    var aCtx = code.slice(aStart, aEnd);
-                    if (/(?:master|super[_\s\-]?admin|owner)/i.test(aCtx)) {
-                        try {
-                            var decoded = atob(m[1]).trim().toLowerCase();
-                            if (/^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$/i.test(decoded) && !IGNORED_EMAIL_RE.test(decoded)) {
-                                extractedMasterEmails.add(decoded);
-                            }
-                        } catch (e2) {}
-                    }
-                }
-
-                // 3. Explicit Master UID constants
-                var uidRe = /(?:MASTER[_\s]?ADMIN[_\s]?UID|MASTER[_\s]?UID|SUPER[_\s]?ADMIN[_\s]?UID)\s*[:=]\s*["']([A-Za-z0-9_\-]{16,64})["']/gi;
-                while ((m = uidRe.exec(code)) !== null) {
-                    if (m[1]) extractedMasterUids.add(String(m[1]).trim());
-                }
-            } catch (e) {}
-        }
-
-        function scanBundleForMasterHints(payloadObj) {
-            if (!payloadObj || typeof payloadObj !== "object") return;
-            try {
-                if (typeof payloadObj.bodyHtml === "string") scanTextForMasterHints(payloadObj.bodyHtml);
-                if (Array.isArray(payloadObj.scripts)) {
-                    for (var i = 0; i < payloadObj.scripts.length; i++) {
-                        var sc = payloadObj.scripts[i];
-                        if (sc && typeof sc.code === "string") scanTextForMasterHints(sc.code);
-                    }
-                }
-            } catch (e) {}
-        }
-
-        /**
-         * Reads Firebase Modular SDK auth persistence from IndexedDB (firebaseLocalStorageDb)
-         * without creating the DB if it doesn't exist yet.
-         */
-        function readFirebaseIndexedDbUser() {
-            return new Promise(function (resolve) {
-                if (!window.indexedDB) return resolve(null);
-                var settled = false;
-                var timer = setTimeout(function () { if (!settled) { settled = true; resolve(null); } }, 800);
-                function done(val) { if (!settled) { settled = true; clearTimeout(timer); resolve(val); } }
-                try {
-                    var req = indexedDB.open("firebaseLocalStorageDb");
-                    req.onupgradeneeded = function (ev) {
-                        // Do not leave an empty unexpected DB if Firebase hasn't initialized it
-                        try { ev.target.transaction.abort(); } catch (e) {}
-                        done(null);
-                    };
-                    req.onerror = function () { done(null); };
-                    req.onblocked = function () { done(null); };
-                    req.onsuccess = function (ev) {
-                        var db = ev.target.result;
-                        try {
-                            if (!db.objectStoreNames || !db.objectStoreNames.contains("firebaseLocalStorage")) {
-                                db.close();
-                                return done(null);
-                            }
-                            var tx = db.transaction("firebaseLocalStorage", "readonly");
-                            var store = tx.objectStore("firebaseLocalStorage");
-                            var getAllReq = store.getAll();
-                            getAllReq.onsuccess = function () {
-                                var rows = getAllReq.result || [];
-                                var found = null;
-                                for (var i = 0; i < rows.length; i++) {
-                                    var row = rows[i];
-                                    var keyStr = String((row && (row.fbase_key || row.key)) || "");
-                                    var val = row && row.value ? row.value : row;
-                                    if (val && typeof val === "object" && (val.email || val.uid) && (/authUser/i.test(keyStr) || val.stsTokenManager || val.apiKey)) {
-                                        found = {
-                                            email: String(val.email || "").trim().toLowerCase(),
-                                            uid: String(val.uid || "").trim()
-                                        };
-                                        break;
-                                    }
-                                }
-                                try { db.close(); } catch (e) {}
-                                done(found);
-                            };
-                            getAllReq.onerror = function () {
-                                try { db.close(); } catch (e) {}
-                                done(null);
-                            };
-                        } catch (e) {
-                            try { db.close(); } catch (e2) {}
-                            done(null);
-                        }
-                    };
-                } catch (e) {
-                    done(null);
-                }
-            });
-        }
-
-        /**
-         * Inspects localStorage and sessionStorage for Firebase Auth records and app user/role sessions.
-         */
-        function inspectWebStorageAuth() {
-            var info = {
-                email: "",
-                uid: "",
-                hasFirebaseSession: false,
-                hasStorageSession: false,
-                explicitMasterRole: false,
-                explicitNonMasterRole: false
-            };
-
-            function scanStorage(storage) {
-                if (!storage) return;
-                try {
-                    for (var i = 0; i < storage.length; i++) {
-                        var k = storage.key(i);
-                        if (!k) continue;
-                        var v = storage.getItem(k);
-                        if (!v) continue;
-
-                        // Firebase Auth user key
-                        if (/^firebase:authUser:/i.test(k)) {
-                            try {
-                                var fbObj = JSON.parse(v);
-                                if (fbObj && (fbObj.email || fbObj.uid)) {
-                                    info.hasFirebaseSession = true;
-                                    if (fbObj.email && !info.email) info.email = String(fbObj.email).trim().toLowerCase();
-                                    if (fbObj.uid && !info.uid) info.uid = String(fbObj.uid).trim();
-                                }
-                            } catch (e) {}
-                            continue;
-                        }
-
-                        // Skip unrelated cache / settings keys
-                        if (!/(?:user|auth|login|session|role|admin|master|profile|account)/i.test(k)) continue;
-                        if (/healed_globals|cache|bundle|theme|font|lang/i.test(k)) continue;
-
-                        var lowerK = k.toLowerCase();
-                        var trimmedV = String(v).trim();
-                        var lowerV = trimmedV.toLowerCase();
-
-                        // Direct boolean/string role keys
-                        if (/^(?:ug_)?(?:is_?master(?:_?admin)?|master_?admin_?logged_?in|master_?session)$/i.test(lowerK)) {
-                            if (lowerV === "true" || lowerV === "1" || lowerV === "yes") {
-                                info.explicitMasterRole = true;
-                                info.hasStorageSession = true;
-                            }
-                            continue;
-                        }
-                        if (/^(?:ug_)?(?:user_?role|account_?role|admin_?role|role)$/i.test(lowerK)) {
-                            if (/^(?:master|master_admin|masteradmin|superadmin|super_admin|owner)$/.test(lowerV)) {
-                                info.explicitMasterRole = true;
-                                info.hasStorageSession = true;
-                            } else if (/^(?:granted|granted_admin|sub_admin|subadmin|student|user|guest)$/.test(lowerV)) {
-                                info.explicitNonMasterRole = true;
-                            }
-                            continue;
-                        }
-
-                        // JSON session objects
-                        if (trimmedV.charAt(0) === "{") {
-                            try {
-                                var obj = JSON.parse(trimmedV);
-                                if (!obj || typeof obj !== "object") continue;
-
-                                var roleStr = String(obj.role || obj.userRole || obj.adminRole || obj.accountType || obj.userType || "").trim().toLowerCase();
-                                var isGranted = obj.isGrantedAdmin === true || obj.grantedAdmin === true || /granted|sub_?admin|limited/.test(roleStr);
-                                var isMasterFlag = (obj.isMaster === true || obj.isMasterAdmin === true || obj.masterAdmin === true || obj.isSuperAdmin === true || /^(?:master|master_admin|masteradmin|superadmin|super_admin|owner)$/.test(roleStr)) && !isGranted;
-
-                                if (obj.email && typeof obj.email === "string" && obj.email.indexOf("@") !== -1) {
-                                    info.hasStorageSession = true;
-                                    if (!info.email) info.email = obj.email.trim().toLowerCase();
-                                }
-                                if (obj.uid && typeof obj.uid === "string" && !info.uid) {
-                                    info.uid = obj.uid.trim();
-                                }
-                                if (isMasterFlag) {
-                                    info.explicitMasterRole = true;
-                                    info.hasStorageSession = true;
-                                } else if (isGranted || roleStr === "student" || roleStr === "user") {
-                                    info.explicitNonMasterRole = true;
-                                }
-                            } catch (e) {}
-                        }
-                    }
-                } catch (e) {}
-            }
-
-            scanStorage(window.sessionStorage);
-            scanStorage(window.localStorage);
-            return info;
-        }
-
-        /**
-         * Refreshes the cached authentication snapshot from Firebase compat SDK,
-         * Firebase Modular IndexedDB, and Web Storage.
-         */
-        async function refreshAuthSnapshot() {
-            var next = {
-                email: "",
-                uid: "",
-                hasFirebaseSession: false,
-                hasStorageSession: false,
-                explicitMasterRole: false,
-                explicitNonMasterRole: false
-            };
-
-            try {
-                // 1. Firebase Compat / v8 global SDK
-                if (window.firebase && typeof window.firebase.auth === "function") {
-                    try {
-                        var cu = window.firebase.auth().currentUser;
-                        if (cu) {
-                            next.hasFirebaseSession = true;
-                            if (cu.email) next.email = String(cu.email).trim().toLowerCase();
-                            if (cu.uid) next.uid = String(cu.uid).trim();
-                        }
-                    } catch (e) {}
-                }
-
-                // 2. Firebase Modular SDK IndexedDB
-                if (!next.hasFirebaseSession) {
-                    var idbUser = await readFirebaseIndexedDbUser();
-                    if (idbUser && (idbUser.email || idbUser.uid)) {
-                        next.hasFirebaseSession = true;
-                        if (idbUser.email) next.email = idbUser.email;
-                        if (idbUser.uid) next.uid = idbUser.uid;
-                    }
-                }
-
-                // 3. Web Storage
-                var stInfo = inspectWebStorageAuth();
-                if (!next.email && stInfo.email) next.email = stInfo.email;
-                if (!next.uid && stInfo.uid) next.uid = stInfo.uid;
-                if (stInfo.hasFirebaseSession) next.hasFirebaseSession = true;
-                if (stInfo.hasStorageSession) next.hasStorageSession = true;
-                if (stInfo.explicitMasterRole) next.explicitMasterRole = true;
-                if (stInfo.explicitNonMasterRole) next.explicitNonMasterRole = true;
-            } catch (e) {}
-
-            var changed = (
-                next.email !== authSnapshot.email ||
-                next.uid !== authSnapshot.uid ||
-                next.hasFirebaseSession !== authSnapshot.hasFirebaseSession ||
-                next.explicitMasterRole !== authSnapshot.explicitMasterRole ||
-                next.explicitNonMasterRole !== authSnapshot.explicitNonMasterRole
-            );
-
-            authSnapshot = next;
-            if (changed) scheduleApply();
-        }
-
-        /**
-         * Determines whether the site is currently open in Mobile Mode.
-         * Covers phones (portrait & landscape), responsive mobile viewports, and app mobile classes.
-         */
-        function isMobileModeNow() {
-            try {
-                var w = window.innerWidth || document.documentElement.clientWidth || 1024;
-                var h = window.innerHeight || document.documentElement.clientHeight || 768;
-                var htmlEl = document.documentElement;
-                var bodyEl = document.body;
-
-                // Explicit mobile mode classes/attributes set by the app
-                if (htmlEl && (htmlEl.classList.contains("ug-mobile-mode") || htmlEl.classList.contains("mobile-mode") || htmlEl.getAttribute("data-mobile-mode") === "true")) {
-                    return true;
-                }
-                if (bodyEl && (bodyEl.classList.contains("ug-mobile-mode") || bodyEl.classList.contains("mobile-mode") || bodyEl.getAttribute("data-mobile-mode") === "true")) {
-                    return true;
-                }
-
-                // Standard mobile viewport breakpoint (<= 768px covers phones & mobile emulator)
-                if (w <= 768) return true;
-                if (window.matchMedia && window.matchMedia("(max-width: 768px)").matches) return true;
-
-                // Mobile devices in landscape orientation (e.g. up to 932px wide with touch/coarse pointer)
-                var ua = String(navigator.userAgent || "");
-                var isMobileUA = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua) && !/iPad/i.test(ua);
-                var isCoarse = !!(window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
-                if (w <= 932 && ((isMobileUA && isCoarse) || (isCoarse && h <= 540))) {
-                    return true;
-                }
-
-                return false;
-            } catch (e) {
-                return true; // Fail safe on error
-            }
-        }
-
-        /**
-         * Checks whether a blocking login form is currently active (user not logged in).
-         */
-        function isLoginScreenBlocking() {
-            try {
-                if (authSnapshot.hasFirebaseSession) return false;
-                var pwdInput = document.querySelector('input[type="password"]');
-                if (!pwdInput) return false;
-                var rect = pwdInput.getBoundingClientRect();
-                if (rect.width <= 0 || rect.height <= 0) return false;
-                var form = pwdInput.closest("form, [role='dialog'], .modal, div");
-                var formText = form ? String(form.textContent || "") : "";
-                // Ignore admin panel password change forms if user already has a session
-                if (/(?:change password|new password|पासवर्ड बदलें|add admin|grant admin)/i.test(formText)) return false;
-                if (/(?:login|sign\s*in|लॉगिन|लॉग\s*इन)/i.test(formText) && !authSnapshot.hasStorageSession) {
-                    return true;
-                }
-            } catch (e) {}
-            return false;
-        }
-
-        /**
-         * Strict Master Account check.
-         * Returns TRUE only and only when authenticated as the Master Account
-         * (rejects guests, students, and Granted Admins).
-         */
-        function isMasterAccountNow() {
-            try {
-                if (isLoginScreenBlocking()) return false;
-
-                var email = authSnapshot.email;
-                var uid = authSnapshot.uid;
-
-                // 1. Authoritative check against Master Emails / UIDs extracted from the cloud app bundle
-                if (extractedMasterEmails.size > 0 || extractedMasterUids.size > 0) {
-                    if (email && extractedMasterEmails.has(email)) return true;
-                    if (uid && extractedMasterUids.has(uid)) return true;
-                    // If we know the logged-in user's email and we have the app's master email list,
-                    // any non-matching email is strictly NOT the Master Account (blocks Students & Granted Admins).
-                    if (email && extractedMasterEmails.size > 0) return false;
-                }
-
-                // 2. Explicit app-level Master globals or root role attributes
-                if (window.__UG_IS_MASTER_ADMIN__ === true || window.__UG_IS_MASTER__ === true || window.isMasterAdmin === true || window.isMasterAccount === true) {
-                    if (window.__UG_IS_GRANTED_ADMIN__ !== true) return true;
-                }
-                var globalRole = String(window.__UG_USER_ROLE__ || window.__UG_CURRENT_ROLE__ || "").trim().toLowerCase();
-                if (/^(?:master|master_admin|masteradmin|superadmin|super_admin|owner)$/.test(globalRole)) return true;
-                if (/^(?:granted|granted_admin|sub_admin|student|user|guest)$/.test(globalRole)) return false;
-
-                var rootEl = document.documentElement;
-                var bodyEl = document.body;
-                var attrRole = String(
-                    (rootEl && (rootEl.getAttribute("data-ug-role") || rootEl.getAttribute("data-role"))) ||
-                    (bodyEl && (bodyEl.getAttribute("data-ug-role") || bodyEl.getAttribute("data-role"))) ||
-                    ""
-                ).trim().toLowerCase();
-                if (/^(?:master|master_admin|masteradmin|superadmin|super_admin|owner)$/.test(attrRole)) return true;
-                if (/^(?:granted|granted_admin|sub_admin|student|user|guest)$/.test(attrRole)) return false;
-
-                if ((rootEl && rootEl.getAttribute("data-master-admin") === "true") || (bodyEl && bodyEl.getAttribute("data-master-admin") === "true")) {
-                    return true;
-                }
-
-                // 3. Explicit Master session flag from Web Storage (only when not marked as granted/student)
-                if (authSnapshot.explicitNonMasterRole && !authSnapshot.explicitMasterRole) return false;
-                if (authSnapshot.explicitMasterRole && !authSnapshot.explicitNonMasterRole) return true;
-
-                // 4. Strict DOM fallback ONLY when authenticated (and no extracted email already rejected the user)
-                if (authSnapshot.hasFirebaseSession || authSnapshot.hasStorageSession) {
-                    var domVerdict = inspectDomForStrictMasterStatus();
-                    if (domVerdict === true) return true;
-                    if (domVerdict === false) return false;
-                }
-
-                // Default deny: hide in mobile mode unless Master Account is confirmed
-                return false;
-            } catch (e) {
-                return false;
-            }
-        }
-
-        /**
-         * Inspects mounted UI elements for unmistakable Master-only badges/controls
-         * while explicitly rejecting Granted Admin / Sub Admin sessions.
-         */
-        function inspectDomForStrictMasterStatus() {
-            try {
-                if (!document.body) return null;
-                var candidates = document.body.querySelectorAll("span, div, p, button, a, small, strong, b, h1, h2, h3, h4, li");
-                var sawMasterMarker = false;
-
-                for (var i = 0; i < candidates.length; i++) {
-                    var el = candidates[i];
-                    if (!el || el.children.length > 2) continue;
-                    // Ignore login forms, footers, and hidden script/style containers
-                    if (el.closest("form, footer, script, style, [data-ug-alp-psycho-hidden='1']")) continue;
-
-                    var txt = String(el.textContent || "").replace(/\s+/g, " ").trim();
-                    if (!txt || txt.length > 42) continue;
-
-                    // Explicit Granted Admin / Sub Admin rejection
-                    if (/^(?:granted\s*admin|sub\s*admin|limited\s*admin|ग्रांटेड\s*एडमिन|सब\s*एडमिन)$/i.test(txt)) {
-                        return false;
-                    }
-
-                    // Unmistakable Master-only badges or Master-only admin controls
-                    if (
-                        /^(?:master\s*admin|master\s*account|super\s*admin|master\s*panel|मास्टर\s*एडमिन|मास्टर\s*अकाउंट|मास्टर\s*पैनल)$/i.test(txt) ||
-                        /^(?:grant\s*admin|manage\s*admins?|admin\s*access|admin\s*permissions?|एडमिन\s*एक्सेस|एडमिन\s*प्रबंधन)$/i.test(txt)
-                    ) {
-                        // Ensure this element is not hidden by CSS (e.g., initGrantedAdminMenuGuard hiding it)
-                        var cs = window.getComputedStyle ? window.getComputedStyle(el) : null;
-                        if (!cs || (cs.display !== "none" && cs.visibility !== "hidden")) {
-                            sawMasterMarker = true;
-                        }
-                    }
-                }
-                return sawMasterMarker ? true : null;
-            } catch (e) {
-                return null;
-            }
-        }
-
-        /**
-         * Replaces all "Mock Test Series" text variants with "ALP PSYCHO TEST".
-         */
-        function replaceMockText(str) {
-            var out = String(str || "");
-            for (var i = 0; i < RENAME_PATTERNS.length; i++) {
-                out = out.replace(RENAME_PATTERNS[i], TARGET_LABEL);
-            }
-            return out;
-        }
-
-        /**
-         * Determines whether a DOM node is a protected top-level layout container
-         * that must NEVER be hidden.
-         */
-        function isProtectedContainer(el) {
-            if (!el || el.nodeType !== 1) return true;
-            var tag = el.tagName;
-            if (tag === "HTML" || tag === "BODY" || tag === "HEAD" || tag === "MAIN" || tag === "HEADER" || tag === "NAV" || tag === "FOOTER" || tag === "ASIDE" || tag === "FORM" || tag === "TABLE" || tag === "TBODY" || tag === "UL" || tag === "OL") {
-                return true;
-            }
-            var id = String(el.id || "").toLowerCase();
-            if (id === "root" || id === "app" || id === "__next" || id === "ug-cloud-loader-ui") return true;
-            if (el.querySelector && el.querySelector("#root, main, header, nav")) return true;
-            return false;
-        }
-
-        /**
-         * Given an element whose text/attribute matched "Mock Test Series" / "ALP PSYCHO TEST",
-         * resolves the exact logical UI unit (button, nav link, menu item, option, card, or dedicated section)
-         * to hide without ever affecting neighboring items or page layout.
-         */
-        function resolveHideTarget(originEl) {
-            if (!originEl || originEl.nodeType !== 1) return null;
-            try {
-                // 1. Dropdown <option>
-                if (originEl.tagName === "OPTION") return originEl;
-
-                // 2. Check if inside an atomic interactive control (button, link, tab, menuitem, li)
-                var cur = originEl;
-                var depth = 0;
-                while (cur && cur.nodeType === 1 && depth < 6 && !isProtectedContainer(cur)) {
-                    var tag = cur.tagName;
-                    var role = String(cur.getAttribute("role") || "").toLowerCase();
-                    if (tag === "BUTTON" || tag === "A" || role === "button" || role === "tab" || role === "menuitem" || role === "option") {
-                        var tLen = String(cur.textContent || "").replace(/\s+/g, " ").trim().length;
-                        if (tLen <= 280) {
-                            // If parent <li> wraps only this single control, hide the <li> cleanly
-                            var pLi = cur.parentElement;
-                            if (pLi && pLi.tagName === "LI" && !isProtectedContainer(pLi)) {
-                                var liLen = String(pLi.textContent || "").replace(/\s+/g, " ").trim().length;
-                                var liBtns = pLi.querySelectorAll("button, a").length;
-                                if (liLen <= 280 && liBtns <= 2) return pLi;
-                            }
-                            return cur;
-                        }
-                    }
-                    if (tag === "LI") {
-                        var liTextLen = String(cur.textContent || "").replace(/\s+/g, " ").trim().length;
-                        if (liTextLen <= 280 && cur.querySelectorAll("button, a").length <= 2) return cur;
-                    }
-                    cur = cur.parentElement;
-                    depth++;
-                }
-
-                // 3. Check if originEl is the title/label of a dedicated Card or Section
-                var originText = String(originEl.textContent || "").replace(/\s+/g, " ").trim();
-                var isPrimaryLabel = originText.length <= 55;
-                if (!isPrimaryLabel) return null;
-
-                // Climb up to find a single-topic card or dedicated section
-                var candidate = originEl;
-                var bestCard = originEl;
-                var step = 0;
-                while (candidate && candidate.nodeType === 1 && step < 5) {
-                    var parent = candidate.parentElement;
-                    if (!parent || isProtectedContainer(parent)) break;
-
-                    var parentText = String(parent.textContent || "").replace(/\s+/g, " ").trim();
-                    var parentHeadings = parent.querySelectorAll("h1, h2, h3, h4").length;
-                    var parentInteractives = parent.querySelectorAll("button, a").length;
-
-                    // Case 3a: Dedicated <section> whose main heading is ALP PSYCHO TEST
-                    if (parent.tagName === "SECTION" && parent.querySelectorAll("section").length === 0) {
-                        var firstH = parent.querySelector("h1, h2, h3");
-                        if (firstH && (firstH === originEl || firstH.contains(originEl))) {
-                            bestCard = parent;
-                            break;
-                        }
-                    }
-
-                    // Case 3b: Card container (compact text, single heading, few buttons, sibling cards exist)
-                    var grandParent = parent.parentElement;
-                    var hasSiblings = !!(grandParent && grandParent.children && grandParent.children.length >= 2);
-                    var cls = String(parent.className || "");
-                    var looksLikeCard = /(?:card|tile|item|tab|menu|nav|btn|button|rounded|shadow|border|cursor-pointer)/i.test(cls) || parent.hasAttribute("onclick");
-
-                    if (parentText.length <= 360 && parentHeadings <= 1 && parentInteractives <= 2 && (looksLikeCard || hasSiblings)) {
-                        bestCard = parent;
-                        candidate = parent;
-                        step++;
-                        continue;
-                    }
-                    break;
-                }
-
-                return isProtectedContainer(bestCard) ? null : bestCard;
-            } catch (e) {
-                return null;
-            }
-        }
-
-        /**
-         * Applies or removes hidden state on a resolved target element without mutating React's DOM structure.
-         */
-        function setElementHiddenState(el, shouldHide) {
-            if (!el || el.nodeType !== 1) return;
-            try {
-                if (shouldHide) {
-                    if (el.getAttribute("data-ug-alp-psycho-hidden") !== "1") {
-                        el.setAttribute("data-ug-alp-psycho-hidden", "1");
-                    }
-                    if (el.tagName === "OPTION") {
-                        el.hidden = true;
-                        el.disabled = true;
-                    } else {
-                        if (el.getAttribute("data-ug-alp-orig-saved") !== "1") {
-                            el.setAttribute("data-ug-alp-orig-saved", "1");
-                            el.setAttribute("data-ug-alp-orig-display", el.style.getPropertyValue("display") || "");
-                            el.setAttribute("data-ug-alp-orig-priority", el.style.getPropertyPriority("display") || "");
-                        }
-                        if (el.style.getPropertyValue("display") !== "none" || el.style.getPropertyPriority("display") !== "important") {
-                            el.style.setProperty("display", "none", "important");
-                        }
-                        el.setAttribute("aria-hidden", "true");
-                    }
-                } else {
-                    if (el.hasAttribute("data-ug-alp-psycho-hidden")) {
-                        el.removeAttribute("data-ug-alp-psycho-hidden");
-                    }
-                    if (el.tagName === "OPTION") {
-                        el.hidden = false;
-                        el.disabled = false;
-                    } else if (el.getAttribute("data-ug-alp-orig-saved") === "1") {
-                        var origDisp = el.getAttribute("data-ug-alp-orig-display") || "";
-                        var origPrio = el.getAttribute("data-ug-alp-orig-priority") || "";
-                        if (origDisp) el.style.setProperty("display", origDisp, origPrio);
-                        else el.style.removeProperty("display");
-                        el.removeAttribute("data-ug-alp-orig-saved");
-                        el.removeAttribute("data-ug-alp-orig-display");
-                        el.removeAttribute("data-ug-alp-orig-priority");
-                        if (el.getAttribute("aria-hidden") === "true") el.removeAttribute("aria-hidden");
-                    }
-                }
-            } catch (e) {}
-        }
-
-        /**
-         * Core DOM pass:
-         * 1. Renames all visible "Mock Test Series" text & UI attributes to "ALP PSYCHO TEST".
-         * 2. Tags matching UI controls/cards/sections with data-ug-alp-psycho-item="1".
-         * 3. Hides all tagged items when in Mobile Mode and NOT logged in as Master Account,
-         *    and restores them immediately when Master Account logs in or in Desktop Mode.
-         */
-        function applyRenameAndVisibility() {
-            if (isApplying) return;
-            isApplying = true;
-            try {
-                ensureGuardStyleAttached();
-
-                // Update document.title if needed
-                if (document.title && MATCH_ANY_PATTERN.test(document.title)) {
-                    var renamedTitle = replaceMockText(document.title);
-                    if (renamedTitle !== document.title) document.title = renamedTitle;
-                }
-
-                var isMobile = isMobileModeNow();
-                var isMaster = isMasterAccountNow();
-                var shouldHide = isMobile && !isMaster;
-
-                // Toggle root class immediately for CSS-level enforcement
-                if (document.documentElement) {
-                    document.documentElement.classList.toggle("ug-alp-mobile-hide", shouldHide);
-                }
-
-                if (!document.body) return;
-
-                var matchedTargets = new Set();
-
-                // A. Walk all text nodes safely (skip scripts, styles, editable inputs)
-                var walker = document.createTreeWalker(
-                    document.body,
-                    NodeFilter.SHOW_TEXT,
-                    {
-                        acceptNode: function (node) {
-                            var p = node.parentNode;
-                            if (!p || p.nodeType !== 1) return NodeFilter.FILTER_REJECT;
-                            var tag = p.tagName;
-                            if (tag === "SCRIPT" || tag === "STYLE" || tag === "NOSCRIPT" || tag === "TEXTAREA" || tag === "INPUT") {
-                                return NodeFilter.FILTER_REJECT;
-                            }
-                            if (p.isContentEditable) return NodeFilter.FILTER_REJECT;
-                            var val = node.nodeValue;
-                            if (!val || !MATCH_ANY_PATTERN.test(val)) return NodeFilter.FILTER_SKIP;
-                            return NodeFilter.FILTER_ACCEPT;
-                        }
-                    }
-                );
-
-                var textNodes = [];
-                var tn;
-                while ((tn = walker.nextNode())) textNodes.push(tn);
-
-                for (var i = 0; i < textNodes.length; i++) {
-                    var tNode = textNodes[i];
-                    var origVal = tNode.nodeValue || "";
-                    var newVal = replaceMockText(origVal);
-                    if (newVal !== origVal) {
-                        tNode.nodeValue = newVal;
-                    }
-                    var parentEl = tNode.parentElement;
-                    if (parentEl) {
-                        var target = resolveHideTarget(parentEl);
-                        if (target) {
-                            target.setAttribute("data-ug-alp-psycho-item", "1");
-                            matchedTargets.add(target);
-                        }
-                    }
-                }
-
-                // B. Check descriptive UI attributes (aria-label, title, placeholder, alt, data-label, data-title)
-                var attrNames = ["aria-label", "title", "placeholder", "alt", "data-label", "data-title"];
-                var attrEls = document.body.querySelectorAll("[aria-label],[title],[placeholder],[alt],[data-label],[data-title]");
-                for (var j = 0; j < attrEls.length; j++) {
-                    var aEl = attrEls[j];
-                    for (var k = 0; k < attrNames.length; k++) {
-                        var aName = attrNames[k];
-                        var aVal = aEl.getAttribute(aName);
-                        if (!aVal || !MATCH_ANY_PATTERN.test(aVal)) continue;
-                        var replacedAttr = replaceMockText(aVal);
-                        if (replacedAttr !== aVal) {
-                            aEl.setAttribute(aName, replacedAttr);
-                        }
-                        if (aName !== "placeholder") {
-                            var aTarget = resolveHideTarget(aEl);
-                            if (aTarget) {
-                                aTarget.setAttribute("data-ug-alp-psycho-item", "1");
-                                matchedTargets.add(aTarget);
-                            }
-                        }
-                    }
-                }
-
-                // C. Include any previously tagged items so they cleanly hide or unhide on mode/auth transitions
-                var allTagged = document.body.querySelectorAll('[data-ug-alp-psycho-item="1"], [data-ug-alp-psycho-hidden="1"]');
-                for (var m = 0; m < allTagged.length; m++) {
-                    matchedTargets.add(allTagged[m]);
-                }
-
-                // D. Apply visibility rule to every matched target
-                matchedTargets.forEach(function (el) {
-                    setElementHiddenState(el, shouldHide);
-                });
-            } catch (e) {
-                // Keep UI resilient
-            } finally {
-                isApplying = false;
-            }
-        }
-
-        /**
-         * Coalesces rapid DOM mutations into a single fast pass.
-         */
-        function scheduleApply() {
-            if (scheduledFrame) return;
-            scheduledFrame = requestAnimationFrame(function () {
-                scheduledFrame = null;
-                applyRenameAndVisibility();
-            });
-        }
-
-        /**
-         * Initializes MutationObserver and global resize/auth listeners.
-         */
-        function startGuard() {
-            ensureGuardStyleAttached();
-
-            // Immediately apply default mobile-hide class before first paint to prevent flicker
-            if (document.documentElement) {
-                document.documentElement.classList.toggle("ug-alp-mobile-hide", isMobileModeNow() && !isMasterAccountNow());
-            }
-
-            if (!observer && typeof MutationObserver !== "undefined") {
-                observer = new MutationObserver(function (mutations) {
-                    if (isApplying) return;
-                    var shouldRunImmediate = false;
-                    for (var i = 0; i < mutations.length; i++) {
-                        if (mutations[i].type === "childList" && mutations[i].addedNodes && mutations[i].addedNodes.length > 0) {
-                            shouldRunImmediate = true;
-                            break;
-                        }
-                    }
-                    if (shouldRunImmediate) applyRenameAndVisibility();
-                    else scheduleApply();
-                });
-                try {
-                    observer.observe(document.documentElement, {
-                        childList: true,
-                        subtree: true,
-                        characterData: true
-                    });
-                } catch (e) {}
-            }
-
-            window.addEventListener("resize", scheduleApply, { passive: true });
-            window.addEventListener("orientationchange", function () {
-                setTimeout(applyRenameAndVisibility, 60);
-                setTimeout(applyRenameAndVisibility, 260);
-            }, { passive: true });
-            window.addEventListener("storage", function () { void refreshAuthSnapshot(); scheduleApply(); });
-            window.addEventListener("hashchange", scheduleApply);
-            window.addEventListener("popstate", scheduleApply);
-            document.addEventListener("visibilitychange", function () {
-                if (!document.hidden) { void refreshAuthSnapshot(); scheduleApply(); }
-            });
-            // Re-check auth shortly after user interactions (e.g., Login / Logout button clicks)
-            document.addEventListener("click", function () {
-                setTimeout(function () { void refreshAuthSnapshot(); scheduleApply(); }, 180);
-                setTimeout(function () { void refreshAuthSnapshot(); scheduleApply(); }, 800);
-            }, true);
-
-            // Lightweight periodic sync to catch Firebase IndexedDB login/logout transitions
-            setInterval(function () {
-                void refreshAuthSnapshot();
-                applyRenameAndVisibility();
-            }, 1200);
-
-            void refreshAuthSnapshot();
-            applyRenameAndVisibility();
-        }
-
-        // Expose safe controller API for cloud loader hooks and debugging
-        window.__UG_ALP_PSYCHO_GUARD__ = {
-            scanBundle: function (payloadObj) {
-                scanBundleForMasterHints(payloadObj);
-                void refreshAuthSnapshot();
-                scheduleApply();
-            },
-            refresh: function () {
-                void refreshAuthSnapshot();
-                applyRenameAndVisibility();
-            },
-            addMasterEmail: function (email) {
-                if (email && typeof email === "string") {
-                    extractedMasterEmails.add(email.trim().toLowerCase());
-                    applyRenameAndVisibility();
-                }
-            },
-            getState: function () {
-                return {
-                    targetLabel: TARGET_LABEL,
-                    isMobileMode: isMobileModeNow(),
-                    isMasterAccount: isMasterAccountNow(),
-                    isHiddenNow: isMobileModeNow() && !isMasterAccountNow(),
-                    currentEmail: authSnapshot.email || "",
-                    extractedMasterEmailCount: extractedMasterEmails.size
-                };
-            }
-        };
-
-        startGuard();
-    })();
-    </script>
-
     <script>
     (function () {
         "use strict";
@@ -975,7 +79,7 @@
         var useBackup = params.has("backup");
         window.__UG_UPDATE_ERRORS__ = [];
         window.__UG_LOADED_UPDATES__ = [];
-        var EMBEDDED_LINKED_ITEMS = [{"id":"unlimited_gyan_test_vs_code_guide_up","mode":"patch","title":"Unlimited_Gyan_Test_VS_Code_Guide_Updated","fileName":"Unlimited_Gyan_Test_VS_Code_Guide_Updated.html","version":1,"chunkCount":1,"enabled":true}];
+        var EMBEDDED_LINKED_ITEMS = [{"id":"unlimited_gyan_test_vs_code_guide_up","mode":"patch","title":"Unlimited_Gyan_Test_VS_Code_Guide_Updated","fileName":"Unlimited_Gyan_Test_VS_Code_Guide_Updated.html","version":1,"chunkCount":1,"enabled":false},{"id":"unlimited_gyan_test_1","mode":"patch","title":"unlimited_gyan_test (1)","fileName":"unlimited_gyan_test (1).html","version":1,"chunkCount":1,"enabled":true}];
         var capturedBaseErr = "";
         var isMountingBase = false;
         var queuedReadyCallbacks = [];
@@ -1133,15 +237,10 @@
         }
 
         async function mountBaseBundle(p) {
-            if (!p || (!p.hasCustomBody && (!Array.isArray(p.scripts) || !p.scripts.length) && (!Array.isArray(p.externalScripts) || !p.externalScripts.length))) throw new Error("वेबसाइट का कोड खाली मिला।");
-            // Feed bundle to ALP PSYCHO TEST Guard so it can extract Master Account hints before scripts mount
-            try { if (window.__UG_ALP_PSYCHO_GUARD__) window.__UG_ALP_PSYCHO_GUARD__.scanBundle(p); } catch (e) {}
+            window.__UG_LAST_BASE_PAYLOAD__ = p;
+              if (!p || (!p.hasCustomBody && (!Array.isArray(p.scripts) || !p.scripts.length) && (!Array.isArray(p.externalScripts) || !p.externalScripts.length))) throw new Error("वेबसाइट का कोड खाली मिला।");
             if (p.title) document.title = p.title;
-            if (p.htmlClass) {
-                var keepHide = document.documentElement.classList.contains("ug-alp-mobile-hide");
-                document.documentElement.className = p.htmlClass;
-                if (keepHide) document.documentElement.classList.add("ug-alp-mobile-hide");
-            }
+            if (p.htmlClass) document.documentElement.className = p.htmlClass;
             ensureHeadLinks(p.headLinks);
             (p.styles || []).forEach(function (st) { var el = document.createElement("style"); if (st.id) el.id = st.id; el.textContent = st.css || ""; document.head.appendChild(el); });
             document.body.removeAttribute("style");
@@ -1151,23 +250,21 @@
             await ensureBabelIfNeeded(p.scripts || []);
             installReadyHooks(); isMountingBase = true; var prevOnload = window.onload;
             try { for (var i = 0; i < p.scripts.length; i++) await runScriptSafe(p.scripts[i], "base_script_" + (i + 1), false); if (window.Babel && typeof window.Babel.transformScriptTags === "function") { try { window.Babel.transformScriptTags(); } catch (e) {} } } finally { isMountingBase = false; var list = queuedReadyCallbacks.slice(); queuedReadyCallbacks.length = 0; list.forEach(function (it) { setTimeout(function () { invokeReady(it.target, it.type, it.fn); }, 0); }); }
-            try { if (window.__UG_ALP_PSYCHO_GUARD__) window.__UG_ALP_PSYCHO_GUARD__.refresh(); } catch (e) {}
-            setTimeout(function () {
-                if (typeof window.onload === "function" && window.onload !== prevOnload) { try { window.onload(new Event("load")); } catch (e) {} }
-                try { if (window.__UG_ALP_PSYCHO_GUARD__) window.__UG_ALP_PSYCHO_GUARD__.refresh(); } catch (e) {}
-            }, 60);
+            setTimeout(function () { if (typeof window.onload === "function" && window.onload !== prevOnload) { try { window.onload(new Event("load")); } catch (e) {} } }, 60);
         }
 
         function adaptRuntimePatchCode(rawCode) {
             var s = String(rawCode || "");
-            if (s.indexOf("bootFromFirebaseCloud") !== -1 && s.indexOf("UGT_AutoSync_DB_") !== -1 && s.indexOf("initModernHamburgerMenuSystem") === -1) return "";
+            if (s.indexOf("window.__UG_REACT_READY__") !== -1 && s.indexOf("loadChainWithTimeout") !== -1 && s.length < 3000) return "";
+            if (s.indexOf("function bootFromFirebaseCloud(") !== -1 && s.indexOf("UGT_AutoSync_DB_") !== -1 && s.indexOf("initModernHamburgerMenuSystem") === -1) return "";
+            s = s.replace(/\bbootFromFirebaseCloud\s*\(\s*\)\s*;?/g, "void 0;");
             s = s.replace(/([(\[,=?:!&|]\s*\/[^\/\r\n'"]+?)\\\\\/\/([gimsuy]{1,6})\.(test|exec)\(/g, "$1\\//$2.$3(");
             s = s.replace(/raw\.split\(\/\\?s\*\/\\?s\*\/\)/g, "raw.split(' / ')");
             if (s.indexOf("__UG_FAST_ENGINE__") !== -1 && s.indexOf("startFastPipeline") !== -1) {
                 s = s.replace(/engine\.payloadPromise\s*=\s*\(async\s+function\s+startFastPipeline\(\)[\s\S]*?\}\)\(\);/, 'engine.payloadPromise = Promise.resolve({ mode: "patch-attached", version: 1, payloadStr: "", payloadObj: { scripts: [] }, speedKBps: 0 });');
             }
-            if (s.indexOf("async function mountCloudPayload") !== -1 && s.indexOf("initModernHamburgerMenuSystem") !== -1 && s.indexOf("patch-attached") === -1) {
-                s = s.replace(/(async\s+function\s+mountCloudPayload\s*\([^)]*\)\s*\{\s*if\s*\(\s*engine\.mounted\s*\)\s*return\s*;)/, '$1 if (mode === "patch-attached") { engine.mounted = true; try{initLoginFirstEnforcer();}catch(e){} try{startModernLoginFrameWatcher();}catch(e){} try{initGlobalPasswordEyeToggles();}catch(e){} try{initMobileTestInterfaceEngine();}catch(e){} try{initSmartDuplicateEmailAuthFixer();}catch(e){} try{initModernHamburgerMenuSystem();}catch(e){} try{initAutoFullscreenSensorEngine();}catch(e){} try{initTestAntiVanishGuard();}catch(e){} try{initMasterAdminProviderEnhancer();}catch(e){} try{initGrantedAdminMenuGuard();}catch(e){} return; }');
+            if (s.indexOf("async function mountCloudPayload") !== -1 && s.indexOf("patch-attached") === -1) {
+                s = s.replace(/(async\s+function\s+mountCloudPayload\s*\([^)]*\)\s*\{)/, '$1 if (typeof mode !== "undefined" && mode === "patch-attached") { try{initLoginFirstEnforcer();}catch(e){} try{startModernLoginFrameWatcher();}catch(e){} try{initGlobalPasswordEyeToggles();}catch(e){} try{initMobileTestInterfaceEngine();}catch(e){} try{initSmartDuplicateEmailAuthFixer();}catch(e){} try{initModernHamburgerMenuSystem();}catch(e){} try{initAutoFullscreenSensorEngine();}catch(e){} try{initTestAntiVanishGuard();}catch(e){} try{initMasterAdminProviderEnhancer();}catch(e){} try{initGrantedAdminMenuGuard();}catch(e){} return; }');
             }
             return s;
         }
@@ -1175,7 +272,6 @@
         async function mountLinkedPatchSafe(item, p) {
             try {
                 if (!p) return;
-                try { if (window.__UG_ALP_PSYCHO_GUARD__) window.__UG_ALP_PSYCHO_GUARD__.scanBundle(p); } catch (e) {}
                 ensureHeadLinks(p.headLinks);
                 (p.styles || []).forEach(function (st) { var el = document.createElement("style"); el.setAttribute("data-ug-update", item.id); if (st.id) el.id = st.id; el.textContent = st.css || ""; document.head.appendChild(el); });
                 if (p.hasCustomBody && p.bodyHtml) {
@@ -1191,8 +287,8 @@
                     if (!adaptedCode.trim()) continue;
                     await runScriptSafe({ id: origSc.id || "", type: origSc.type || "", code: adaptedCode }, "update_" + item.id + "_" + (i + 1), true);
                 }
+                try { if (window.__UG_ADMIN_RBAC__) { if (window.__UG_LAST_BASE_PAYLOAD__) window.__UG_ADMIN_RBAC__.scanBundle(window.__UG_LAST_BASE_PAYLOAD__); window.__UG_ADMIN_RBAC__.refresh(); } } catch (e) {}
                 window.__UG_LOADED_UPDATES__.push({ id: item.id, version: item.version || 1, title: item.title || item.id });
-                try { if (window.__UG_ALP_PSYCHO_GUARD__) window.__UG_ALP_PSYCHO_GUARD__.refresh(); } catch (e) {}
             } catch (err) { window.__UG_UPDATE_ERRORS__.push("Update [" + item.id + "]: " + (err && err.message ? err.message : err)); }
         }
 
@@ -1218,17 +314,16 @@
                     await reactWait; await mountBaseBundle(pData.payloadObj); return;
                 }
                 var activeManId = useBackup ? "backup_manifest" : "manifest", activePref = useBackup ? "backup_chunk_" : "chunk_", activeKey = useBackup ? "backup_base_bundle" : "base_bundle";
-                var forceOldBase = skipPatches || useBackup;
                 var manifest = null, regDoc = null, regOk = false, regItems = [];
                 try {
                     var metaPair = await Promise.all([
                         fsGetDoc(activeManId, 10000).catch(function () { return null; }),
-                        forceOldBase ? Promise.resolve(null) : fsGetDoc("updates_registry", 10000).then(function (d) { regOk = true; return d; }).catch(function () { return null; })
+                        skipPatches ? Promise.resolve(null) : fsGetDoc("updates_registry", 10000).then(function (d) { regOk = true; return d; }).catch(function () { return null; })
                     ]);
                     manifest = metaPair[0];
                     regDoc = metaPair[1];
                 } catch (e) {}
-                if (!forceOldBase) {
+                if (!skipPatches) {
                     if (regOk) {
                         if (regDoc && typeof regDoc.itemsJson === "string") { try { regItems = JSON.parse(regDoc.itemsJson); } catch (e) {} }
                         else if (regDoc && Array.isArray(regDoc.items)) regItems = regDoc.items;
@@ -1237,51 +332,59 @@
                         var cReg = await idbGet("updates_registry_cache");
                         regItems = (Array.isArray(cReg) && cReg.length) ? cReg : EMBEDDED_LINKED_ITEMS;
                     }
-                    var enabledNewFiles = (regItems || []).filter(function (it) { return it && it.mode === "patch" && it.enabled !== false && it.id; });
-                    var activeNewFile = enabledNewFiles.length > 0 ? enabledNewFiles[enabledNewFiles.length - 1] : null;
-                    window.__UG_CLOUD_LINK__ = {
-                        mode: activeNewFile ? "new-file-only" : "old-base-fallback",
-                        oldBaseConnectedInCloud: !!manifest,
-                        oldBaseExecuted: false,
-                        oldBaseMeta: manifest ? { version: manifest.version || 1, fileName: manifest.fileName || "index.html", totalBytes: manifest.totalBytes || 0 } : null,
-                        activeNewFile: activeNewFile ? { id: activeNewFile.id, title: activeNewFile.title || activeNewFile.id, version: activeNewFile.version || 1, fileName: activeNewFile.fileName || "" } : null
-                    };
-                    if (activeNewFile) {
-                        var newCacheKey = "active_new_site_" + activeNewFile.id;
-                        var newData = await getCachedOrFreshBundle(newCacheKey, activeNewFile.version, "upd_" + activeNewFile.id + "_chunk_", activeNewFile.chunkCount, "नई अपडेटेड वेबसाइट (" + (activeNewFile.title || activeNewFile.id) + " v" + (activeNewFile.version || 1) + ") लोड हो रही है…");
-                        if (!newData || !newData.payloadObj) throw new Error("नई अपडेटेड फ़ाइल (" + activeNewFile.id + ") Cloud से लोड नहीं हो सकी।");
-                        var newJoinedScripts = (newData.payloadObj.scripts || []).map(function (s) { return String((s && s.code) || ""); }).join("\n");
-                        if (newJoinedScripts.indexOf("function bootFromFirebaseCloud(") !== -1) throw new Error("नई अपडेट फ़ाइल में Auto-Sync Cloud Loader लूप है। कृपया सही HTML अपलोड करें।");
-                        await reactWait;
-                        await mountBaseBundle(newData.payloadObj);
-                        window.__UG_LOADED_UPDATES__.push({ id: activeNewFile.id, version: activeNewFile.version || 1, title: activeNewFile.title || activeNewFile.id, mode: "new-file-only" });
-                        var bsNew = document.getElementById("ug-boot-loader-style"); if (bsNew && !document.getElementById("ug-cloud-loader-ui")) bsNew.remove();
-                        setTimeout(function () { if (!document.getElementById("ug-cloud-loader-ui")) { var bsNew2 = document.getElementById("ug-boot-loader-style"); if (bsNew2) bsNew2.remove(); void idbSet("last_good_base", { schema: CACHE_SCHEMA, version: activeNewFile.version || 1, payloadStr: newData.payloadStr, savedAt: Date.now() }); } }, 2500);
-                        return;
-                    }
                 }
+                var enabledPatches = (regItems || []).filter(function (it) { return it && it.mode === "patch" && it.enabled !== false && it.id; });
                 var cachedLocal = forceFresh ? null : await idbGet(activeKey);
                 var hasCache = !!(cachedLocal && cachedLocal.schema === CACHE_SCHEMA && cachedLocal.payloadStr);
                 var baseData = null;
                 try {
-                    baseData = await getCachedOrFreshBundle(activeKey, manifest && manifest.version, activePref, manifest && manifest.chunkCount, "मुख्य वेबसाइट (v" + (manifest ? manifest.version : 1) + ") लोड हो रही है…");
+                    if (manifest || hasCache) {
+                        baseData = await getCachedOrFreshBundle(activeKey, manifest && manifest.version, activePref, manifest && manifest.chunkCount, "मुख्य वेबसाइट (v" + (manifest ? manifest.version : 1) + ") लोड हो रही है…");
+                    }
                 } catch (netErr) {
                     if (hasCache) { try { baseData = { version: cachedLocal.version, payloadStr: cachedLocal.payloadStr, payloadObj: JSON.parse(cachedLocal.payloadStr) }; } catch (e) {} }
-                    if (!baseData) throw netErr;
                 }
-                if (!baseData) throw new Error("Cloud में मुख्य वेबसाइट अपलोड नहीं है। कृपया Cloud Uploader से मुख्य वेबसाइट अपलोड करें।");
-                if (!useBackup && isSelfLoaderPayload(baseData.payloadObj)) {
+                if (baseData && !useBackup && isSelfLoaderPayload(baseData.payloadObj)) {
                     var bakMan = await fsGetDoc("backup_manifest", 10000).catch(function () { return null; });
                     var bakData = bakMan ? await getCachedOrFreshBundle("backup_base_bundle", bakMan.version, "backup_chunk_", bakMan.chunkCount, "Backup लोड हो रहा है…") : null;
-                    if (bakData && !isSelfLoaderPayload(bakData.payloadObj)) baseData = bakData;
-                    else throw new Error("Cloud के manifest में Cloud Loader अपलोड हो गया है। कृपया Cloud Uploader में 'मुख्य वेबसाइट बदलें (Base)' चुनकर अपनी असली बड़ी HTML वेबसाइट अपलोड करें।");
+                    baseData = (bakData && !isSelfLoaderPayload(bakData.payloadObj)) ? bakData : null;
                 }
-                window.__UG_CLOUD_LINK__ = window.__UG_CLOUD_LINK__ || {};
-                window.__UG_CLOUD_LINK__.oldBaseExecuted = true;
                 await reactWait;
-                await mountBaseBundle(baseData.payloadObj);
+                var patchStartIdx = 0;
+                if (baseData && baseData.payloadObj) {
+                    await mountBaseBundle(baseData.payloadObj);
+                } else if (enabledPatches.length > 0) {
+                    var firstPatch = enabledPatches[0];
+                    var firstData = await getCachedOrFreshBundle("patch_" + firstPatch.id, firstPatch.version, "upd_" + firstPatch.id + "_chunk_", firstPatch.chunkCount, "वेबसाइट (" + (firstPatch.title || firstPatch.id) + ") लोड हो रही है…");
+                    if (!firstData || !firstData.payloadObj) throw new Error("Cloud से फ़ाइल लोड नहीं हो सकी।");
+                    await mountBaseBundle(firstData.payloadObj);
+                    window.__UG_LOADED_UPDATES__.push({ id: firstPatch.id, version: firstPatch.version || 1, title: firstPatch.title || firstPatch.id });
+                    patchStartIdx = 1;
+                } else {
+                    throw new Error("Cloud में अभी कोई वेबसाइट अपलोड नहीं है। कृपया Cloud Uploader से फ़ाइल अपलोड करें।");
+                }
+                // अब सभी जुड़ी हुई फ़ाइलों (Feature Patches) को एक के बाद एक Auto-Merge करें
+                for (var pIdx = patchStartIdx; pIdx < enabledPatches.length; pIdx++) {
+                    var pItem = enabledPatches[pIdx];
+                    try {
+                        var pBundle = await getCachedOrFreshBundle("patch_" + pItem.id, pItem.version, "upd_" + pItem.id + "_chunk_", pItem.chunkCount, "फ़ीचर #" + (pIdx + 1) + " (" + (pItem.title || pItem.id) + ") जुड़ रहा है…");
+                        if (pBundle && pBundle.payloadObj) {
+                            await mountLinkedPatchSafe(pItem, pBundle.payloadObj);
+                        }
+                    } catch (patchErr) {
+                        window.__UG_UPDATE_ERRORS__.push("Patch [" + pItem.id + "]: " + (patchErr && patchErr.message ? patchErr.message : patchErr));
+                    }
+                }
+                window.__UG_CLOUD_LINK__ = {
+                    mode: "multi-file-auto-merge",
+                    baseLoaded: !!(baseData && baseData.payloadObj),
+                    mergedFilesCount: enabledPatches.length,
+                    mergedFiles: enabledPatches.map(function (x) { return x.title || x.id; })
+                };
                 var bs = document.getElementById("ug-boot-loader-style"); if (bs && !document.getElementById("ug-cloud-loader-ui")) bs.remove();
-                setTimeout(function () { if (!document.getElementById("ug-cloud-loader-ui")) { var bs2 = document.getElementById("ug-boot-loader-style"); if (bs2) bs2.remove(); void idbSet("last_good_base", { schema: CACHE_SCHEMA, version: baseData.version, payloadStr: baseData.payloadStr, savedAt: Date.now() }); } }, 2500);
+                if (baseData && baseData.payloadStr) {
+                    setTimeout(function () { if (!document.getElementById("ug-cloud-loader-ui")) { var bs2 = document.getElementById("ug-boot-loader-style"); if (bs2) bs2.remove(); void idbSet("last_good_base", { schema: CACHE_SCHEMA, version: baseData.version, payloadStr: baseData.payloadStr, savedAt: Date.now() }); } }, 2500);
+                }
             } catch (err) { await showBootError(err && err.message ? err.message : "इंटरनेट जाँचें और पेज Reload करें।"); }
         }
         bootFromFirebaseCloud();
