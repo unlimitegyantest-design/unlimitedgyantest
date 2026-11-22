@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 2,
+  "updatedAt": "2026-11-22T05:03:38.430Z",
+  "mode": "force_github",
+  "activeGithubUrl": "https://unlimitegyantest-design.github.io/unlimitedgyantest/",
+  "fallbackLinks": [
+    "https://unlimitegyantest-design.github.io/unlimitedgyantest/"
+  ],
+  "triggers": {
+    "onQuota429": true,
+    "onHttpError": true,
+    "onBootError": true
+  }
+}
