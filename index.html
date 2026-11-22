@@ -3,35 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta id="ug-viewport-meta" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     <title>Unlimited Gyan Test</title>
-    <link rel="dns-prefetch" href="https://firestore.googleapis.com">
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-    <link rel="dns-prefetch" href="https://checkout.razorpay.com">
     <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://checkout.razorpay.com" crossorigin>
-    <link rel="preconnect" href="https://api.razorpay.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- React, ReactDOM व Razorpay को पैरेलल प्रीलोड करें ताकि वेबसाइट तुरंत खुले -->
-    <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js" crossorigin>
-    <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js" crossorigin>
-    <link rel="preload" as="script" href="https://checkout.razorpay.com/v1/checkout.js">
-    <!-- नॉन-ब्लॉकिंग Google Fonts व FontAwesome (First Paint को तेज़ रखने के लिए) -->
-    <link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&family=Inter:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.onload=null;this.media='all'">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.onload=null;this.media='all'" onerror="this.onerror=null;this.media='all';this.href='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css'">
-    <noscript>
-        <link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&family=Inter:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    </noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&family=Inter:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css'">
     <script>
         window.MathJax = {
             tex: { inlineMath: [["\\(", "\\)"], ["$", "$"]], displayMath: [["\\[", "\\]"], ["$$", "$$"]], processEscapes: true },
@@ -41,6 +26,7 @@
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script defer src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         (function () {
             "use strict";
@@ -50,9 +36,9 @@
                 function next() {
                     if (checkFn()) { onDone(true); return; }
                     if (idx >= urls.length) { onDone(false); return; }
-                    var s = document.createElement("script"); s.crossOrigin = "anonymous"; s.async = false; s.src = urls[idx++];
+                    var s = document.createElement("script"); s.crossOrigin = "anonymous"; s.src = urls[idx++];
                     var settled = false;
-                    var t = setTimeout(function () { if (!settled) { settled = true; try { s.remove(); } catch (e) {} next(); } }, 3500);
+                    var t = setTimeout(function () { if (!settled) { settled = true; try { s.remove(); } catch (e) {} next(); } }, 4000);
                     s.onload = function () { if (!settled) { settled = true; clearTimeout(t); if (checkFn()) onDone(true); else next(); } };
                     s.onerror = function () { if (!settled) { settled = true; clearTimeout(t); try { s.remove(); } catch (e) {} next(); } };
                     document.head.appendChild(s);
@@ -67,6 +53,26 @@
         })();
     </script>
     <style id="ug-boot-loader-style">body{margin:0;font-family:'Noto Sans Devanagari','Inter',Arial,sans-serif;}@keyframes ugSpin{to{transform:rotate(360deg)}}</style>
+    <!-- Protective styles for hiding ALP PSYCHO TEST in Mobile Mode for non-Master accounts -->
+    <style id="ug-alp-psycho-guard-style">
+        html.ug-alp-mobile-hide [data-ug-alp-psycho-hidden="1"],
+        html.ug-alp-mobile-hide [data-ug-alp-psycho-hidden="1"] * {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        html.ug-alp-mobile-hide [data-ug-alp-psycho-hidden="1"] {
+            width: 0 !important;
+            height: 0 !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+            overflow: hidden !important;
+        }
+    </style>
 </head>
 <body>
     <div id="root">
@@ -76,6 +82,882 @@
             <p id="ug-boot-status" style="margin:8px 0 0 0;font-size:13px;color:#cbd5e1;font-weight:600;">Cloud से वेबसाइट लोड हो रही है…</p>
         </div>
     </div>
+
+    <!-- ========================================================================= -->
+    <!-- ALP PSYCHO TEST RENAMER & MOBILE MASTER-ONLY VISIBILITY GUARD ENGINE      -->
+    <!-- Renames "Mock Test Series" -> "ALP PSYCHO TEST" across UI and hides it in -->
+    <!-- Mobile Mode for everyone EXCEPT strictly authenticated Master Accounts.   -->
+    <!-- ========================================================================= -->
+    <script id="ug-alp-psycho-guard-engine">
+    (function () {
+        "use strict";
+
+        var TARGET_LABEL = "ALP PSYCHO TEST";
+
+        // Patterns matching "Mock Test Series" (English + Hindi variants)
+        var RENAME_PATTERNS = [
+            /Mock[\s\-_]*Test[\s\-_]*Series/gi,
+            /मॉक\s*टेस्ट\s*(?:सीरीज|सीरीज़|श्रृंखला)/g
+        ];
+
+        // Pattern matching both old and renamed labels so elements stay tracked after rename
+        var MATCH_ANY_PATTERN = /(?:mock[\s\-_]*test[\s\-_]*series|मॉक\s*टेस्ट\s*(?:सीरीज|सीरीज़|श्रृंखला)|alp[\s\-_]*psycho[\s\-_]*test)/i;
+
+        // Excluded/placeholder emails that should never be mistaken for a master account
+        var IGNORED_EMAIL_RE = /(?:example\.com|firebaseapp\.com|noreply@|no-reply@|support@|placeholder@|demo@|student@|user@|test@test|your-?email)/i;
+
+        // State tracked by the guard
+        var extractedMasterEmails = new Set();
+        var extractedMasterUids = new Set();
+        var authSnapshot = {
+            email: "",
+            uid: "",
+            hasFirebaseSession: false,
+            hasStorageSession: false,
+            explicitMasterRole: false,
+            explicitNonMasterRole: false
+        };
+
+        var observer = null;
+        var scheduledFrame = null;
+        var isApplying = false;
+
+        /**
+         * Ensures the protective guard <style> element stays present at the end of <head>
+         * so it always overrides dynamically injected cloud bundle stylesheets.
+         */
+        function ensureGuardStyleAttached() {
+            try {
+                var st = document.getElementById("ug-alp-psycho-guard-style");
+                if (!st) {
+                    st = document.createElement("style");
+                    st.id = "ug-alp-psycho-guard-style";
+                    st.textContent =
+                        "html.ug-alp-mobile-hide [data-ug-alp-psycho-hidden=\"1\"]," +
+                        "html.ug-alp-mobile-hide [data-ug-alp-psycho-hidden=\"1\"] *{" +
+                        "display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;}" +
+                        "html.ug-alp-mobile-hide [data-ug-alp-psycho-hidden=\"1\"]{" +
+                        "width:0!important;height:0!important;min-width:0!important;min-height:0!important;" +
+                        "margin:0!important;padding:0!important;border:0!important;overflow:hidden!important;}";
+                    document.head.appendChild(st);
+                } else if (document.head && document.head.lastElementChild !== st) {
+                    document.head.appendChild(st);
+                }
+            } catch (e) {}
+        }
+
+        /**
+         * Safely scans downloaded cloud bundle scripts (read-only) to discover Master Account
+         * email addresses and UIDs defined inside the app code.
+         */
+        function scanTextForMasterHints(code) {
+            if (!code || typeof code !== "string") return;
+            try {
+                // 1. Direct email literals near master/superadmin/owner identifiers
+                var emailRe = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
+                var m;
+                while ((m = emailRe.exec(code)) !== null) {
+                    var email = String(m[0] || "").trim().toLowerCase();
+                    if (!email || IGNORED_EMAIL_RE.test(email)) continue;
+                    var start = Math.max(0, m.index - 220);
+                    var end = Math.min(code.length, m.index + email.length + 140);
+                    var ctx = code.slice(start, end);
+                    if (/(?:master|super[_\s\-]?admin|owner[_\s\-]?email|primary[_\s\-]?admin|root[_\s\-]?admin|initMasterAdmin)/i.test(ctx)) {
+                        // Exclude if context specifically says grantedAdmin / subAdmin only
+                        if (!/(?:granted[_\s\-]?admin[_\s\-]?email|demo[_\s\-]?email|student[_\s\-]?email)\s*[:=]\s*["']?[^"']*$/i.test(code.slice(start, m.index))) {
+                            extractedMasterEmails.add(email);
+                        }
+                    }
+                }
+
+                // 2. Base64-encoded strings via atob("...") near master keywords
+                var atobRe = /atob\s*\(\s*["']([A-Za-z0-9+/=]{8,120})["']\s*\)/g;
+                while ((m = atobRe.exec(code)) !== null) {
+                    var aStart = Math.max(0, m.index - 180);
+                    var aEnd = Math.min(code.length, m.index + m[0].length + 120);
+                    var aCtx = code.slice(aStart, aEnd);
+                    if (/(?:master|super[_\s\-]?admin|owner)/i.test(aCtx)) {
+                        try {
+                            var decoded = atob(m[1]).trim().toLowerCase();
+                            if (/^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$/i.test(decoded) && !IGNORED_EMAIL_RE.test(decoded)) {
+                                extractedMasterEmails.add(decoded);
+                            }
+                        } catch (e2) {}
+                    }
+                }
+
+                // 3. Explicit Master UID constants
+                var uidRe = /(?:MASTER[_\s]?ADMIN[_\s]?UID|MASTER[_\s]?UID|SUPER[_\s]?ADMIN[_\s]?UID)\s*[:=]\s*["']([A-Za-z0-9_\-]{16,64})["']/gi;
+                while ((m = uidRe.exec(code)) !== null) {
+                    if (m[1]) extractedMasterUids.add(String(m[1]).trim());
+                }
+            } catch (e) {}
+        }
+
+        function scanBundleForMasterHints(payloadObj) {
+            if (!payloadObj || typeof payloadObj !== "object") return;
+            try {
+                if (typeof payloadObj.bodyHtml === "string") scanTextForMasterHints(payloadObj.bodyHtml);
+                if (Array.isArray(payloadObj.scripts)) {
+                    for (var i = 0; i < payloadObj.scripts.length; i++) {
+                        var sc = payloadObj.scripts[i];
+                        if (sc && typeof sc.code === "string") scanTextForMasterHints(sc.code);
+                    }
+                }
+            } catch (e) {}
+        }
+
+        /**
+         * Reads Firebase Modular SDK auth persistence from IndexedDB (firebaseLocalStorageDb)
+         * without creating the DB if it doesn't exist yet.
+         */
+        function readFirebaseIndexedDbUser() {
+            return new Promise(function (resolve) {
+                if (!window.indexedDB) return resolve(null);
+                var settled = false;
+                var timer = setTimeout(function () { if (!settled) { settled = true; resolve(null); } }, 800);
+                function done(val) { if (!settled) { settled = true; clearTimeout(timer); resolve(val); } }
+                try {
+                    var req = indexedDB.open("firebaseLocalStorageDb");
+                    req.onupgradeneeded = function (ev) {
+                        // Do not leave an empty unexpected DB if Firebase hasn't initialized it
+                        try { ev.target.transaction.abort(); } catch (e) {}
+                        done(null);
+                    };
+                    req.onerror = function () { done(null); };
+                    req.onblocked = function () { done(null); };
+                    req.onsuccess = function (ev) {
+                        var db = ev.target.result;
+                        try {
+                            if (!db.objectStoreNames || !db.objectStoreNames.contains("firebaseLocalStorage")) {
+                                db.close();
+                                return done(null);
+                            }
+                            var tx = db.transaction("firebaseLocalStorage", "readonly");
+                            var store = tx.objectStore("firebaseLocalStorage");
+                            var getAllReq = store.getAll();
+                            getAllReq.onsuccess = function () {
+                                var rows = getAllReq.result || [];
+                                var found = null;
+                                for (var i = 0; i < rows.length; i++) {
+                                    var row = rows[i];
+                                    var keyStr = String((row && (row.fbase_key || row.key)) || "");
+                                    var val = row && row.value ? row.value : row;
+                                    if (val && typeof val === "object" && (val.email || val.uid) && (/authUser/i.test(keyStr) || val.stsTokenManager || val.apiKey)) {
+                                        found = {
+                                            email: String(val.email || "").trim().toLowerCase(),
+                                            uid: String(val.uid || "").trim()
+                                        };
+                                        break;
+                                    }
+                                }
+                                try { db.close(); } catch (e) {}
+                                done(found);
+                            };
+                            getAllReq.onerror = function () {
+                                try { db.close(); } catch (e) {}
+                                done(null);
+                            };
+                        } catch (e) {
+                            try { db.close(); } catch (e2) {}
+                            done(null);
+                        }
+                    };
+                } catch (e) {
+                    done(null);
+                }
+            });
+        }
+
+        /**
+         * Inspects localStorage and sessionStorage for Firebase Auth records and app user/role sessions.
+         */
+        function inspectWebStorageAuth() {
+            var info = {
+                email: "",
+                uid: "",
+                hasFirebaseSession: false,
+                hasStorageSession: false,
+                explicitMasterRole: false,
+                explicitNonMasterRole: false
+            };
+
+            function scanStorage(storage) {
+                if (!storage) return;
+                try {
+                    for (var i = 0; i < storage.length; i++) {
+                        var k = storage.key(i);
+                        if (!k) continue;
+                        var v = storage.getItem(k);
+                        if (!v) continue;
+
+                        // Firebase Auth user key
+                        if (/^firebase:authUser:/i.test(k)) {
+                            try {
+                                var fbObj = JSON.parse(v);
+                                if (fbObj && (fbObj.email || fbObj.uid)) {
+                                    info.hasFirebaseSession = true;
+                                    if (fbObj.email && !info.email) info.email = String(fbObj.email).trim().toLowerCase();
+                                    if (fbObj.uid && !info.uid) info.uid = String(fbObj.uid).trim();
+                                }
+                            } catch (e) {}
+                            continue;
+                        }
+
+                        // Skip unrelated cache / settings keys
+                        if (!/(?:user|auth|login|session|role|admin|master|profile|account)/i.test(k)) continue;
+                        if (/healed_globals|cache|bundle|theme|font|lang/i.test(k)) continue;
+
+                        var lowerK = k.toLowerCase();
+                        var trimmedV = String(v).trim();
+                        var lowerV = trimmedV.toLowerCase();
+
+                        // Direct boolean/string role keys
+                        if (/^(?:ug_)?(?:is_?master(?:_?admin)?|master_?admin_?logged_?in|master_?session)$/i.test(lowerK)) {
+                            if (lowerV === "true" || lowerV === "1" || lowerV === "yes") {
+                                info.explicitMasterRole = true;
+                                info.hasStorageSession = true;
+                            }
+                            continue;
+                        }
+                        if (/^(?:ug_)?(?:user_?role|account_?role|admin_?role|role)$/i.test(lowerK)) {
+                            if (/^(?:master|master_admin|masteradmin|superadmin|super_admin|owner)$/.test(lowerV)) {
+                                info.explicitMasterRole = true;
+                                info.hasStorageSession = true;
+                            } else if (/^(?:granted|granted_admin|sub_admin|subadmin|student|user|guest)$/.test(lowerV)) {
+                                info.explicitNonMasterRole = true;
+                            }
+                            continue;
+                        }
+
+                        // JSON session objects
+                        if (trimmedV.charAt(0) === "{") {
+                            try {
+                                var obj = JSON.parse(trimmedV);
+                                if (!obj || typeof obj !== "object") continue;
+
+                                var roleStr = String(obj.role || obj.userRole || obj.adminRole || obj.accountType || obj.userType || "").trim().toLowerCase();
+                                var isGranted = obj.isGrantedAdmin === true || obj.grantedAdmin === true || /granted|sub_?admin|limited/.test(roleStr);
+                                var isMasterFlag = (obj.isMaster === true || obj.isMasterAdmin === true || obj.masterAdmin === true || obj.isSuperAdmin === true || /^(?:master|master_admin|masteradmin|superadmin|super_admin|owner)$/.test(roleStr)) && !isGranted;
+
+                                if (obj.email && typeof obj.email === "string" && obj.email.indexOf("@") !== -1) {
+                                    info.hasStorageSession = true;
+                                    if (!info.email) info.email = obj.email.trim().toLowerCase();
+                                }
+                                if (obj.uid && typeof obj.uid === "string" && !info.uid) {
+                                    info.uid = obj.uid.trim();
+                                }
+                                if (isMasterFlag) {
+                                    info.explicitMasterRole = true;
+                                    info.hasStorageSession = true;
+                                } else if (isGranted || roleStr === "student" || roleStr === "user") {
+                                    info.explicitNonMasterRole = true;
+                                }
+                            } catch (e) {}
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            scanStorage(window.sessionStorage);
+            scanStorage(window.localStorage);
+            return info;
+        }
+
+        /**
+         * Refreshes the cached authentication snapshot from Firebase compat SDK,
+         * Firebase Modular IndexedDB, and Web Storage.
+         */
+        async function refreshAuthSnapshot() {
+            var next = {
+                email: "",
+                uid: "",
+                hasFirebaseSession: false,
+                hasStorageSession: false,
+                explicitMasterRole: false,
+                explicitNonMasterRole: false
+            };
+
+            try {
+                // 1. Firebase Compat / v8 global SDK
+                if (window.firebase && typeof window.firebase.auth === "function") {
+                    try {
+                        var cu = window.firebase.auth().currentUser;
+                        if (cu) {
+                            next.hasFirebaseSession = true;
+                            if (cu.email) next.email = String(cu.email).trim().toLowerCase();
+                            if (cu.uid) next.uid = String(cu.uid).trim();
+                        }
+                    } catch (e) {}
+                }
+
+                // 2. Firebase Modular SDK IndexedDB
+                if (!next.hasFirebaseSession) {
+                    var idbUser = await readFirebaseIndexedDbUser();
+                    if (idbUser && (idbUser.email || idbUser.uid)) {
+                        next.hasFirebaseSession = true;
+                        if (idbUser.email) next.email = idbUser.email;
+                        if (idbUser.uid) next.uid = idbUser.uid;
+                    }
+                }
+
+                // 3. Web Storage
+                var stInfo = inspectWebStorageAuth();
+                if (!next.email && stInfo.email) next.email = stInfo.email;
+                if (!next.uid && stInfo.uid) next.uid = stInfo.uid;
+                if (stInfo.hasFirebaseSession) next.hasFirebaseSession = true;
+                if (stInfo.hasStorageSession) next.hasStorageSession = true;
+                if (stInfo.explicitMasterRole) next.explicitMasterRole = true;
+                if (stInfo.explicitNonMasterRole) next.explicitNonMasterRole = true;
+            } catch (e) {}
+
+            var changed = (
+                next.email !== authSnapshot.email ||
+                next.uid !== authSnapshot.uid ||
+                next.hasFirebaseSession !== authSnapshot.hasFirebaseSession ||
+                next.explicitMasterRole !== authSnapshot.explicitMasterRole ||
+                next.explicitNonMasterRole !== authSnapshot.explicitNonMasterRole
+            );
+
+            authSnapshot = next;
+            if (changed) scheduleApply();
+        }
+
+        /**
+         * Determines whether the site is currently open in Mobile Mode.
+         * Covers phones (portrait & landscape), responsive mobile viewports, and app mobile classes.
+         */
+        function isMobileModeNow() {
+            try {
+                var w = window.innerWidth || document.documentElement.clientWidth || 1024;
+                var h = window.innerHeight || document.documentElement.clientHeight || 768;
+                var htmlEl = document.documentElement;
+                var bodyEl = document.body;
+
+                // Explicit mobile mode classes/attributes set by the app
+                if (htmlEl && (htmlEl.classList.contains("ug-mobile-mode") || htmlEl.classList.contains("mobile-mode") || htmlEl.getAttribute("data-mobile-mode") === "true")) {
+                    return true;
+                }
+                if (bodyEl && (bodyEl.classList.contains("ug-mobile-mode") || bodyEl.classList.contains("mobile-mode") || bodyEl.getAttribute("data-mobile-mode") === "true")) {
+                    return true;
+                }
+
+                // Standard mobile viewport breakpoint (<= 768px covers phones & mobile emulator)
+                if (w <= 768) return true;
+                if (window.matchMedia && window.matchMedia("(max-width: 768px)").matches) return true;
+
+                // Mobile devices in landscape orientation (e.g. up to 932px wide with touch/coarse pointer)
+                var ua = String(navigator.userAgent || "");
+                var isMobileUA = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua) && !/iPad/i.test(ua);
+                var isCoarse = !!(window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+                if (w <= 932 && ((isMobileUA && isCoarse) || (isCoarse && h <= 540))) {
+                    return true;
+                }
+
+                return false;
+            } catch (e) {
+                return true; // Fail safe on error
+            }
+        }
+
+        /**
+         * Checks whether a blocking login form is currently active (user not logged in).
+         */
+        function isLoginScreenBlocking() {
+            try {
+                if (authSnapshot.hasFirebaseSession) return false;
+                var pwdInput = document.querySelector('input[type="password"]');
+                if (!pwdInput) return false;
+                var rect = pwdInput.getBoundingClientRect();
+                if (rect.width <= 0 || rect.height <= 0) return false;
+                var form = pwdInput.closest("form, [role='dialog'], .modal, div");
+                var formText = form ? String(form.textContent || "") : "";
+                // Ignore admin panel password change forms if user already has a session
+                if (/(?:change password|new password|पासवर्ड बदलें|add admin|grant admin)/i.test(formText)) return false;
+                if (/(?:login|sign\s*in|लॉगिन|लॉग\s*इन)/i.test(formText) && !authSnapshot.hasStorageSession) {
+                    return true;
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        /**
+         * Strict Master Account check.
+         * Returns TRUE only and only when authenticated as the Master Account
+         * (rejects guests, students, and Granted Admins).
+         */
+        function isMasterAccountNow() {
+            try {
+                if (isLoginScreenBlocking()) return false;
+
+                var email = authSnapshot.email;
+                var uid = authSnapshot.uid;
+
+                // 1. Authoritative check against Master Emails / UIDs extracted from the cloud app bundle
+                if (extractedMasterEmails.size > 0 || extractedMasterUids.size > 0) {
+                    if (email && extractedMasterEmails.has(email)) return true;
+                    if (uid && extractedMasterUids.has(uid)) return true;
+                    // If we know the logged-in user's email and we have the app's master email list,
+                    // any non-matching email is strictly NOT the Master Account (blocks Students & Granted Admins).
+                    if (email && extractedMasterEmails.size > 0) return false;
+                }
+
+                // 2. Explicit app-level Master globals or root role attributes
+                if (window.__UG_IS_MASTER_ADMIN__ === true || window.__UG_IS_MASTER__ === true || window.isMasterAdmin === true || window.isMasterAccount === true) {
+                    if (window.__UG_IS_GRANTED_ADMIN__ !== true) return true;
+                }
+                var globalRole = String(window.__UG_USER_ROLE__ || window.__UG_CURRENT_ROLE__ || "").trim().toLowerCase();
+                if (/^(?:master|master_admin|masteradmin|superadmin|super_admin|owner)$/.test(globalRole)) return true;
+                if (/^(?:granted|granted_admin|sub_admin|student|user|guest)$/.test(globalRole)) return false;
+
+                var rootEl = document.documentElement;
+                var bodyEl = document.body;
+                var attrRole = String(
+                    (rootEl && (rootEl.getAttribute("data-ug-role") || rootEl.getAttribute("data-role"))) ||
+                    (bodyEl && (bodyEl.getAttribute("data-ug-role") || bodyEl.getAttribute("data-role"))) ||
+                    ""
+                ).trim().toLowerCase();
+                if (/^(?:master|master_admin|masteradmin|superadmin|super_admin|owner)$/.test(attrRole)) return true;
+                if (/^(?:granted|granted_admin|sub_admin|student|user|guest)$/.test(attrRole)) return false;
+
+                if ((rootEl && rootEl.getAttribute("data-master-admin") === "true") || (bodyEl && bodyEl.getAttribute("data-master-admin") === "true")) {
+                    return true;
+                }
+
+                // 3. Explicit Master session flag from Web Storage (only when not marked as granted/student)
+                if (authSnapshot.explicitNonMasterRole && !authSnapshot.explicitMasterRole) return false;
+                if (authSnapshot.explicitMasterRole && !authSnapshot.explicitNonMasterRole) return true;
+
+                // 4. Strict DOM fallback ONLY when authenticated (and no extracted email already rejected the user)
+                if (authSnapshot.hasFirebaseSession || authSnapshot.hasStorageSession) {
+                    var domVerdict = inspectDomForStrictMasterStatus();
+                    if (domVerdict === true) return true;
+                    if (domVerdict === false) return false;
+                }
+
+                // Default deny: hide in mobile mode unless Master Account is confirmed
+                return false;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        /**
+         * Inspects mounted UI elements for unmistakable Master-only badges/controls
+         * while explicitly rejecting Granted Admin / Sub Admin sessions.
+         */
+        function inspectDomForStrictMasterStatus() {
+            try {
+                if (!document.body) return null;
+                var candidates = document.body.querySelectorAll("span, div, p, button, a, small, strong, b, h1, h2, h3, h4, li");
+                var sawMasterMarker = false;
+
+                for (var i = 0; i < candidates.length; i++) {
+                    var el = candidates[i];
+                    if (!el || el.children.length > 2) continue;
+                    // Ignore login forms, footers, and hidden script/style containers
+                    if (el.closest("form, footer, script, style, [data-ug-alp-psycho-hidden='1']")) continue;
+
+                    var txt = String(el.textContent || "").replace(/\s+/g, " ").trim();
+                    if (!txt || txt.length > 42) continue;
+
+                    // Explicit Granted Admin / Sub Admin rejection
+                    if (/^(?:granted\s*admin|sub\s*admin|limited\s*admin|ग्रांटेड\s*एडमिन|सब\s*एडमिन)$/i.test(txt)) {
+                        return false;
+                    }
+
+                    // Unmistakable Master-only badges or Master-only admin controls
+                    if (
+                        /^(?:master\s*admin|master\s*account|super\s*admin|master\s*panel|मास्टर\s*एडमिन|मास्टर\s*अकाउंट|मास्टर\s*पैनल)$/i.test(txt) ||
+                        /^(?:grant\s*admin|manage\s*admins?|admin\s*access|admin\s*permissions?|एडमिन\s*एक्सेस|एडमिन\s*प्रबंधन)$/i.test(txt)
+                    ) {
+                        // Ensure this element is not hidden by CSS (e.g., initGrantedAdminMenuGuard hiding it)
+                        var cs = window.getComputedStyle ? window.getComputedStyle(el) : null;
+                        if (!cs || (cs.display !== "none" && cs.visibility !== "hidden")) {
+                            sawMasterMarker = true;
+                        }
+                    }
+                }
+                return sawMasterMarker ? true : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        /**
+         * Replaces all "Mock Test Series" text variants with "ALP PSYCHO TEST".
+         */
+        function replaceMockText(str) {
+            var out = String(str || "");
+            for (var i = 0; i < RENAME_PATTERNS.length; i++) {
+                out = out.replace(RENAME_PATTERNS[i], TARGET_LABEL);
+            }
+            return out;
+        }
+
+        /**
+         * Determines whether a DOM node is a protected top-level layout container
+         * that must NEVER be hidden.
+         */
+        function isProtectedContainer(el) {
+            if (!el || el.nodeType !== 1) return true;
+            var tag = el.tagName;
+            if (tag === "HTML" || tag === "BODY" || tag === "HEAD" || tag === "MAIN" || tag === "HEADER" || tag === "NAV" || tag === "FOOTER" || tag === "ASIDE" || tag === "FORM" || tag === "TABLE" || tag === "TBODY" || tag === "UL" || tag === "OL") {
+                return true;
+            }
+            var id = String(el.id || "").toLowerCase();
+            if (id === "root" || id === "app" || id === "__next" || id === "ug-cloud-loader-ui") return true;
+            if (el.querySelector && el.querySelector("#root, main, header, nav")) return true;
+            return false;
+        }
+
+        /**
+         * Given an element whose text/attribute matched "Mock Test Series" / "ALP PSYCHO TEST",
+         * resolves the exact logical UI unit (button, nav link, menu item, option, card, or dedicated section)
+         * to hide without ever affecting neighboring items or page layout.
+         */
+        function resolveHideTarget(originEl) {
+            if (!originEl || originEl.nodeType !== 1) return null;
+            try {
+                // 1. Dropdown <option>
+                if (originEl.tagName === "OPTION") return originEl;
+
+                // 2. Check if inside an atomic interactive control (button, link, tab, menuitem, li)
+                var cur = originEl;
+                var depth = 0;
+                while (cur && cur.nodeType === 1 && depth < 6 && !isProtectedContainer(cur)) {
+                    var tag = cur.tagName;
+                    var role = String(cur.getAttribute("role") || "").toLowerCase();
+                    if (tag === "BUTTON" || tag === "A" || role === "button" || role === "tab" || role === "menuitem" || role === "option") {
+                        var tLen = String(cur.textContent || "").replace(/\s+/g, " ").trim().length;
+                        if (tLen <= 280) {
+                            // If parent <li> wraps only this single control, hide the <li> cleanly
+                            var pLi = cur.parentElement;
+                            if (pLi && pLi.tagName === "LI" && !isProtectedContainer(pLi)) {
+                                var liLen = String(pLi.textContent || "").replace(/\s+/g, " ").trim().length;
+                                var liBtns = pLi.querySelectorAll("button, a").length;
+                                if (liLen <= 280 && liBtns <= 2) return pLi;
+                            }
+                            return cur;
+                        }
+                    }
+                    if (tag === "LI") {
+                        var liTextLen = String(cur.textContent || "").replace(/\s+/g, " ").trim().length;
+                        if (liTextLen <= 280 && cur.querySelectorAll("button, a").length <= 2) return cur;
+                    }
+                    cur = cur.parentElement;
+                    depth++;
+                }
+
+                // 3. Check if originEl is the title/label of a dedicated Card or Section
+                var originText = String(originEl.textContent || "").replace(/\s+/g, " ").trim();
+                var isPrimaryLabel = originText.length <= 55;
+                if (!isPrimaryLabel) return null;
+
+                // Climb up to find a single-topic card or dedicated section
+                var candidate = originEl;
+                var bestCard = originEl;
+                var step = 0;
+                while (candidate && candidate.nodeType === 1 && step < 5) {
+                    var parent = candidate.parentElement;
+                    if (!parent || isProtectedContainer(parent)) break;
+
+                    var parentText = String(parent.textContent || "").replace(/\s+/g, " ").trim();
+                    var parentHeadings = parent.querySelectorAll("h1, h2, h3, h4").length;
+                    var parentInteractives = parent.querySelectorAll("button, a").length;
+
+                    // Case 3a: Dedicated <section> whose main heading is ALP PSYCHO TEST
+                    if (parent.tagName === "SECTION" && parent.querySelectorAll("section").length === 0) {
+                        var firstH = parent.querySelector("h1, h2, h3");
+                        if (firstH && (firstH === originEl || firstH.contains(originEl))) {
+                            bestCard = parent;
+                            break;
+                        }
+                    }
+
+                    // Case 3b: Card container (compact text, single heading, few buttons, sibling cards exist)
+                    var grandParent = parent.parentElement;
+                    var hasSiblings = !!(grandParent && grandParent.children && grandParent.children.length >= 2);
+                    var cls = String(parent.className || "");
+                    var looksLikeCard = /(?:card|tile|item|tab|menu|nav|btn|button|rounded|shadow|border|cursor-pointer)/i.test(cls) || parent.hasAttribute("onclick");
+
+                    if (parentText.length <= 360 && parentHeadings <= 1 && parentInteractives <= 2 && (looksLikeCard || hasSiblings)) {
+                        bestCard = parent;
+                        candidate = parent;
+                        step++;
+                        continue;
+                    }
+                    break;
+                }
+
+                return isProtectedContainer(bestCard) ? null : bestCard;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        /**
+         * Applies or removes hidden state on a resolved target element without mutating React's DOM structure.
+         */
+        function setElementHiddenState(el, shouldHide) {
+            if (!el || el.nodeType !== 1) return;
+            try {
+                if (shouldHide) {
+                    if (el.getAttribute("data-ug-alp-psycho-hidden") !== "1") {
+                        el.setAttribute("data-ug-alp-psycho-hidden", "1");
+                    }
+                    if (el.tagName === "OPTION") {
+                        el.hidden = true;
+                        el.disabled = true;
+                    } else {
+                        if (el.getAttribute("data-ug-alp-orig-saved") !== "1") {
+                            el.setAttribute("data-ug-alp-orig-saved", "1");
+                            el.setAttribute("data-ug-alp-orig-display", el.style.getPropertyValue("display") || "");
+                            el.setAttribute("data-ug-alp-orig-priority", el.style.getPropertyPriority("display") || "");
+                        }
+                        if (el.style.getPropertyValue("display") !== "none" || el.style.getPropertyPriority("display") !== "important") {
+                            el.style.setProperty("display", "none", "important");
+                        }
+                        el.setAttribute("aria-hidden", "true");
+                    }
+                } else {
+                    if (el.hasAttribute("data-ug-alp-psycho-hidden")) {
+                        el.removeAttribute("data-ug-alp-psycho-hidden");
+                    }
+                    if (el.tagName === "OPTION") {
+                        el.hidden = false;
+                        el.disabled = false;
+                    } else if (el.getAttribute("data-ug-alp-orig-saved") === "1") {
+                        var origDisp = el.getAttribute("data-ug-alp-orig-display") || "";
+                        var origPrio = el.getAttribute("data-ug-alp-orig-priority") || "";
+                        if (origDisp) el.style.setProperty("display", origDisp, origPrio);
+                        else el.style.removeProperty("display");
+                        el.removeAttribute("data-ug-alp-orig-saved");
+                        el.removeAttribute("data-ug-alp-orig-display");
+                        el.removeAttribute("data-ug-alp-orig-priority");
+                        if (el.getAttribute("aria-hidden") === "true") el.removeAttribute("aria-hidden");
+                    }
+                }
+            } catch (e) {}
+        }
+
+        /**
+         * Core DOM pass:
+         * 1. Renames all visible "Mock Test Series" text & UI attributes to "ALP PSYCHO TEST".
+         * 2. Tags matching UI controls/cards/sections with data-ug-alp-psycho-item="1".
+         * 3. Hides all tagged items when in Mobile Mode and NOT logged in as Master Account,
+         *    and restores them immediately when Master Account logs in or in Desktop Mode.
+         */
+        function applyRenameAndVisibility() {
+            if (isApplying) return;
+            isApplying = true;
+            try {
+                ensureGuardStyleAttached();
+
+                // Update document.title if needed
+                if (document.title && MATCH_ANY_PATTERN.test(document.title)) {
+                    var renamedTitle = replaceMockText(document.title);
+                    if (renamedTitle !== document.title) document.title = renamedTitle;
+                }
+
+                var isMobile = isMobileModeNow();
+                var isMaster = isMasterAccountNow();
+                var shouldHide = isMobile && !isMaster;
+
+                // Toggle root class immediately for CSS-level enforcement
+                if (document.documentElement) {
+                    document.documentElement.classList.toggle("ug-alp-mobile-hide", shouldHide);
+                }
+
+                if (!document.body) return;
+
+                var matchedTargets = new Set();
+
+                // A. Walk all text nodes safely (skip scripts, styles, editable inputs)
+                var walker = document.createTreeWalker(
+                    document.body,
+                    NodeFilter.SHOW_TEXT,
+                    {
+                        acceptNode: function (node) {
+                            var p = node.parentNode;
+                            if (!p || p.nodeType !== 1) return NodeFilter.FILTER_REJECT;
+                            var tag = p.tagName;
+                            if (tag === "SCRIPT" || tag === "STYLE" || tag === "NOSCRIPT" || tag === "TEXTAREA" || tag === "INPUT") {
+                                return NodeFilter.FILTER_REJECT;
+                            }
+                            if (p.isContentEditable) return NodeFilter.FILTER_REJECT;
+                            var val = node.nodeValue;
+                            if (!val || !MATCH_ANY_PATTERN.test(val)) return NodeFilter.FILTER_SKIP;
+                            return NodeFilter.FILTER_ACCEPT;
+                        }
+                    }
+                );
+
+                var textNodes = [];
+                var tn;
+                while ((tn = walker.nextNode())) textNodes.push(tn);
+
+                for (var i = 0; i < textNodes.length; i++) {
+                    var tNode = textNodes[i];
+                    var origVal = tNode.nodeValue || "";
+                    var newVal = replaceMockText(origVal);
+                    if (newVal !== origVal) {
+                        tNode.nodeValue = newVal;
+                    }
+                    var parentEl = tNode.parentElement;
+                    if (parentEl) {
+                        var target = resolveHideTarget(parentEl);
+                        if (target) {
+                            target.setAttribute("data-ug-alp-psycho-item", "1");
+                            matchedTargets.add(target);
+                        }
+                    }
+                }
+
+                // B. Check descriptive UI attributes (aria-label, title, placeholder, alt, data-label, data-title)
+                var attrNames = ["aria-label", "title", "placeholder", "alt", "data-label", "data-title"];
+                var attrEls = document.body.querySelectorAll("[aria-label],[title],[placeholder],[alt],[data-label],[data-title]");
+                for (var j = 0; j < attrEls.length; j++) {
+                    var aEl = attrEls[j];
+                    for (var k = 0; k < attrNames.length; k++) {
+                        var aName = attrNames[k];
+                        var aVal = aEl.getAttribute(aName);
+                        if (!aVal || !MATCH_ANY_PATTERN.test(aVal)) continue;
+                        var replacedAttr = replaceMockText(aVal);
+                        if (replacedAttr !== aVal) {
+                            aEl.setAttribute(aName, replacedAttr);
+                        }
+                        if (aName !== "placeholder") {
+                            var aTarget = resolveHideTarget(aEl);
+                            if (aTarget) {
+                                aTarget.setAttribute("data-ug-alp-psycho-item", "1");
+                                matchedTargets.add(aTarget);
+                            }
+                        }
+                    }
+                }
+
+                // C. Include any previously tagged items so they cleanly hide or unhide on mode/auth transitions
+                var allTagged = document.body.querySelectorAll('[data-ug-alp-psycho-item="1"], [data-ug-alp-psycho-hidden="1"]');
+                for (var m = 0; m < allTagged.length; m++) {
+                    matchedTargets.add(allTagged[m]);
+                }
+
+                // D. Apply visibility rule to every matched target
+                matchedTargets.forEach(function (el) {
+                    setElementHiddenState(el, shouldHide);
+                });
+            } catch (e) {
+                // Keep UI resilient
+            } finally {
+                isApplying = false;
+            }
+        }
+
+        /**
+         * Coalesces rapid DOM mutations into a single fast pass.
+         */
+        function scheduleApply() {
+            if (scheduledFrame) return;
+            scheduledFrame = requestAnimationFrame(function () {
+                scheduledFrame = null;
+                applyRenameAndVisibility();
+            });
+        }
+
+        /**
+         * Initializes MutationObserver and global resize/auth listeners.
+         */
+        function startGuard() {
+            ensureGuardStyleAttached();
+
+            // Immediately apply default mobile-hide class before first paint to prevent flicker
+            if (document.documentElement) {
+                document.documentElement.classList.toggle("ug-alp-mobile-hide", isMobileModeNow() && !isMasterAccountNow());
+            }
+
+            if (!observer && typeof MutationObserver !== "undefined") {
+                observer = new MutationObserver(function (mutations) {
+                    if (isApplying) return;
+                    var shouldRunImmediate = false;
+                    for (var i = 0; i < mutations.length; i++) {
+                        if (mutations[i].type === "childList" && mutations[i].addedNodes && mutations[i].addedNodes.length > 0) {
+                            shouldRunImmediate = true;
+                            break;
+                        }
+                    }
+                    if (shouldRunImmediate) applyRenameAndVisibility();
+                    else scheduleApply();
+                });
+                try {
+                    observer.observe(document.documentElement, {
+                        childList: true,
+                        subtree: true,
+                        characterData: true
+                    });
+                } catch (e) {}
+            }
+
+            window.addEventListener("resize", scheduleApply, { passive: true });
+            window.addEventListener("orientationchange", function () {
+                setTimeout(applyRenameAndVisibility, 60);
+                setTimeout(applyRenameAndVisibility, 260);
+            }, { passive: true });
+            window.addEventListener("storage", function () { void refreshAuthSnapshot(); scheduleApply(); });
+            window.addEventListener("hashchange", scheduleApply);
+            window.addEventListener("popstate", scheduleApply);
+            document.addEventListener("visibilitychange", function () {
+                if (!document.hidden) { void refreshAuthSnapshot(); scheduleApply(); }
+            });
+            // Re-check auth shortly after user interactions (e.g., Login / Logout button clicks)
+            document.addEventListener("click", function () {
+                setTimeout(function () { void refreshAuthSnapshot(); scheduleApply(); }, 180);
+                setTimeout(function () { void refreshAuthSnapshot(); scheduleApply(); }, 800);
+            }, true);
+
+            // Lightweight periodic sync to catch Firebase IndexedDB login/logout transitions
+            setInterval(function () {
+                void refreshAuthSnapshot();
+                applyRenameAndVisibility();
+            }, 1200);
+
+            void refreshAuthSnapshot();
+            applyRenameAndVisibility();
+        }
+
+        // Expose safe controller API for cloud loader hooks and debugging
+        window.__UG_ALP_PSYCHO_GUARD__ = {
+            scanBundle: function (payloadObj) {
+                scanBundleForMasterHints(payloadObj);
+                void refreshAuthSnapshot();
+                scheduleApply();
+            },
+            refresh: function () {
+                void refreshAuthSnapshot();
+                applyRenameAndVisibility();
+            },
+            addMasterEmail: function (email) {
+                if (email && typeof email === "string") {
+                    extractedMasterEmails.add(email.trim().toLowerCase());
+                    applyRenameAndVisibility();
+                }
+            },
+            getState: function () {
+                return {
+                    targetLabel: TARGET_LABEL,
+                    isMobileMode: isMobileModeNow(),
+                    isMasterAccount: isMasterAccountNow(),
+                    isHiddenNow: isMobileModeNow() && !isMasterAccountNow(),
+                    currentEmail: authSnapshot.email || "",
+                    extractedMasterEmailCount: extractedMasterEmails.size
+                };
+            }
+        };
+
+        startGuard();
+    })();
+    </script>
+
     <script>
     (function () {
         "use strict";
@@ -104,7 +986,7 @@
 
         function bindSafeGlobalFallback(varName) {
             if (!varName || !/^[a-zA-Z_$][\w$]*$/.test(varName)) return;
-            var blocked = { React: 1, ReactDOM: 1, firebase: 1, MathJax: 1, Razorpay: 1, RazorpayCheckout: 1, CheckoutBridge: 1, webkit: 1, tailwind: 1, document: 1, window: 1, console: 1, fetch: 1, postMessage: 1, localStorage: 1, sessionStorage: 1, XMLHttpRequest: 1, Promise: 1, Intl: 1, crypto: 1, URL: 1 };
+            var blocked = { React: 1, ReactDOM: 1, firebase: 1, MathJax: 1, Razorpay: 1, tailwind: 1, document: 1, window: 1, console: 1, fetch: 1 };
             if (blocked[varName] || (varName in window)) return;
             var isCounter = /^(?:[ijkmnxy]|idx|index|count|len|pos|step)$/i.test(varName);
             try { Object.defineProperty(window, varName, { value: isCounter ? 0 : undefined, writable: true, enumerable: false, configurable: true }); } catch (e) {}
@@ -164,31 +1046,17 @@
             } finally { if (timer) clearTimeout(timer); }
         }
 
-        // IndexedDB कनेक्शन को एक बार खोलकर री-यूज़ करता है (10x तेज़ कैश एक्सेस)
-        var _cachedDbPromise = null;
         function openDB() {
-            if (_cachedDbPromise) return _cachedDbPromise;
-            _cachedDbPromise = new Promise(function (res) {
-                if (!window.indexedDB) { _cachedDbPromise = null; return res(null); }
-                var settled = false, guard = setTimeout(function () { if (!settled) { settled = true; _cachedDbPromise = null; res(null); } }, 1200);
-                function done(v) { if (!settled) { settled = true; clearTimeout(guard); if (!v) _cachedDbPromise = null; res(v); } }
-                try {
-                    var r = indexedDB.open(CACHE_DB_NAME, 1);
-                    r.onupgradeneeded = function (e) { try { if (!e.target.result.objectStoreNames.contains(CACHE_STORE)) e.target.result.createObjectStore(CACHE_STORE); } catch (e2) {} };
-                    r.onsuccess = function (e) {
-                        var db = e.target.result;
-                        try { db.onclose = function () { _cachedDbPromise = null; }; } catch (e3) {}
-                        done(db);
-                    };
-                    r.onerror = function () { done(null); };
-                    r.onblocked = function () { done(null); };
-                } catch (e) { done(null); }
+            return new Promise(function (res) {
+                if (!window.indexedDB) return res(null);
+                var settled = false, guard = setTimeout(function () { if (!settled) { settled = true; res(null); } }, 1200);
+                function done(v) { if (!settled) { settled = true; clearTimeout(guard); res(v); } }
+                try { var r = indexedDB.open(CACHE_DB_NAME, 1); r.onupgradeneeded = function (e) { try { if (!e.target.result.objectStoreNames.contains(CACHE_STORE)) e.target.result.createObjectStore(CACHE_STORE); } catch (e2) {} }; r.onsuccess = function (e) { done(e.target.result); }; r.onerror = function () { done(null); }; r.onblocked = function () { done(null); }; } catch (e) { done(null); }
             });
-            return _cachedDbPromise;
         }
-        async function idbGet(k) { var db = await openDB(); if (!db) return null; return new Promise(function (res) { var g = setTimeout(function () { res(null); }, 1000); try { var r = db.transaction(CACHE_STORE, "readonly").objectStore(CACHE_STORE).get(k); r.onsuccess = function () { clearTimeout(g); res(r.result || null); }; r.onerror = function () { clearTimeout(g); res(null); }; } catch (e) { clearTimeout(g); res(null); } }); }
+        async function idbGet(k) { var db = await openDB(); if (!db) return null; return new Promise(function (res) { var g = setTimeout(function () { res(null); }, 1200); try { var r = db.transaction(CACHE_STORE, "readonly").objectStore(CACHE_STORE).get(k); r.onsuccess = function () { clearTimeout(g); res(r.result || null); }; r.onerror = function () { clearTimeout(g); res(null); }; } catch (e) { clearTimeout(g); res(null); } }); }
         async function idbSet(k, v) { var db = await openDB(); if (!db) return; try { db.transaction(CACHE_STORE, "readwrite").objectStore(CACHE_STORE).put(v, k); } catch (e) {} }
-        async function idbClear() { var db = await openDB(); if (!db) return; return new Promise(function (res) { var g = setTimeout(res, 1000); try { var r = db.transaction(CACHE_STORE, "readwrite").objectStore(CACHE_STORE).clear(); r.onsuccess = function () { clearTimeout(g); res(); }; r.onerror = function () { clearTimeout(g); res(); }; } catch (e) { clearTimeout(g); res(); } }); }
+        async function idbClear() { var db = await openDB(); if (!db) return; return new Promise(function (res) { var g = setTimeout(res, 1200); try { var r = db.transaction(CACHE_STORE, "readwrite").objectStore(CACHE_STORE).clear(); r.onsuccess = function () { clearTimeout(g); res(); }; r.onerror = function () { clearTimeout(g); res(); }; } catch (e) { clearTimeout(g); res(); } }); }
 
         async function fetchChunks(prefix, count) {
             var total = Number(count || 0); if (total <= 0) throw new Error("Cloud चंक संख्या अमान्य है।");
@@ -223,320 +1091,10 @@
             if (/(?:^|\/)react(?:\.production|\.development)?\.min\.js|\/react@\d/i.test(s) && !/react-dom/i.test(s) && window.React) return true;
             if (/(?:^|\/)react-dom(?:\.production|\.development)?\.min\.js|\/react-dom@\d/i.test(s) && window.ReactDOM) return true;
             if (/mathjax/i.test(s) && (window.MathJax || document.querySelector('script[src*="mathjax" i]'))) return true;
-            if (/checkout\.razorpay\.com/i.test(s) && window.Razorpay && document.querySelector('script[data-ug-rzp-mounted="1"]')) return true;
+            if (/checkout\.razorpay\.com/i.test(s) && window.Razorpay) return true;
             return false;
         }
         function ensureHeadLinks(links) { (links || []).forEach(function (attrs) { if (!attrs || !attrs.href) return; if (document.querySelector('link[href="' + String(attrs.href).replace(/"/g, "") + '"]')) return; var lk = document.createElement("link"); Object.keys(attrs).forEach(function (k) { try { lk.setAttribute(k, attrs[k]); } catch (e) {} }); document.head.appendChild(lk); }); }
-        // फास्ट-पाथ Regex सैनिटाइज़र (बड़े क्लाउड स्क्रिप्ट्स को बिना लैग के सिर्फ़ ज़रूरत पड़ने पर ठीक करता है)
-        function sanitizeCorruptedRegexes(rawCode) {
-            var s = String(rawCode || "");
-            if (!s || (s.indexOf(".test(") === -1 && s.indexOf(".exec(") === -1 && s.indexOf("raw.split(") === -1)) return s;
-            var hasSuspectPattern =
-                s.indexOf("\\\\//") !== -1 ||
-                s.indexOf("raw.split(") !== -1 ||
-                /\/\/[gimsuydv]{1,6}\.(?:test|exec)\(/.test(s) ||
-                /\/[^\/\r\n'"]+?\/[^;\r\n{}'"`,=:?]{0,80}\/\s*[gimsuydv]{1,6}\.(?:test|exec)\(/.test(s);
-            if (!hasSuspectPattern) return s;
-
-            var origValid = false;
-            try { new Function(s); origValid = true; } catch (e) {}
-            var out = s;
-            try {
-                // 1. /...\\//i.test( को /...\//i.test( में बदलें
-                out = out.replace(
-                    /([(\[,=?:!&|{};>\n]\s*|\breturn\s+)\/((?:\\.|\[(?:\\.|[^\]\\\r\n])*\]|[^\/\\\r\n])+?)\\\\\/\/([gimsuydv]{1,6})\.(test|exec)\(/g,
-                    "$1/$2\\//$3.$4("
-                );
-                // 2. /...//i.test( को /...\//i.test( में बदलें
-                out = out.replace(
-                    /([(\[,=?:!&|{};>\n]\s*|\breturn\s+)\/((?:\\.|\[(?:\\.|[^\]\\\r\n])*\]|[^\/\\\r\n])+?)\/\/([gimsuydv]{1,6})\.(test|exec)\(/g,
-                    "$1/$2\\//$3.$4("
-                );
-                // 3. /foo/id/i.test( या /foo/ /i.test( जैसे टूटे हुए Regex ठीक करें
-                out = out.replace(
-                    /([(\[,=?:!&|{};>\n]\s*|\breturn\s+)\/((?:\\.|\[(?:\\.|[^\]\\\r\n])*\]|[^\/\\\r\n])+?)\/(\s*[gimsuydv]{0,6}\s*)\/\s*([gimsuydv]{1,6})\.(test|exec)\(/g,
-                    "$1/$2\\/$3/$4.$5("
-                );
-                // 4. /pass/|fail/i.test( जैसे टूटे हुए alternation Regex ठीक करें
-                out = out.replace(
-                    /([(\[,=?:!&|{};>\n]\s*|\breturn\s+)\/((?:\\.|\[(?:\\.|[^\]\\\r\n])*\]|[^\/\\\r\n])+?)\/([gimsuydv]{0,6}\s*[|&^+\-][^;\r\n{}'"`,=:?]+?)\/\s*([gimsuydv]{1,6})\.(test|exec)\(/g,
-                    function (full, pfx, body1, mid, flags, fnName) {
-                        if (mid.indexOf("||") !== -1 || mid.indexOf("&&") !== -1 || /\.(?:test|exec)\s*\(/.test(mid)) return full;
-                        var escapedMid = mid.replace(/(\\.|\/)/g, function (m) { return m === "/" ? "\\/" : m; });
-                        return pfx + "/" + body1 + "\\/" + escapedMid + "/" + flags + "." + fnName + "(";
-                    }
-                );
-                // 5. split regex फिक्स
-                out = out.replace(/raw\.split\(\/\\?s\*\/\\?s\*\/\)/g, "raw.split(' / ')");
-                if (origValid && out !== s) {
-                    try { new Function(out); } catch (verifyErr) { return s; }
-                }
-            } catch (err) {
-                return s;
-            }
-            return out;
-        }
-        // Firebase Firestore (v10 Modular & Compat) के लिए ऑटो Long-Polling फिक्स
-        // WebChannel/Fetch-Streams ब्लॉक होने पर आने वाले "Could not reach Cloud Firestore backend [code=unavailable]" एरर को रोकता है
-        var _ugFsPatchUid = 0;
-        function appendImportSpec(specList, addition) {
-            var trimmed = String(specList || "").replace(/,\s*$/, "");
-            return trimmed + ", " + addition;
-        }
-        function patchFirestoreLongPolling(rawCode) {
-            var s = String(rawCode || "");
-            if (!s) return s;
-            if (s.indexOf("firebase-firestore") === -1 && s.indexOf("firebase-app") === -1) return s;
-            if (s.indexOf("__ugOrigGetFs_") !== -1 || s.indexOf("__ugOrigInitFs_") !== -1) return s;
-            var out = s;
-            try {
-                // 1. firebase-app से default app कैप्चर करें (ताकि बिना आर्ग्युमेंट getFirestore() भी Long-Polling यूज़ कर सके)
-                out = out.replace(
-                    /(^|[;\r\n]\s*)import\s*\{([^}]+)\}\s*from\s*(['"])([^'"]*firebase-app(?!-compat)[^'"]*)\3\s*;?/g,
-                    function (full, lead, specs, q, modUrl) {
-                        var mInit = specs.match(/\binitializeApp(?:\s+as\s+([a-zA-Z_$][\w$]*))?\b/);
-                        if (!mInit) return full;
-                        var uid = ++_ugFsPatchUid;
-                        var localName = mInit[1] || "initializeApp";
-                        var origAlias = "__ugOrigInitApp_" + uid;
-                        var newSpecs = specs.replace(/\binitializeApp(?:\s+as\s+[a-zA-Z_$][\w$]*)?\b/, "initializeApp as " + origAlias);
-                        return lead + "import {" + newSpecs + "} from " + q + modUrl + q + ";\n" +
-                            "function " + localName + "(){var __a=" + origAlias + ".apply(this,arguments);if(!window.__UG_FB_APP__&&arguments.length<=1)window.__UG_FB_APP__=__a;return __a;}\n";
-                    }
-                );
-
-                // 2. Static ES Module named import: import { getFirestore, ... } from "...firebase-firestore.js"
-                out = out.replace(
-                    /(^|[;\r\n]\s*)import\s*\{([^}]+)\}\s*from\s*(['"])([^'"]*firebase-firestore(?!-lite|-compat)[^'"]*)\3\s*;?/g,
-                    function (full, lead, specs, q, modUrl) {
-                        var mGet = specs.match(/\bgetFirestore(?:\s+as\s+([a-zA-Z_$][\w$]*))?\b/);
-                        var mInit = specs.match(/\binitializeFirestore(?:\s+as\s+([a-zA-Z_$][\w$]*))?\b/);
-                        if (!mGet && !mInit) return full;
-                        var uid = ++_ugFsPatchUid;
-                        var getOrig = "__ugOrigGetFs_" + uid;
-                        var initOrig = "__ugOrigInitFs_" + uid;
-                        var newSpecs = specs;
-                        if (mGet) {
-                            newSpecs = newSpecs.replace(/\bgetFirestore(?:\s+as\s+[a-zA-Z_$][\w$]*)?\b/, "getFirestore as " + getOrig);
-                        } else {
-                            newSpecs = appendImportSpec(newSpecs, "getFirestore as " + getOrig);
-                        }
-                        if (mInit) {
-                            newSpecs = newSpecs.replace(/\binitializeFirestore(?:\s+as\s+[a-zA-Z_$][\w$]*)?\b/, "initializeFirestore as " + initOrig);
-                        } else {
-                            newSpecs = appendImportSpec(newSpecs, "initializeFirestore as " + initOrig);
-                        }
-                        var helpers = "";
-                        if (mGet) {
-                            var getLocal = mGet[1] || "getFirestore";
-                            helpers += "\nfunction " + getLocal + "(a,b){var __a=a!==undefined?a:window.__UG_FB_APP__;try{var __c={experimentalForceLongPolling:true,useFetchStreams:false};if(__a!==undefined)return b!==undefined?" + initOrig + "(__a,__c,b):" + initOrig + "(__a,__c);return " + getOrig + "();}catch(_e){return b!==undefined?" + getOrig + "(a,b):(a!==undefined?" + getOrig + "(a):" + getOrig + "());}}";
-                        }
-                        if (mInit) {
-                            var initLocal = mInit[1] || "initializeFirestore";
-                            helpers += "\nfunction " + initLocal + "(a,st,b){var __c=Object.assign({},st||{});if(__c.experimentalAutoDetectLongPolling)delete __c.experimentalAutoDetectLongPolling;__c.experimentalForceLongPolling=true;if(__c.useFetchStreams===undefined)__c.useFetchStreams=false;try{return b!==undefined?" + initOrig + "(a,__c,b):" + initOrig + "(a,__c);}catch(_e){return b!==undefined?" + getOrig + "(a,b):" + getOrig + "(a);}}";
-                        }
-                        return lead + "import {" + newSpecs + "} from " + q + modUrl + q + ";" + helpers + "\n";
-                    }
-                );
-
-                // 3. Static ES Module namespace import: import * as fs from "...firebase-firestore.js"
-                out = out.replace(
-                    /(^|[;\r\n]\s*)import\s*\*\s*as\s+([a-zA-Z_$][\w$]*)\s+from\s*(['"])([^'"]*firebase-firestore(?!-lite|-compat)[^'"]*)\3\s*;?/g,
-                    function (full, lead, nsName, q, modUrl) {
-                        var uid = ++_ugFsPatchUid;
-                        var rawNs = "__ugFsNs_" + uid;
-                        return lead + "import * as " + rawNs + " from " + q + modUrl + q + ";\n" +
-                            "var " + nsName + "=Object.assign({}, " + rawNs + ",{getFirestore:function(a,b){var __a=a!==undefined?a:window.__UG_FB_APP__;try{var __c={experimentalForceLongPolling:true,useFetchStreams:false};if(__a!==undefined&&" + rawNs + ".initializeFirestore)return b!==undefined?" + rawNs + ".initializeFirestore(__a,__c,b):" + rawNs + ".initializeFirestore(__a,__c);return " + rawNs + ".getFirestore();}catch(_e){return b!==undefined?" + rawNs + ".getFirestore(a,b):(a!==undefined?" + rawNs + ".getFirestore(a):" + rawNs + ".getFirestore());}}});\n";
-                    }
-                );
-
-                // 4. Dynamic import("...firebase-firestore.js")
-                out = out.replace(
-                    /(^|[^.\w$])import\s*\(\s*(['"])(https?:\/\/[^'"]*firebase-firestore(?!-lite|-compat)(?:\.min)?\.js[^'"]*)\2\s*\)/g,
-                    function (full, lead, q, modUrl) {
-                        return lead + "(import(" + q + modUrl + q + ").then(function(__m){if(!__m||!__m.initializeFirestore)return __m;var __o=Object.assign({},__m);__o.getFirestore=function(a,b){var __a=a!==undefined?a:window.__UG_FB_APP__;try{var __c={experimentalForceLongPolling:true,useFetchStreams:false};if(__a!==undefined)return b!==undefined?__m.initializeFirestore(__a,__c,b):__m.initializeFirestore(__a,__c);return __m.getFirestore();}catch(_e){return b!==undefined?__m.getFirestore(a,b):(a!==undefined?__m.getFirestore(a):__m.getFirestore());}};__o.initializeFirestore=function(a,st,b){var __c=Object.assign({},st||{});if(__c.experimentalAutoDetectLongPolling)delete __c.experimentalAutoDetectLongPolling;__c.experimentalForceLongPolling=true;if(__c.useFetchStreams===undefined)__c.useFetchStreams=false;try{return b!==undefined?__m.initializeFirestore(a,__c,b):__m.initializeFirestore(a,__c);}catch(_e){return b!==undefined?__m.getFirestore(a,b):__m.getFirestore(a);}};return __o;}))";
-                    }
-                );
-            } catch (e) {
-                return s;
-            }
-            return out;
-        }
-        // Firebase Compat SDK (window.firebase.firestore) के लिए Long-Polling रैपर
-        function patchCompatFirestoreLongPolling() {
-            try {
-                if (!window.firebase || typeof window.firebase.firestore !== "function") return;
-                if (window.firebase.firestore.__ugLpPatched) return;
-                var origFs = window.firebase.firestore;
-                var wrappedFs = function () {
-                    var db = origFs.apply(this, arguments);
-                    if (db && typeof db.settings === "function" && !db.__ugLpApplied) {
-                        db.__ugLpApplied = true;
-                        try { db.settings({ experimentalForceLongPolling: true, useFetchStreams: false, merge: true }); } catch (e) {}
-                    }
-                    return db;
-                };
-                try {
-                    Object.getOwnPropertyNames(origFs).forEach(function (k) {
-                        if (k === "length" || k === "name" || k === "prototype" || k === "arguments" || k === "caller") return;
-                        try {
-                            var d = Object.getOwnPropertyDescriptor(origFs, k);
-                            if (d) Object.defineProperty(wrappedFs, k, d);
-                        } catch (e2) {}
-                    });
-                } catch (e1) {}
-                wrappedFs.__ugLpPatched = true;
-                window.firebase.firestore = wrappedFs;
-            } catch (e) {}
-        }
-        // नेटवर्क ऑफ़लाइन/ऑनलाइन स्टेटस इंडिकेटर (बिना alert के)
-        function initNetworkStatusWatcher() {
-            if (window.__UG_NET_WATCHER__) return;
-            window.__UG_NET_WATCHER__ = true;
-            var hideTimer = null;
-            function renderBanner(isOnline) {
-                try {
-                    if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
-                    var el = document.getElementById("ug-net-status-pill");
-                    if (isOnline) {
-                        if (!el) return;
-                        el.style.background = "#059669";
-                        el.textContent = "✅ इंटरनेट वापस जुड़ गया है";
-                        hideTimer = setTimeout(function () { if (el && el.parentNode) el.remove(); }, 2500);
-                        return;
-                    }
-                    if (!el) {
-                        el = document.createElement("div");
-                        el.id = "ug-net-status-pill";
-                        el.style.cssText = "position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:2147483610;background:#b91c1c;color:#fff;padding:8px 14px;border-radius:999px;font-family:'Noto Sans Devanagari','Inter',sans-serif;font-size:12px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.3);white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;";
-                        document.body.appendChild(el);
-                    }
-                    el.style.background = "#b91c1c";
-                    el.textContent = "⚠️ इंटरनेट कनेक्शन नहीं है — ऑफ़लाइन मोड चालू";
-                } catch (e) {}
-            }
-            window.addEventListener("offline", function () { renderBanner(false); }, { passive: true });
-            window.addEventListener("online", function () { renderBanner(true); }, { passive: true });
-            if (typeof navigator !== "undefined" && navigator.onLine === false) renderBanner(false);
-        }
-        // क्लाउड से बाद में जुड़ने वाले किसी भी <script> टैग (cloud_bundle_script_*) को चलने से पहले सैनिटाइज़ व Firestore Long-Polling पैच करता है
-        function installDynamicScriptSanitizer() {
-            if (window.__UG_SCRIPT_SANITIZER__) return;
-            window.__UG_SCRIPT_SANITIZER__ = true;
-            function maybeSanitizeNode(node) {
-                try {
-                    if (!node || node.nodeType !== 1 || node.tagName !== "SCRIPT") return;
-                    var srcAttr = node.getAttribute("src") || node.src || "";
-                    if (srcAttr) {
-                        if (/firebase/i.test(srcAttr) && !node.__ugFbLoadHooked) {
-                            node.__ugFbLoadHooked = true;
-                            node.addEventListener("load", patchCompatFirestoreLongPolling, { once: true });
-                        }
-                        return;
-                    }
-                    var t = String(node.type || "").trim().toLowerCase();
-                    if (t && t !== "text/javascript" && t !== "application/javascript" && t !== "module" && t !== "text/babel") return;
-                    var raw = node.textContent || "";
-                    if (!raw) return;
-                    var fixed = raw;
-                    if (fixed.indexOf(".test(") !== -1 || fixed.indexOf(".exec(") !== -1 || fixed.indexOf("raw.split(") !== -1) {
-                        fixed = sanitizeCorruptedRegexes(fixed);
-                    }
-                    if (fixed.indexOf("firebase-firestore") !== -1 || fixed.indexOf("firebase-app") !== -1) {
-                        fixed = patchFirestoreLongPolling(fixed);
-                    }
-                    if (fixed !== raw) node.textContent = fixed;
-                } catch (e) {}
-            }
-            var origAppendChild = Node.prototype.appendChild;
-            Node.prototype.appendChild = function (child) {
-                maybeSanitizeNode(child);
-                return origAppendChild.call(this, child);
-            };
-            var origInsertBefore = Node.prototype.insertBefore;
-            Node.prototype.insertBefore = function (newNode, refNode) {
-                maybeSanitizeNode(newNode);
-                return origInsertBefore.call(this, newNode, refNode);
-            };
-            if (typeof Element !== "undefined" && Element.prototype && Element.prototype.append) {
-                var origAppend = Element.prototype.append;
-                Element.prototype.append = function () {
-                    for (var i = 0; i < arguments.length; i++) maybeSanitizeNode(arguments[i]);
-                    return origAppend.apply(this, arguments);
-                };
-            }
-        }
-        // file:// प्रोटोकॉल पर कस्टम हिंदी संदेश बॉक्स दिखाता है (बिना alert के)
-        function showPaymentProtocolNotice() {
-            var existing = document.getElementById("ug-rzp-file-notice");
-            if (existing) existing.remove();
-            var overlay = document.createElement("div");
-            overlay.id = "ug-rzp-file-notice";
-            overlay.style.cssText = "position:fixed;inset:0;z-index:2147483647;background:rgba(15,23,42,0.72);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;font-family:'Noto Sans Devanagari','Inter',Arial,sans-serif;";
-            overlay.innerHTML = '<div style="width:100%;max-width:420px;background:#ffffff;color:#0f172a;border-radius:18px;padding:22px;box-shadow:0 20px 45px rgba(0,0,0,0.35);text-align:center;">' +
-                '<div style="width:48px;height:48px;margin:0 auto 12px;border-radius:50%;background:#fef2f2;color:#dc2626;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;">!</div>' +
-                '<h3 style="margin:0 0 8px;font-size:17px;font-weight:800;color:#0f172a;">फ़ाइल (file://) पर पेमेंट समर्थित नहीं है</h3>' +
-                '<p style="margin:0 0 16px;font-size:13.5px;line-height:1.6;color:#475569;">यह वेबसाइट सीधे कंप्यूटर फ़ाइल से खुली है। सुरक्षा कारणों से Razorpay पेमेंट केवल लाइव वेबसाइट (<strong>https://</strong>) या Local Server (<strong>http://localhost</strong>) पर ही खुलता है।</p>' +
-                '<button id="ug-rzp-notice-close" type="button" style="background:#2563eb;color:#ffffff;border:none;border-radius:12px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;">ठीक है</button>' +
-                '</div>';
-            document.body.appendChild(overlay);
-            var closeBtn = document.getElementById("ug-rzp-notice-close");
-            if (closeBtn) closeBtn.onclick = function () { overlay.remove(); };
-            overlay.onclick = function (ev) { if (ev.target === overlay) overlay.remove(); };
-        }
-        // Razorpay को नॉन-ब्लॉकिंग तरीके से बैकग्राउंड में लोड करता है ताकि वेबसाइट का शुरुआती लोड सुपरफास्ट रहे
-        var _rzpReadyPromise = null;
-        function ensureRazorpayReady() {
-            if (_rzpReadyPromise && document.querySelector('script[data-ug-rzp-mounted="1"]')) return _rzpReadyPromise;
-            _rzpReadyPromise = new Promise(function (resolve) {
-                try {
-                    var stale = document.querySelectorAll(".razorpay-container");
-                    for (var i = 0; i < stale.length; i++) { try { stale[i].remove(); } catch (e) {} }
-                } catch (e) {}
-                function applyFileProtocolGuard() {
-                    if (window.location.protocol !== "file:") return;
-                    if (window.__UG_RZP_FILE_GUARD__) return;
-                    window.__UG_RZP_FILE_GUARD__ = true;
-                    var OrigRazorpay = window.Razorpay;
-                    if (typeof OrigRazorpay === "function") {
-                        var GuardedRazorpay = function () {
-                            return {
-                                open: function () { showPaymentProtocolNotice(); },
-                                on: function () {},
-                                close: function () {}
-                            };
-                        };
-                        try { Object.keys(OrigRazorpay).forEach(function (k) { GuardedRazorpay[k] = OrigRazorpay[k]; }); } catch (e) {}
-                        window.Razorpay = GuardedRazorpay;
-                    }
-                }
-                if (window.Razorpay && document.querySelector('script[data-ug-rzp-mounted="1"]')) {
-                    applyFileProtocolGuard();
-                    return resolve();
-                }
-                try {
-                    var oldScripts = document.querySelectorAll('script[src*="checkout.razorpay.com" i]');
-                    for (var j = 0; j < oldScripts.length; j++) { try { oldScripts[j].remove(); } catch (e) {} }
-                } catch (e) {}
-                var s = document.createElement("script");
-                s.src = "https://checkout.razorpay.com/v1/checkout.js";
-                s.async = true;
-                s.setAttribute("data-ug-rzp-mounted", "1");
-                var settled = false;
-                function done() {
-                    if (!settled) {
-                        settled = true;
-                        applyFileProtocolGuard();
-                        resolve();
-                    }
-                }
-                s.addEventListener("load", done, { once: true });
-                s.addEventListener("error", done, { once: true });
-                setTimeout(done, 8000);
-                (document.head || document.body).appendChild(s);
-            });
-            return _rzpReadyPromise;
-        }
         function loadSingleExternalScript(sc) {
             return new Promise(function (resolve) {
                 if (!sc || !sc.src || isCoreCdnLoaded(sc.src)) return resolve();
@@ -544,7 +1102,7 @@
                 var el = document.createElement("script"); var attrs = sc.attrs || {};
                 Object.keys(attrs).forEach(function (k) { var lk = k.toLowerCase(); if (lk === "defer" || lk === "async") return; try { el.setAttribute(k, attrs[k]); } catch (e) {} });
                 if (sc.id && !el.id) el.id = sc.id; if (sc.type && !el.type) el.type = sc.type; if (!el.getAttribute("src")) el.src = sc.src; el.async = false;
-                var done = false; function fin() { if (!done) { done = true; if (/firebase/i.test(String(sc.src || ""))) patchCompatFirestoreLongPolling(); resolve(); } }
+                var done = false; function fin() { if (!done) { done = true; resolve(); } }
                 el.addEventListener("load", fin, { once: true }); el.addEventListener("error", fin, { once: true }); setTimeout(fin, 10000);
                 document.body.appendChild(el);
             });
@@ -565,8 +1123,7 @@
                 if (!sc) return resolve();
                 if (sc.src || sc.kind === "external") { loadSingleExternalScript(sc).then(resolve); return; }
                 var code = String(sc.code || ""); if (!code.trim()) return resolve();
-                code = sanitizeCorruptedRegexes(code);
-                code = patchFirestoreLongPolling(code);
+                code = code.replace(/([(\[,=?:!&|]\s*\/[^\/\r\n'"]+?)\\\\\/\/([gimsuy]{1,6})\.(test|exec)\(/g, "$1\\//$2.$3(");
                 var t = String(sc.type || "").trim().toLowerCase(), isMod = t === "module", isCls = !t || t === "text/javascript" || t === "application/javascript";
                 if (isCls && !isMod) { try { new Function(code); } catch (synErr) { window.__UG_UPDATE_ERRORS__.push(tagName + " SyntaxError: " + synErr.message); if (!isolated && !capturedBaseErr) capturedBaseErr = synErr.message; return resolve(); } }
                 var jsEl = document.createElement("script"); if (sc.id) jsEl.id = sc.id; if (sc.type) jsEl.type = sc.type;
@@ -575,68 +1132,37 @@
             });
         }
 
-        // नेटवर्क या बंडल त्रुटि होने पर सुरक्षित रिकवरी स्क्रीन दिखाता है
-        async function showBootError(msg) {
-            var good = await idbGet("last_good_base"), hasSafe = !!(good && good.payloadStr), target = document.getElementById("root") || document.body;
-            target.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f172a;padding:20px;text-align:center;font-family:\'Noto Sans Devanagari\',Arial,sans-serif;"><div style="width:100%;max-width:460px;background:#fff;border:2px solid #fecdd3;border-radius:22px;padding:24px;"><h2 style="color:#be123c;margin:0 0 8px 0;font-size:19px;font-weight:900;">वेबसाइट Cloud से लोड नहीं हो सकी</h2><p style="color:#475569;font-size:13px;line-height:1.6;margin:0 0 18px 0;word-break:break-word;">' + esc(msg) + '</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">' + (hasSafe ? '<button id="ug-safe" type="button" style="background:#059669;color:#fff;border:none;padding:10px 16px;border-radius:12px;font-weight:800;font-size:13px;cursor:pointer;">सुरक्षित मोड</button>' : "") + '<button id="ug-r1" type="button" style="background:#0284c7;color:#fff;border:none;padding:10px 18px;border-radius:12px;font-weight:800;font-size:13px;cursor:pointer;">Reload करें</button><button id="ug-r2" type="button" style="background:#f1f5f9;color:#0f172a;border:1px solid #cbd5e1;padding:10px 16px;border-radius:12px;font-weight:800;font-size:13px;cursor:pointer;">कैश साफ़ करें</button></div></div></div>';
-            var r1 = document.getElementById("ug-r1"); if (r1) r1.onclick = function () { window.location.reload(); };
-            var r2 = document.getElementById("ug-r2"); if (r2) r2.onclick = async function () { await idbClear(); navWith({ fresh: "1" }); };
-            var sf = document.getElementById("ug-safe"); if (sf && hasSafe) sf.onclick = async function () { await idbSet("base_bundle", good); window.location.reload(); };
-        }
-
-        // बैकग्राउंड में नया क्लाउड अपडेट डाउनलोड होने पर हल्का नोटिफिकेशन दिखाता है (टेस्ट में कोई रुकावट नहीं)
-        function showUpdateReadyToast() {
-            try {
-                if (document.getElementById("ug-update-toast")) return;
-                var toast = document.createElement("div");
-                toast.id = "ug-update-toast";
-                toast.style.cssText = "position:fixed;right:14px;bottom:14px;z-index:2147483600;display:flex;align-items:center;gap:10px;background:#0f172a;color:#f8fafc;border:1px solid rgba(56,189,248,0.45);border-radius:14px;padding:10px 14px;box-shadow:0 12px 30px rgba(15,23,42,0.35);font-family:'Noto Sans Devanagari','Inter',sans-serif;font-size:12.5px;font-weight:700;max-width:calc(100vw - 28px);transform:translate3d(0,0,0);";
-                toast.innerHTML = '<span>✨ नया अपडेट तैयार है</span><button id="ug-upd-reload" type="button" style="background:#2563eb;color:#fff;border:none;border-radius:9px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">अपडेट करें</button><button id="ug-upd-close" type="button" aria-label="बंद करें" style="background:transparent;color:#94a3b8;border:none;font-size:15px;font-weight:800;cursor:pointer;padding:2px 4px;line-height:1;">✕</button>';
-                document.body.appendChild(toast);
-                var rBtn = document.getElementById("ug-upd-reload");
-                var cBtn = document.getElementById("ug-upd-close");
-                if (rBtn) rBtn.onclick = function () { window.location.reload(); };
-                if (cBtn) cBtn.onclick = function () { toast.remove(); };
-            } catch (e) {}
-        }
-
-        // नॉन-हीरो इमेजेज़ पर लेज़ी लोडिंग व एसिंक डिकोडिंग लगाकर स्क्रॉलिंग को 60fps रखता है
-        function optimizeRenderedMedia() {
-            try {
-                var imgs = document.querySelectorAll("img:not([data-ug-opt])");
-                for (var i = 0; i < imgs.length; i++) {
-                    var im = imgs[i];
-                    im.setAttribute("data-ug-opt", "1");
-                    if (!im.getAttribute("decoding")) im.decoding = "async";
-                    if (i > 2 && !im.getAttribute("loading")) im.loading = "lazy";
-                }
-            } catch (e) {}
-        }
-
         async function mountBaseBundle(p) {
             if (!p || (!p.hasCustomBody && (!Array.isArray(p.scripts) || !p.scripts.length) && (!Array.isArray(p.externalScripts) || !p.externalScripts.length))) throw new Error("वेबसाइट का कोड खाली मिला।");
+            // Feed bundle to ALP PSYCHO TEST Guard so it can extract Master Account hints before scripts mount
+            try { if (window.__UG_ALP_PSYCHO_GUARD__) window.__UG_ALP_PSYCHO_GUARD__.scanBundle(p); } catch (e) {}
             if (p.title) document.title = p.title;
-            if (p.htmlClass) document.documentElement.className = p.htmlClass;
+            if (p.htmlClass) {
+                var keepHide = document.documentElement.classList.contains("ug-alp-mobile-hide");
+                document.documentElement.className = p.htmlClass;
+                if (keepHide) document.documentElement.classList.add("ug-alp-mobile-hide");
+            }
             ensureHeadLinks(p.headLinks);
             (p.styles || []).forEach(function (st) { var el = document.createElement("style"); if (st.id) el.id = st.id; el.textContent = st.css || ""; document.head.appendChild(el); });
             document.body.removeAttribute("style");
             if (p.bodyId) document.body.id = p.bodyId; if (p.bodyStyle) document.body.setAttribute("style", p.bodyStyle); if (p.bodyClass) document.body.className = p.bodyClass;
             if (p.hasCustomBody && p.bodyHtml) { document.body.innerHTML = p.bodyHtml; if (!document.getElementById("root")) { var r = document.createElement("div"); r.id = "root"; document.body.insertBefore(r, document.body.firstChild); } }
-            // Razorpay को बैकग्राउंड में लोड करें (रेंडरिंग ब्लॉक किए बिना)
-            void ensureRazorpayReady();
             await loadExternalScripts(p.externalScripts || []);
             await ensureBabelIfNeeded(p.scripts || []);
             installReadyHooks(); isMountingBase = true; var prevOnload = window.onload;
             try { for (var i = 0; i < p.scripts.length; i++) await runScriptSafe(p.scripts[i], "base_script_" + (i + 1), false); if (window.Babel && typeof window.Babel.transformScriptTags === "function") { try { window.Babel.transformScriptTags(); } catch (e) {} } } finally { isMountingBase = false; var list = queuedReadyCallbacks.slice(); queuedReadyCallbacks.length = 0; list.forEach(function (it) { setTimeout(function () { invokeReady(it.target, it.type, it.fn); }, 0); }); }
-            setTimeout(function () { if (typeof window.onload === "function" && window.onload !== prevOnload) { try { window.onload(new Event("load")); } catch (e) {} } }, 40);
-            (window.requestAnimationFrame || setTimeout)(function () { try { ensureFastUIAndExamEngine(); optimizeRenderedMedia(); } catch (e) {} }, 60);
+            try { if (window.__UG_ALP_PSYCHO_GUARD__) window.__UG_ALP_PSYCHO_GUARD__.refresh(); } catch (e) {}
+            setTimeout(function () {
+                if (typeof window.onload === "function" && window.onload !== prevOnload) { try { window.onload(new Event("load")); } catch (e) {} }
+                try { if (window.__UG_ALP_PSYCHO_GUARD__) window.__UG_ALP_PSYCHO_GUARD__.refresh(); } catch (e) {}
+            }, 60);
         }
 
-        // मूल Cloud Loader के पैच-एडॉप्टर व लिंक्ड-पैच माउंट हेल्पर (100% बैकवर्ड कम्पैटिबिलिटी के लिए सुरक्षित)
         function adaptRuntimePatchCode(rawCode) {
             var s = String(rawCode || "");
             if (s.indexOf("bootFromFirebaseCloud") !== -1 && s.indexOf("UGT_AutoSync_DB_") !== -1 && s.indexOf("initModernHamburgerMenuSystem") === -1) return "";
-            s = sanitizeCorruptedRegexes(s);
+            s = s.replace(/([(\[,=?:!&|]\s*\/[^\/\r\n'"]+?)\\\\\/\/([gimsuy]{1,6})\.(test|exec)\(/g, "$1\\//$2.$3(");
+            s = s.replace(/raw\.split\(\/\\?s\*\/\\?s\*\/\)/g, "raw.split(' / ')");
             if (s.indexOf("__UG_FAST_ENGINE__") !== -1 && s.indexOf("startFastPipeline") !== -1) {
                 s = s.replace(/engine\.payloadPromise\s*=\s*\(async\s+function\s+startFastPipeline\(\)[\s\S]*?\}\)\(\);/, 'engine.payloadPromise = Promise.resolve({ mode: "patch-attached", version: 1, payloadStr: "", payloadObj: { scripts: [] }, speedKBps: 0 });');
             }
@@ -649,6 +1175,7 @@
         async function mountLinkedPatchSafe(item, p) {
             try {
                 if (!p) return;
+                try { if (window.__UG_ALP_PSYCHO_GUARD__) window.__UG_ALP_PSYCHO_GUARD__.scanBundle(p); } catch (e) {}
                 ensureHeadLinks(p.headLinks);
                 (p.styles || []).forEach(function (st) { var el = document.createElement("style"); el.setAttribute("data-ug-update", item.id); if (st.id) el.id = st.id; el.textContent = st.css || ""; document.head.appendChild(el); });
                 if (p.hasCustomBody && p.bodyHtml) {
@@ -665,729 +1192,23 @@
                     await runScriptSafe({ id: origSc.id || "", type: origSc.type || "", code: adaptedCode }, "update_" + item.id + "_" + (i + 1), true);
                 }
                 window.__UG_LOADED_UPDATES__.push({ id: item.id, version: item.version || 1, title: item.title || item.id });
+                try { if (window.__UG_ALP_PSYCHO_GUARD__) window.__UG_ALP_PSYCHO_GUARD__.refresh(); } catch (e) {}
             } catch (err) { window.__UG_UPDATE_ERRORS__.push("Update [" + item.id + "]: " + (err && err.message ? err.message : err)); }
         }
 
-        // =========================================================================
-        // Unified Superfast 60fps Engine (Desktop + Mobile + Master Sidebar + Exam Mode)
-        // जीरो लेआउट थ्रैशिंग (No innerText), स्मार्ट टाइमर फ़िल्टर और GPU एक्सीलरेशन
-        // =========================================================================
-        function ensureFastUIAndExamEngine() {
-            var STYLE_ID = "ug-superfast-ui-style";
-            var PORTAL_ID = "ug-tb-overlay-portal";
-            var FONT_KEY = "ug_mobile_exam_font_scale_v1";
-            var CLASSIC_KEY = "ug_mobile_exam_classic_mode";
-            var INTERACTIVE_SEL = "button, a, [role='button'], [role='menuitem'], [role='tab'], summary, label, input, select, [onclick], [tabindex]:not([tabindex='-1']), .cursor-pointer";
-            var SIDEBAR_HINT_RE = /sidebar|side[-_]?bar|drawer|right[-_]?panel|right[-_]?menu|master|admin[-_]?menu|admin[-_]?panel|admin[-_]?sidebar|tool[-_]?panel|control[-_]?panel|nav[-_]?panel/i;
-            var BACKDROP_HINT_RE = /backdrop|overlay|scrim|mask|dimmer|curtain|blocker|drawer[-_]?bg/i;
-            var BOTTOM_MENU_RE = /^(?:☰\s*)?(?:मेनू|मेन्यू|मैन्यू|menu)\s*(?:खोलें|खोले|खोलिए|khole)|(?:open|show)\s*menu$/i;
-
-            var isApplying = false;
-            var syncTimer = null;
-            var rafId = 0;
-            var curPaletteHost = null;
-            var curFooterHost = null;
-            var curLayoutRow = null;
-            var curQuestionHost = null;
-
-            function isMobileExamView() { return window.innerWidth <= 920; }
-            function isTouchOrTabletView() { return window.innerWidth <= 1024 || ("ontouchstart" in window) || (navigator.maxTouchPoints > 0); }
-
-            function getReactClickFn(el) {
-                if (!el || el.nodeType !== 1) return null;
-                try {
-                    var keys = Object.keys(el);
-                    for (var i = 0; i < keys.length; i++) {
-                        if (keys[i].indexOf("__reactProps$") === 0) {
-                            var p = el[keys[i]];
-                            if (p && typeof p.onClick === "function") return p.onClick;
-                            if (p && typeof p.onClickCapture === "function") return p.onClickCapture;
-                            return null;
-                        }
-                    }
-                } catch (e) {}
-                return null;
-            }
-
-            // 1. Desktop + Mobile 60fps CSS (GPU Composited, Smooth Scroll, Exam App Mode)
-            function injectStyles() {
-                if (document.getElementById(STYLE_ID)) return;
-                var st = document.createElement("style");
-                st.id = STYLE_ID;
-                st.textContent = [
-                    ":root { --ug-exam-font-scale: 1; }",
-                    "/* Desktop व Mobile दोनों के लिए सुपरफास्ट, 60fps स्मूद बेस */",
-                    "html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }",
-                    "html, body { max-width: 100%; overflow-x: clip; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeSpeed; }",
-                    "button, a, [role='button'], summary, label, input, select { touch-action: manipulation; }",
-                    "img, video, svg { max-width: 100%; }",
-                    "mjx-container { max-width: 100% !important; overflow-x: auto !important; overflow-y: hidden !important; -webkit-overflow-scrolling: touch; }",
-                    "/* Desktop आधुनिक पतला स्क्रॉलबार */",
-                    "@media (min-width: 921px) {",
-                    "  * { scrollbar-width: thin; scrollbar-color: rgba(100,116,139,0.45) transparent; }",
-                    "  ::-webkit-scrollbar { width: 7px; height: 7px; }",
-                    "  ::-webkit-scrollbar-track { background: transparent; }",
-                    "  ::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.42); border-radius: 999px; }",
-                    "  ::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,0.7); }",
-                    "}",
-                    "@media (prefers-reduced-motion: reduce) {",
-                    "  html { scroll-behavior: auto; }",
-                    "  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }",
-                    "}",
-                    "/* Mobile व Tablet टच, साइडबार हीलर और बॉटम 'मेनू खोलें' रिमूवर */",
-                    "@media (max-width: 1024px), (hover: none) and (pointer: coarse) {",
-                    "  body { -webkit-tap-highlight-color: transparent; overscroll-behavior-y: contain; }",
-                    "  input[type='text'], input[type='email'], input[type='password'], input[type='search'], input[type='tel'], textarea, select { font-size: 16px !important; }",
-                    "  [data-ug-hidden-bottom-menu='1'] { display: none !important; visibility: hidden !important; pointer-events: none !important; }",
-                    "  [data-ug-mobile-sidebar='1'] { pointer-events: auto !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; touch-action: pan-y !important; overscroll-behavior: contain !important; }",
-                    "  [data-ug-mobile-sidebar='1'] button:not([disabled]), [data-ug-mobile-sidebar='1'] a, [data-ug-mobile-sidebar='1'] [role='button'], [data-ug-mobile-sidebar='1'] [data-ug-sidebar-tap='1'] { pointer-events: auto !important; touch-action: manipulation !important; cursor: pointer !important; min-height: 40px; }",
-                    "  [data-ug-mobile-sidebar='1'] button svg, [data-ug-mobile-sidebar='1'] button i, [data-ug-mobile-sidebar='1'] a svg, [data-ug-mobile-sidebar='1'] a i { pointer-events: none !important; }",
-                    "}",
-                    "/* ================= TESTBOOK / PW MOBILE APP EXAM MODE ================= */",
-                    "@media (max-width: 920px) {",
-                    "  body.ug-mobile-test-active:not(.ug-tb-classic-mode) {",
-                    "    padding-top: 48px !important;",
-                    "    padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important;",
-                    "  }",
-                    "  #ug-tb-overlay-portal { contain: layout style; }",
-                    "  #ug-tb-app-bar {",
-                    "    display: none; position: fixed; top: 0; left: 0; right: 0; height: 48px; z-index: 45;",
-                    "    background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #1e1b4b 100%);",
-                    "    color: #f8fafc; padding: 0 10px;",
-                    "    align-items: center; justify-content: space-between; gap: 6px;",
-                    "    box-shadow: 0 3px 14px rgba(15,23,42,0.28); border-bottom: 1px solid rgba(148,163,184,0.22);",
-                    "    font-family: 'Noto Sans Devanagari', 'Inter', sans-serif; transform: translate3d(0,0,0);",
-                    "  }",
-                    "  body.ug-mobile-test-active #ug-tb-app-bar { display: flex !important; }",
-                    "  .ug-tb-bar-left, .ug-tb-bar-right { display: flex; align-items: center; gap: 6px; min-width: 0; }",
-                    "  .ug-tb-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(56,189,248,0.16); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.32); padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap; }",
-                    "  .ug-tb-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px #22c55e; }",
-                    "  .ug-tb-btn { appearance: none; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.09); color: #fff; height: 32px; padding: 0 9px; border-radius: 9px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; transition: transform 0.1s ease; }",
-                    "  .ug-tb-btn:active { transform: scale(0.93); background: rgba(255,255,255,0.2); }",
-                    "  .ug-tb-btn-palette { background: linear-gradient(135deg, #2563eb, #4f46e5) !important; border-color: rgba(147,197,253,0.45) !important; padding: 0 11px !important; box-shadow: 0 2px 8px rgba(37,99,235,0.4); }",
-                    "  .ug-tb-btn-hidden { display: none !important; }",
-                    "  body.ug-mobile-test-active:not(.ug-tb-classic-mode) .ug-tb-layout-row { display: block !important; width: 100% !important; max-width: 100% !important; gap: 0 !important; }",
-                    "  body.ug-mobile-test-active:not(.ug-tb-classic-mode) .ug-tb-question-host { width: 100% !important; max-width: 100% !important; min-width: 0 !important; margin-left: 0 !important; margin-right: 0 !important; padding-left: 10px !important; padding-right: 10px !important; box-sizing: border-box !important; }",
-                    "  body.ug-mobile-test-active:not(.ug-tb-classic-mode) .ug-tb-option-card { min-height: 50px !important; padding: 11px 13px !important; border-radius: 13px !important; margin-bottom: 9px !important; font-size: calc(14.5px * var(--ug-exam-font-scale)) !important; line-height: 1.5 !important; transition: transform 0.1s ease !important; box-shadow: 0 1px 3px rgba(15,23,42,0.06); }",
-                    "  body.ug-mobile-test-active:not(.ug-tb-classic-mode) .ug-tb-option-card:active { transform: scale(0.985); }",
-                    "  body.ug-mobile-test-active:not(.ug-tb-classic-mode) .ug-tb-table-scroll { display: block !important; width: 100% !important; max-width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; border-radius: 10px; }",
-                    "  body.ug-mobile-test-active:not(.ug-tb-classic-mode) .ug-tb-palette-host {",
-                    "    position: fixed !important; top: 48px !important; right: 0 !important; bottom: 0 !important;",
-                    "    width: min(86vw, 340px) !important; max-width: 340px !important;",
-                    "    height: calc(100dvh - 48px) !important; max-height: calc(100dvh - 48px) !important;",
-                    "    z-index: 48 !important; margin: 0 !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important;",
-                    "    padding: 52px 14px calc(24px + env(safe-area-inset-bottom, 0px)) 14px !important;",
-                    "    background: #ffffff !important; color: #0f172a !important;",
-                    "    box-shadow: -10px 0 32px rgba(15,23,42,0.35) !important; border-left: 1px solid rgba(148,163,184,0.25) !important;",
-                    "    border-radius: 18px 0 0 18px !important; will-change: transform;",
-                    "    transform: translate3d(106%,0,0) !important; transition: transform 0.24s cubic-bezier(0.22,1,0.36,1) !important;",
-                    "    display: block !important; visibility: visible !important; opacity: 1 !important;",
-                    "  }",
-                    "  body.ug-mobile-test-active.ug-tb-dark-surface:not(.ug-tb-classic-mode) .ug-tb-palette-host { background: #0f172a !important; color: #f8fafc !important; border-left-color: rgba(148,163,184,0.2) !important; }",
-                    "  body.ug-mobile-test-active.ug-tb-palette-open:not(.ug-tb-classic-mode) .ug-tb-palette-host { transform: translate3d(0,0,0) !important; }",
-                    "  body.ug-mobile-test-active:not(.ug-tb-classic-mode) .ug-tb-palette-host button { min-height: 38px; border-radius: 10px; font-weight: 700; }",
-                    "  #ug-tb-palette-backdrop { display: none; position: fixed; inset: 0; top: 48px; z-index: 47; background: rgba(15,23,42,0.56); }",
-                    "  body.ug-mobile-test-active.ug-tb-palette-open:not(.ug-tb-classic-mode) #ug-tb-palette-backdrop { display: block !important; }",
-                    "  #ug-tb-palette-close-bar { display: none; position: fixed; top: 56px; right: 12px; z-index: 49; width: calc(min(86vw, 340px) - 24px); align-items: center; justify-content: space-between; padding: 6px 10px; border-radius: 11px; background: linear-gradient(135deg,#1e293b,#0f172a); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.22); font-family: 'Noto Sans Devanagari','Inter',sans-serif; }",
-                    "  body.ug-mobile-test-active.ug-tb-palette-open:not(.ug-tb-classic-mode) #ug-tb-palette-close-bar { display: flex !important; }",
-                    "  body.ug-mobile-test-active:not(.ug-tb-classic-mode) .ug-tb-footer-host {",
-                    "    position: fixed !important; left: 0 !important; right: 0 !important; bottom: 0 !important;",
-                    "    z-index: 42 !important; width: 100% !important; max-width: 100% !important;",
-                    "    margin: 0 !important; border-radius: 16px 16px 0 0 !important;",
-                    "    padding: 9px 10px calc(9px + env(safe-area-inset-bottom, 0px)) 10px !important;",
-                    "    background: rgba(255,255,255,0.97) !important; border-top: 1px solid rgba(148,163,184,0.28) !important;",
-                    "    box-shadow: 0 -6px 24px rgba(15,23,42,0.14) !important;",
-                    "    display: flex !important; flex-wrap: wrap !important; align-items: center !important; justify-content: space-between !important; gap: 6px !important;",
-                    "    transform: translate3d(0,0,0);",
-                    "  }",
-                    "  body.ug-mobile-test-active.ug-tb-dark-surface:not(.ug-tb-classic-mode) .ug-tb-footer-host { background: rgba(15,23,42,0.97) !important; border-top-color: rgba(148,163,184,0.22) !important; }",
-                    "  body.ug-mobile-test-active:not(.ug-tb-classic-mode) .ug-tb-footer-host button { flex: 1 1 auto !important; min-height: 42px !important; padding: 8px 10px !important; border-radius: 11px !important; font-size: 12.5px !important; font-weight: 800 !important; white-space: nowrap !important; text-overflow: ellipsis; overflow: hidden; }",
-                    "  body.ug-mobile-test-active:not(.ug-tb-classic-mode) .ug-tb-footer-host button:active { transform: scale(0.95) !important; }",
-                    "}"
-                ].join("\n");
-                (document.head || document.documentElement).appendChild(st);
-            }
-
-            // 2. Testbook/PW Mobile Exam Overlay Portal (सिर्फ़ मोबाइल व्यू में बनाता है)
-            function ensureOverlayPortal() {
-                var portal = document.getElementById(PORTAL_ID);
-                if (portal) return portal;
-                if (!isMobileExamView()) return null;
-                portal = document.createElement("div");
-                portal.id = PORTAL_ID;
-                portal.innerHTML = [
-                    '<div id="ug-tb-app-bar" role="toolbar" aria-label="Mobile Exam Controls">',
-                    '  <div class="ug-tb-bar-left">',
-                    '    <span class="ug-tb-badge"><span class="ug-tb-dot"></span><span>Exam Mode</span></span>',
-                    '    <button id="ug-tb-font-dec" type="button" class="ug-tb-btn" title="फ़ॉन्ट छोटा करें">A-</button>',
-                    '    <button id="ug-tb-font-inc" type="button" class="ug-tb-btn" title="फ़ॉन्ट बड़ा करें">A+</button>',
-                    '  </div>',
-                    '  <div class="ug-tb-bar-right">',
-                    '    <button id="ug-tb-classic-toggle" type="button" class="ug-tb-btn" title="क्लासिक/ऐप व्यू बदलें">⇄ व्यू</button>',
-                    '    <button id="ug-tb-fullscreen-btn" type="button" class="ug-tb-btn" title="फुलस्क्रीन">⛶</button>',
-                    '    <button id="ug-tb-palette-btn" type="button" class="ug-tb-btn ug-tb-btn-palette ug-tb-btn-hidden" title="प्रश्न पैलेट खोलें">☰ पैलेट</button>',
-                    '  </div>',
-                    '</div>',
-                    '<div id="ug-tb-palette-backdrop"></div>',
-                    '<div id="ug-tb-palette-close-bar">',
-                    '  <span style="font-size:13px;font-weight:800;letter-spacing:0.2px;">📋 प्रश्न पैलेट</span>',
-                    '  <button id="ug-tb-palette-close-btn" type="button" style="background:#ef4444;color:#fff;border:none;border-radius:8px;padding:5px 11px;font-size:12px;font-weight:800;cursor:pointer;">✕ बंद करें</button>',
-                    '</div>'
-                ].join("");
-                document.body.appendChild(portal);
-
-                var scale = 1;
-                try {
-                    var saved = parseFloat(localStorage.getItem(FONT_KEY) || "1");
-                    if (saved >= 0.85 && saved <= 1.35) scale = saved;
-                } catch (e) {}
-                document.documentElement.style.setProperty("--ug-exam-font-scale", String(scale));
-                try { if (localStorage.getItem(CLASSIC_KEY) === "1") document.body.classList.add("ug-tb-classic-mode"); } catch (e) {}
-
-                function updateFont(delta) {
-                    var cur = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--ug-exam-font-scale") || "1") || 1;
-                    var next = Math.max(0.85, Math.min(1.35, Math.round((cur + delta) * 20) / 20));
-                    document.documentElement.style.setProperty("--ug-exam-font-scale", String(next));
-                    try { localStorage.setItem(FONT_KEY, String(next)); } catch (e) {}
-                }
-
-                var decBtn = document.getElementById("ug-tb-font-dec");
-                var incBtn = document.getElementById("ug-tb-font-inc");
-                var palBtn = document.getElementById("ug-tb-palette-btn");
-                var backdrop = document.getElementById("ug-tb-palette-backdrop");
-                var closeBtn = document.getElementById("ug-tb-palette-close-btn");
-                var fsBtn = document.getElementById("ug-tb-fullscreen-btn");
-                var classicBtn = document.getElementById("ug-tb-classic-toggle");
-
-                if (decBtn) decBtn.onclick = function () { updateFont(-0.08); };
-                if (incBtn) incBtn.onclick = function () { updateFont(0.08); };
-                if (palBtn) palBtn.onclick = function () { document.body.classList.toggle("ug-tb-palette-open"); };
-                if (backdrop) backdrop.onclick = function () { document.body.classList.remove("ug-tb-palette-open"); };
-                if (closeBtn) closeBtn.onclick = function () { document.body.classList.remove("ug-tb-palette-open"); };
-                if (fsBtn) fsBtn.onclick = function () {
-                    try {
-                        if (!document.fullscreenElement && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {});
-                        else if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function () {});
-                    } catch (e) {}
-                };
-                if (classicBtn) {
-                    if (document.body.classList.contains("ug-tb-classic-mode")) classicBtn.textContent = "⚡ ऐप मोड";
-                    classicBtn.onclick = function () {
-                        var isClassic = document.body.classList.toggle("ug-tb-classic-mode");
-                        document.body.classList.remove("ug-tb-palette-open");
-                        classicBtn.textContent = isClassic ? "⚡ ऐप मोड" : "⇄ व्यू";
-                        try { localStorage.setItem(CLASSIC_KEY, isClassic ? "1" : "0"); } catch (e) {}
-                    };
-                }
-                return portal;
-            }
-
-            function isActiveModalOrDialog(el) {
-                if (!el || el.nodeType !== 1) return false;
-                return el.id === "ug-rzp-file-notice" || el.id === "ug-update-toast" ||
-                    !!(el.closest && el.closest(".razorpay-container, [role='dialog'], [aria-modal='true'], #ug-rzp-file-notice, #ug-update-toast"));
-            }
-
-            // 3. मोबाइल बॉटम "मेनू खोलें" रिमूवर (textContent आधारित — ज़ीरो लेआउट थ्रैशिंग)
-            function cleanupBottomMenuOption() {
-                if (!isTouchOrTabletView()) return;
-                var vh = window.innerHeight || 700;
-                var nodes = document.querySelectorAll("button, a, [role='button']");
-                for (var i = 0; i < nodes.length; i++) {
-                    var el = nodes[i];
-                    if (el.getAttribute("data-ug-hidden-bottom-menu") === "1") continue;
-                    if (el.closest("#" + PORTAL_ID) || el.closest(".razorpay-container")) continue;
-                    var txt = String(el.textContent || "").replace(/\s+/g, " ").trim();
-                    if (!txt || txt.length > 35 || !BOTTOM_MENU_RE.test(txt)) continue;
-                    var rect = el.getBoundingClientRect();
-                    if (rect.width <= 0 || rect.height <= 0 || rect.top <= 96) continue;
-                    var st = getComputedStyle(el);
-                    var p = el.parentElement;
-                    var pSt = p ? getComputedStyle(p) : null;
-                    if (rect.top > vh * 0.55 || st.position === "fixed" || st.position === "sticky" || (pSt && (pSt.position === "fixed" || pSt.position === "sticky"))) {
-                        el.setAttribute("data-ug-hidden-bottom-menu", "1");
-                        if (p && p !== document.body && p.id !== "root" && pSt && (pSt.position === "fixed" || pSt.position === "sticky")) {
-                            var pRect = p.getBoundingClientRect();
-                            if (pRect.top > vh * 0.58 && pRect.height < 110) {
-                                var visibleSibs = 0;
-                                for (var c = 0; c < p.children.length; c++) {
-                                    var ch = p.children[c];
-                                    if (ch !== el && ch.getAttribute("data-ug-hidden-bottom-menu") !== "1" && getComputedStyle(ch).display !== "none") visibleSibs++;
-                                }
-                                if (visibleSibs === 0) p.setAttribute("data-ug-hidden-bottom-menu", "1");
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 4. Master Account राइट साइडबार व मोबाइल ड्रॉअर टच/ओवरले हीलर (हल्का व तेज़)
-            function healMobileSidebars() {
-                if (!isTouchOrTabletView()) return;
-                var vw = window.innerWidth || 390;
-                var vh = window.innerHeight || 700;
-                var els = document.querySelectorAll("aside, nav, [class*='fixed'], [class*='sidebar' i], [class*='drawer' i], [id*='sidebar' i]");
-                var maxBackdropZ = 0;
-                var sidebars = [];
-
-                for (var i = 0; i < els.length; i++) {
-                    var el = els[i];
-                    if (!el || el.closest("#" + PORTAL_ID) || isActiveModalOrDialog(el)) continue;
-                    if (el.classList.contains("ug-tb-palette-host")) continue;
-                    var cs = getComputedStyle(el);
-                    if (cs.display === "none" || cs.visibility === "hidden" || parseFloat(cs.opacity || "1") < 0.05) continue;
-                    var pos = cs.position;
-                    if (pos !== "fixed" && pos !== "absolute" && pos !== "sticky") continue;
-                    var r = el.getBoundingClientRect();
-                    if (r.width <= 0 || r.height <= 0) continue;
-                    var z = parseInt(cs.zIndex, 10) || 0;
-                    var hint = (el.id || "") + " " + (typeof el.className === "string" ? el.className : "");
-
-                    if (pos === "fixed" && r.width >= vw * 0.85 && r.height >= vh * 0.85 && !el.querySelector("input, textarea, form") && (el.childElementCount === 0 || BACKDROP_HINT_RE.test(hint))) {
-                        if (z > maxBackdropZ && z < 99980) maxBackdropZ = z;
-                        continue;
-                    }
-                    var isEdge = (r.right >= vw - 24 && r.left >= 12) || (r.left <= 16 && r.right <= vw - 16);
-                    var hasSidebarHint = SIDEBAR_HINT_RE.test(hint);
-                    if ((isEdge || hasSidebarHint) && r.width >= 130 && r.width <= (hasSidebarHint ? vw : vw * 0.95) && r.height >= vh * 0.35 && el.querySelector("button, a, [role='button'], [onclick]")) {
-                        sidebars.push({ el: el, cs: cs, z: z });
-                    }
-                }
-
-                for (var s = 0; s < sidebars.length; s++) {
-                    var item = sidebars[s];
-                    if (item.el.getAttribute("data-ug-mobile-sidebar") !== "1") {
-                        item.el.setAttribute("data-ug-mobile-sidebar", "1");
-                    }
-                    if (maxBackdropZ > 0 && item.z <= maxBackdropZ) {
-                        item.el.style.setProperty("z-index", String(Math.min(maxBackdropZ + 5, 99990)), "important");
-                    }
-                }
-            }
-
-            // 5. स्मार्ट Testbook / PW मोबाइल एग्जाम डिटेक्टर (ज़ीरो innerText लेआउट थ्रैशिंग)
-            function isVisibleQuick(el) {
-                if (!el || el.offsetParent === null && getComputedStyle(el).position !== "fixed") return false;
-                var r = el.getBoundingClientRect();
-                return r.width > 12 && r.height > 12;
-            }
-
-            function detectActiveTestState() {
-                if (!isMobileExamView()) return { active: false };
-                var root = document.getElementById("root") || document.body;
-                if (!root || document.querySelector(".razorpay-container[style*='display: block'], #ug-rzp-file-notice")) return { active: false };
-
-                var allBtns = root.querySelectorAll("button, [role='button']");
-                var actionBtns = [];
-                var submitBtns = [];
-                var numBtns = [];
-                var hasResultMarker = false;
-                var hasAdminMarker = false;
-
-                var actionRe = /\b(save\s*&?\s*next|save\s+and\s+next|mark\s+for\s+review|clear\s+response|next\s+question|previous|prev\b|skip\b|submit\s*test|finish\s*test|end\s*test)\b|(सेव\s*(?:और|&)\s*अगला|अगला\s*प्रश्न|पिछला|समीक्षा\s*के\s*लिए|उत्तर\s*हटा|टेस्ट\s*सबमिट|समाप्त\s*करें)/i;
-                var submitRe = /\b(submit\s*test|finish\s*test|end\s*test|final\s*submit)\b|(टेस्ट\s*सबमिट|फाइनल\s*सबमिट)/i;
-                var resultBtnRe = /\b(re-?attempt|retake\s*test|back\s*to\s*dashboard|view\s*solutions?|download\s*pdf|leaderboard)\b|(डैशबोर्ड\s*पर\s*वापस|पुनः\s*प्रयास|परिणाम\s*देखें)/i;
-                var adminBtnRe = /\b(upload\s*question|create\s*test|manage\s*users|master\s*admin|grant\s*access|razorpay|pay\s*₹)\b/i;
-
-                for (var i = 0; i < allBtns.length; i++) {
-                    var b = allBtns[i];
-                    if (b.getAttribute("data-ug-hidden-bottom-menu") === "1" || b.closest("[role='dialog']")) continue;
-                    var t = String(b.textContent || "").replace(/\s+/g, " ").trim();
-                    if (!t) continue;
-                    if (!isVisibleQuick(b)) continue;
-                    if (resultBtnRe.test(t)) hasResultMarker = true;
-                    if (adminBtnRe.test(t)) hasAdminMarker = true;
-                    if (actionRe.test(t) && t.length <= 42) actionBtns.push(b);
-                    if (submitRe.test(t) && t.length <= 36) submitBtns.push(b);
-                    if (/^\d{1,3}$/.test(t)) {
-                        var n = parseInt(t, 10);
-                        if (n >= 1 && n <= 300) numBtns.push({ el: b, num: n });
-                    }
-                }
-
-                if (hasAdminMarker && actionBtns.length < 2) return { active: false };
-                var active = actionBtns.length >= 2;
-                if (!active && (actionBtns.length >= 1 || submitBtns.length >= 1)) {
-                    var fastText = String(root.textContent || "").slice(0, 4500);
-                    var hasTimer = /\b\d{1,2}\s*:\s*\d{2}(?:\s*:\s*\d{2})?\b/.test(fastText);
-                    var hasQ = /\b(Q\s*\.?\s*\d+|Question\s+\d+|Marks\s*:)\b|(प्रश्न\s*(?:सं\.|संख्या)?\s*\d+)/i.test(fastText);
-                    if (hasTimer && (!hasResultMarker || hasQ)) active = true;
-                }
-                return { active: active, actionBtns: actionBtns, numBtns: numBtns, root: root };
-            }
-
-            function detectPaletteContainer(numBtns, root) {
-                if (!numBtns || numBtns.length < 5) return null;
-                var counts = new Map();
-                for (var i = 0; i < numBtns.length; i++) {
-                    var p = numBtns[i].el.parentElement;
-                    for (var d = 0; d < 4 && p && p !== root && p !== document.body; d++) {
-                        var entry = counts.get(p);
-                        if (!entry) { entry = new Set(); counts.set(p, entry); }
-                        entry.add(numBtns[i].num);
-                        p = p.parentElement;
-                    }
-                }
-                var bestGrid = null, bestScore = 0;
-                counts.forEach(function (set, node) {
-                    if (set.size < 5) return;
-                    var hits = 0;
-                    for (var k = 1; k <= 5; k++) if (set.has(k)) hits++;
-                    if (hits < 4) return;
-                    if (set.size > bestScore && (!bestGrid || !node.contains(bestGrid))) {
-                        bestScore = set.size; bestGrid = node;
-                    }
-                });
-                if (!bestGrid) return null;
-
-                var host = bestGrid, cur = bestGrid.parentElement;
-                while (cur && cur !== root && cur !== document.body) {
-                    var txt = String(cur.textContent || "");
-                    if (/(save\s*&?\s*next|save\s+and\s+next|सेव\s*(?:और|&)\s*अगला)/i.test(txt)) break;
-                    if (cur.querySelector("input[type='radio']")) break;
-                    if (cur.tagName === "ASIDE" || /(palette|answered|not\s*answered|marked|not\s*visited|पैलेट|उत्तर\s*दिया|समीक्षा)/i.test(txt) || /palette|sidebar|drawer/i.test(String(cur.className || "") + " " + String(cur.id || ""))) {
-                        host = cur;
-                        if (cur.tagName === "ASIDE") break;
-                    }
-                    cur = cur.parentElement;
-                }
-                var fTxt = String(host.textContent || "");
-                var ok = host.tagName === "ASIDE" || /(palette|answered|not\s*answered|marked|not\s*visited|submit|पैलेट|उत्तर|समीक्षा|सबमिट)/i.test(fTxt) || /palette|sidebar|question-nav/i.test(String(host.className || "") + " " + String(host.id || ""));
-                return (ok || bestScore >= 10) ? host : null;
-            }
-
-            function detectFooterContainer(actionBtns, paletteHost, root) {
-                var filtered = [];
-                for (var i = 0; i < actionBtns.length; i++) {
-                    if (!paletteHost || !paletteHost.contains(actionBtns[i])) filtered.push(actionBtns[i]);
-                }
-                if (filtered.length < 2) return null;
-                var cand = filtered[0].parentElement;
-                while (cand && cand !== root && cand !== document.body) {
-                    var cnt = 0;
-                    for (var j = 0; j < filtered.length; j++) if (cand.contains(filtered[j])) cnt++;
-                    if (cnt >= 2) break;
-                    cand = cand.parentElement;
-                }
-                if (!cand || cand === root || cand === document.body) return null;
-                var r = cand.getBoundingClientRect();
-                if (r.height > Math.min(180, (window.innerHeight || 700) * 0.32) || cand.querySelector("input[type='radio'], table")) return null;
-                return cand;
-            }
-
-            function swapClass(prevEl, nextEl, cls) {
-                if (prevEl === nextEl) {
-                    if (nextEl && !nextEl.classList.contains(cls)) nextEl.classList.add(cls);
-                    return nextEl;
-                }
-                if (prevEl) prevEl.classList.remove(cls);
-                if (nextEl) nextEl.classList.add(cls);
-                return nextEl;
-            }
-
-            function clearExamClasses() {
-                if (!document.body.classList.contains("ug-mobile-test-active")) return;
-                document.body.classList.remove("ug-mobile-test-active", "ug-tb-palette-open", "ug-tb-dark-surface");
-                curPaletteHost = swapClass(curPaletteHost, null, "ug-tb-palette-host");
-                curFooterHost = swapClass(curFooterHost, null, "ug-tb-footer-host");
-                curLayoutRow = swapClass(curLayoutRow, null, "ug-tb-layout-row");
-                curQuestionHost = swapClass(curQuestionHost, null, "ug-tb-question-host");
-            }
-
-            function syncUI() {
-                if (isApplying) return;
-                isApplying = true;
-                try {
-                    injectStyles();
-                    optimizeRenderedMedia();
-
-                    // डेस्कटॉप पर मोबाइल-स्पेसिफ़िक स्कैन न चलाएँ (100% ज़ीरो ओवरहेड)
-                    if (!isTouchOrTabletView()) {
-                        clearExamClasses();
-                        return;
-                    }
-
-                    cleanupBottomMenuOption();
-                    healMobileSidebars();
-
-                    if (!isMobileExamView()) {
-                        clearExamClasses();
-                        return;
-                    }
-
-                    ensureOverlayPortal();
-                    var state = detectActiveTestState();
-                    if (!state.active) {
-                        clearExamClasses();
-                        return;
-                    }
-
-                    document.body.classList.add("ug-mobile-test-active");
-                    try {
-                        var bg = getComputedStyle(document.body).backgroundColor || "";
-                        var m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-                        if (m) {
-                            var lum = 0.299 * Number(m[1]) + 0.587 * Number(m[2]) + 0.114 * Number(m[3]);
-                            document.body.classList.toggle("ug-tb-dark-surface", lum < 95);
-                        }
-                    } catch (e) {}
-
-                    var nextPalette = detectPaletteContainer(state.numBtns, state.root);
-                    curPaletteHost = swapClass(curPaletteHost, nextPalette, "ug-tb-palette-host");
-                    var palBtn = document.getElementById("ug-tb-palette-btn");
-                    var nextRow = null, nextQHost = null;
-
-                    if (nextPalette) {
-                        if (palBtn) palBtn.classList.remove("ug-tb-btn-hidden");
-                        var rowP = nextPalette.parentElement;
-                        if (rowP && rowP !== document.body) {
-                            nextRow = rowP;
-                            for (var s = 0; s < rowP.children.length; s++) {
-                                if (rowP.children[s] !== nextPalette && isVisibleQuick(rowP.children[s])) {
-                                    nextQHost = rowP.children[s];
-                                    break;
-                                }
-                            }
-                        }
-                    } else {
-                        if (palBtn) palBtn.classList.add("ug-tb-btn-hidden");
-                        document.body.classList.remove("ug-tb-palette-open");
-                    }
-                    curLayoutRow = swapClass(curLayoutRow, nextRow, "ug-tb-layout-row");
-                    curQuestionHost = swapClass(curQuestionHost, nextQHost, "ug-tb-question-host");
-
-                    var nextFooter = detectFooterContainer(state.actionBtns, nextPalette, state.root);
-                    curFooterHost = swapClass(curFooterHost, nextFooter, "ug-tb-footer-host");
-
-                    var qScope = nextQHost || state.root;
-                    if (qScope) {
-                        var radios = qScope.querySelectorAll("input[type='radio']");
-                        for (var rIdx = 0; rIdx < radios.length; rIdx++) {
-                            var box = radios[rIdx].closest("label, div, li");
-                            if (box && box !== qScope && (!nextPalette || !nextPalette.contains(box))) box.classList.add("ug-tb-option-card");
-                        }
-                        var optBtns = qScope.querySelectorAll("button, div[role='button']");
-                        for (var ob = 0; ob < optBtns.length; ob++) {
-                            var obEl = optBtns[ob];
-                            if ((nextPalette && nextPalette.contains(obEl)) || (nextFooter && nextFooter.contains(obEl)) || obEl.closest("header, nav, [role='dialog']")) continue;
-                            var obTxt = String(obEl.textContent || "").trim();
-                            if (/^(?:\(?[A-E1-5]\)?[\.\)\s:-]+|Option\s+[A-E])/i.test(obTxt) && obTxt.length >= 2) obEl.classList.add("ug-tb-option-card");
-                        }
-                        var tables = qScope.querySelectorAll("table");
-                        for (var tb = 0; tb < tables.length; tb++) {
-                            if (tables[tb].scrollWidth > (window.innerWidth || 380) - 24 && tables[tb].parentElement) {
-                                tables[tb].parentElement.classList.add("ug-tb-table-scroll");
-                            }
-                        }
-                    }
-                } catch (err) {
-                } finally {
-                    isApplying = false;
-                }
-            }
-
-            function scheduleSync(delayMs) {
-                if (syncTimer) clearTimeout(syncTimer);
-                syncTimer = setTimeout(function () {
-                    syncTimer = null;
-                    if (rafId) cancelAnimationFrame(rafId);
-                    rafId = (window.requestAnimationFrame || setTimeout)(function () { rafId = 0; syncUI(); }, 0);
-                }, typeof delayMs === "number" ? delayMs : 180);
-            }
-
-            // 6. सिंगल एकीकृत इवेंट लिसनर्स (पैलेट ऑटो-क्लोज़ + Master साइडबार टच-टू-क्लिक ब्रिज)
-            if (!window.__UG_FAST_ENGINE_LISTENERS__) {
-                window.__UG_FAST_ENGINE_LISTENERS__ = true;
-                var activeTouch = null;
-                var lastSynth = { el: null, ts: 0 };
-
-                function findSidebarInteractive(startEl, x, y) {
-                    var sb = startEl && startEl.closest ? startEl.closest("[data-ug-mobile-sidebar='1']") : null;
-                    if (!sb && document.elementsFromPoint) {
-                        var stack = document.elementsFromPoint(x, y);
-                        for (var i = 0; i < stack.length; i++) {
-                            if (isActiveModalOrDialog(stack[i])) return null;
-                            var found = stack[i].closest ? stack[i].closest("[data-ug-mobile-sidebar='1']") : null;
-                            if (found) { sb = found; startEl = stack[i]; break; }
-                        }
-                    }
-                    if (!sb) return null;
-                    var cur = startEl, depth = 0;
-                    while (cur && cur !== sb && depth < 9) {
-                        if (!cur.disabled && cur.getAttribute("aria-disabled") !== "true") {
-                            if ((cur.matches && cur.matches(INTERACTIVE_SEL)) || getReactClickFn(cur)) {
-                                if (cur.tagName === "TEXTAREA" || cur.tagName === "SELECT" || (cur.tagName === "INPUT" && !/^(button|submit|reset|checkbox|radio)$/i.test(cur.type || ""))) return null;
-                                return { btn: cur, sb: sb };
-                            }
-                        }
-                        cur = cur.parentElement;
-                        depth++;
-                    }
-                    return null;
-                }
-
-                document.addEventListener("touchstart", function (ev) {
-                    if (!isTouchOrTabletView() || !ev.touches || ev.touches.length !== 1) { activeTouch = null; return; }
-                    var t = ev.touches[0];
-                    var hit = findSidebarInteractive(ev.target, t.clientX, t.clientY);
-                    if (!hit) { activeTouch = null; return; }
-                    activeTouch = { id: t.identifier, btn: hit.btn, reactClick: getReactClickFn(hit.btn), x: t.clientX, y: t.clientY, ts: Date.now(), moved: false, clicked: false };
-                }, { capture: true, passive: true });
-
-                document.addEventListener("touchmove", function (ev) {
-                    if (!activeTouch || !ev.touches) return;
-                    for (var i = 0; i < ev.touches.length; i++) {
-                        if (ev.touches[i].identifier === activeTouch.id) {
-                            if (Math.hypot(ev.touches[i].clientX - activeTouch.x, ev.touches[i].clientY - activeTouch.y) > 15) activeTouch.moved = true;
-                            break;
-                        }
-                    }
-                }, { capture: true, passive: true });
-
-                document.addEventListener("click", function (ev) {
-                    var target = ev.target;
-                    // सिंथेटिक क्लिक के बाद देर से आने वाला डुप्लीकेट नेटिव क्लिक रोकें
-                    if (ev.isTrusted && lastSynth.el && (Date.now() - lastSynth.ts) < 420 && (target === lastSynth.el || (lastSynth.el.contains && lastSynth.el.contains(target)))) {
-                        ev.preventDefault(); ev.stopImmediatePropagation(); return;
-                    }
-                    if (activeTouch && activeTouch.btn && (target === activeTouch.btn || (activeTouch.btn.contains && activeTouch.btn.contains(target)))) {
-                        activeTouch.clicked = true;
-                    }
-                    // पैलेट के प्रश्न नंबर पर टैप करते ही ड्रॉअर बंद हो जाए
-                    if (document.body.classList.contains("ug-tb-palette-open") && target && target.closest) {
-                        var pal = target.closest(".ug-tb-palette-host");
-                        if (pal) {
-                            var btn = target.closest("button, [role='button'], a");
-                            if (btn && (/^\d{1,3}$/.test(String(btn.textContent || "").trim()) || /submit|सबमिट/i.test(String(btn.textContent || "")))) {
-                                setTimeout(function () { document.body.classList.remove("ug-tb-palette-open"); }, 120);
-                            }
-                        }
-                    }
-                    // मोबाइल टैप पर CSS क्लास/स्टाइल से खुलने वाले साइडबार व व्यू को तुरंत सिंक करें (0ms आइडल ओवरहेड)
-                    if (isTouchOrTabletView() && !(target && target.closest && target.closest("#" + PORTAL_ID))) {
-                        scheduleSync(130);
-                    }
-                }, true);
-
-                document.addEventListener("touchend", function (ev) {
-                    if (!activeTouch || !ev.changedTouches) return;
-                    var snap = activeTouch;
-                    activeTouch = null;
-                    var endT = null;
-                    for (var i = 0; i < ev.changedTouches.length; i++) if (ev.changedTouches[i].identifier === snap.id) { endT = ev.changedTouches[i]; break; }
-                    if (!endT || snap.moved || Math.hypot(endT.clientX - snap.x, endT.clientY - snap.y) > 16 || (Date.now() - snap.ts) > 650) return;
-                    setTimeout(function () {
-                        if (snap.clicked) return;
-                        snap.clicked = true;
-                        lastSynth = { el: snap.btn, ts: Date.now() };
-                        try {
-                            if (snap.btn && snap.btn.isConnected) snap.btn.click();
-                            else if (typeof snap.reactClick === "function") snap.reactClick({ type: "click", target: snap.btn, currentTarget: snap.btn, preventDefault: function () {}, stopPropagation: function () {} });
-                        } catch (e) {}
-                    }, 125);
-                }, { capture: true, passive: true });
-
-                window.addEventListener("resize", function () { scheduleSync(150); }, { passive: true });
-                window.addEventListener("orientationchange", function () { scheduleSync(200); }, { passive: true });
-
-                // स्मार्ट MutationObserver: केवल असली Element बदलावों पर चलता है (1-सेकंड टाइमर टिक पर 0ms ओवरहेड!)
-                if (typeof MutationObserver !== "undefined") {
-                    var obs = new MutationObserver(function (mutations) {
-                        if (isApplying) return;
-                        var hasElementChange = false;
-                        for (var i = 0; i < mutations.length; i++) {
-                            var m = mutations[i];
-                            if (m.target && m.target.closest && m.target.closest("#" + PORTAL_ID + ", #ug-update-toast")) continue;
-                            for (var a = 0; a < m.addedNodes.length; a++) { if (m.addedNodes[a].nodeType === 1) { hasElementChange = true; break; } }
-                            if (hasElementChange) break;
-                            for (var r = 0; r < m.removedNodes.length; r++) { if (m.removedNodes[r].nodeType === 1) { hasElementChange = true; break; } }
-                            if (hasElementChange) break;
-                        }
-                        if (hasElementChange) scheduleSync(180);
-                    });
-                    obs.observe(document.documentElement, { childList: true, subtree: true });
-                }
-            }
-
-            syncUI();
-        }
-
-        // बैकग्राउंड में क्लाउड अपडेट जाँचता है (Instant SWR बूट के बाद बिना किसी लैग के)
-        function syncCloudUpdatesInBackground(bootedActiveId, bootedVersion) {
-            var runBg = async function () {
-                try {
-                    var metaPair = await Promise.all([
-                        fsGetDoc("manifest", 10000).catch(function () { return null; }),
-                        fsGetDoc("updates_registry", 10000).catch(function () { return null; })
-                    ]);
-                    var manifest = metaPair[0], regDoc = metaPair[1], regItems = [];
-                    if (regDoc && typeof regDoc.itemsJson === "string") { try { regItems = JSON.parse(regDoc.itemsJson); } catch (e) {} }
-                    else if (regDoc && Array.isArray(regDoc.items)) regItems = regDoc.items;
-                    if (regItems.length) void idbSet("updates_registry_cache", regItems);
-
-                    var enabledNew = (regItems || []).filter(function (it) { return it && it.mode === "patch" && it.enabled !== false && it.id; });
-                    var activeNew = enabledNew.length ? enabledNew[enabledNew.length - 1] : null;
-
-                    if (activeNew) {
-                        var liveId = activeNew.id, liveVer = Number(activeNew.version || 1);
-                        if (liveId === bootedActiveId && liveVer === Number(bootedVersion || 1)) return;
-                        var freshStr = await fetchChunks("upd_" + liveId + "_chunk_", activeNew.chunkCount);
-                        var freshObj = JSON.parse(freshStr);
-                        var joined = (freshObj.scripts || []).map(function (s) { return String((s && s.code) || ""); }).join("\n");
-                        if (joined.indexOf("function bootFromFirebaseCloud(") !== -1) return;
-                        await idbSet("active_new_site_" + liveId, { schema: CACHE_SCHEMA, version: liveVer, payloadStr: freshStr, savedAt: Date.now() });
-                        await idbSet("last_good_base", { schema: CACHE_SCHEMA, activeId: liveId, version: liveVer, payloadStr: freshStr, savedAt: Date.now() });
-                        showUpdateReadyToast();
-                    } else if (manifest && manifest.chunkCount) {
-                        var baseVer = Number(manifest.version || 1);
-                        if (bootedActiveId === "__base__" && baseVer === Number(bootedVersion || 1)) return;
-                        var baseStr = await fetchChunks("chunk_", manifest.chunkCount);
-                        var baseObj = JSON.parse(baseStr);
-                        if (isSelfLoaderPayload(baseObj)) return;
-                        await idbSet("base_bundle", { schema: CACHE_SCHEMA, version: baseVer, payloadStr: baseStr, savedAt: Date.now() });
-                        await idbSet("last_good_base", { schema: CACHE_SCHEMA, activeId: "__base__", version: baseVer, payloadStr: baseStr, savedAt: Date.now() });
-                        showUpdateReadyToast();
-                    }
-                } catch (e) {}
-            };
-            if (typeof window.requestIdleCallback === "function") {
-                setTimeout(function () { window.requestIdleCallback(function () { void runBg(); }, { timeout: 3000 }); }, 1400);
-            } else {
-                setTimeout(function () { void runBg(); }, 1800);
-            }
+        async function showBootError(msg) {
+            var good = await idbGet("last_good_base"), hasSafe = !!(good && good.payloadStr), target = document.getElementById("root") || document.body;
+            target.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f172a;padding:20px;text-align:center;font-family:Arial,sans-serif;"><div style="width:100%;max-width:460px;background:#fff;border:2px solid #fecdd3;border-radius:22px;padding:24px;"><h2 style="color:#be123c;margin:0 0 8px 0;font-size:19px;font-weight:900;">वेबसाइट Cloud से लोड नहीं हो सकी</h2><p style="color:#475569;font-size:13px;line-height:1.6;margin:0 0 18px 0;word-break:break-word;">' + esc(msg) + '</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">' + (hasSafe ? '<button id="ug-safe" type="button" style="background:#059669;color:#fff;border:none;padding:10px 16px;border-radius:12px;font-weight:800;font-size:13px;cursor:pointer;">सुरक्षित मोड</button>' : "") + '<button id="ug-r1" type="button" style="background:#0284c7;color:#fff;border:none;padding:10px 18px;border-radius:12px;font-weight:800;font-size:13px;cursor:pointer;">Reload करें</button><button id="ug-r2" type="button" style="background:#f1f5f9;color:#0f172a;border:1px solid #cbd5e1;padding:10px 16px;border-radius:12px;font-weight:800;font-size:13px;cursor:pointer;">कैश साफ़ करें</button></div></div></div>';
+            var r1 = document.getElementById("ug-r1"); if (r1) r1.onclick = function () { window.location.reload(); };
+            var r2 = document.getElementById("ug-r2"); if (r2) r2.onclick = async function () { await idbClear(); navWith({ fresh: "1" }); };
+            var sf = document.getElementById("ug-safe"); if (sf && hasSafe) sf.onclick = async function () { await idbSet("base_bundle", good); window.location.reload(); };
         }
 
         async function bootFromFirebaseCloud() {
             initSafeGlobalsAndErrorWatcher();
-            installDynamicScriptSanitizer();
-            initNetworkStatusWatcher();
-            ensureFastUIAndExamEngine();
             setTimeout(function () { if (document.getElementById("ug-cloud-loader-ui") && capturedBaseErr) void showBootError("स्क्रिप्ट एरर: " + capturedBaseErr); }, 6500);
             try {
-                var reactWait = Promise.race([window.__UG_REACT_READY__ || Promise.resolve(false), new Promise(function (r) { setTimeout(function () { r(false); }, 10000); })]);
-
-                // 1. सुपरफास्ट Instant Stale-While-Revalidate (SWR) बूट: लोकल कैश से तुरंत वेबसाइट खोलें!
-                if (!forceFresh && !targetPageId && !useBackup && !skipPatches) {
-                    var instantCached = await idbGet("last_good_base");
-                    if (instantCached && instantCached.schema === CACHE_SCHEMA && instantCached.payloadStr) {
-                        try {
-                            var instantObj = JSON.parse(instantCached.payloadStr);
-                            if (instantObj && !isSelfLoaderPayload(instantObj)) {
-                                setStatus("तेज़ लोकल कैश से खुल रहा है…");
-                                if (instantCached.cloudLink) window.__UG_CLOUD_LINK__ = instantCached.cloudLink;
-                                await reactWait;
-                                await mountBaseBundle(instantObj);
-                                if (instantCached.loadedUpdate) window.__UG_LOADED_UPDATES__.push(instantCached.loadedUpdate);
-                                var bsFast = document.getElementById("ug-boot-loader-style");
-                                if (bsFast && !document.getElementById("ug-cloud-loader-ui")) bsFast.remove();
-                                syncCloudUpdatesInBackground(instantCached.activeId || "", instantCached.version || 1);
-                                return;
-                            }
-                        } catch (e) {}
-                    }
-                }
-
-                // 2. यदि ?page=... पैरामीटर है
+                var reactWait = Promise.race([window.__UG_REACT_READY__ || Promise.resolve(false), new Promise(function (r) { setTimeout(function () { r(false); }, 11000); })]);
                 if (targetPageId) {
                     setStatus("लिंक किया पेज (" + targetPageId + ") लोड हो रहा है…");
                     var pMan = await fsGetDoc("upd_" + targetPageId + "_manifest").catch(function () { return null; });
@@ -1396,8 +1217,6 @@
                     if (!pData) throw new Error("पेज ?page=" + targetPageId + " Cloud में नहीं मिला।");
                     await reactWait; await mountBaseBundle(pData.payloadObj); return;
                 }
-
-                // 3. पहली बार विज़िट या ?fresh=1 होने पर Cloud से लोड करें
                 var activeManId = useBackup ? "backup_manifest" : "manifest", activePref = useBackup ? "backup_chunk_" : "chunk_", activeKey = useBackup ? "backup_base_bundle" : "base_bundle";
                 var forceOldBase = skipPatches || useBackup;
                 var manifest = null, regDoc = null, regOk = false, regItems = [];
@@ -1429,16 +1248,15 @@
                     };
                     if (activeNewFile) {
                         var newCacheKey = "active_new_site_" + activeNewFile.id;
-                        var newData = await getCachedOrFreshBundle(newCacheKey, activeNewFile.version, "upd_" + activeNewFile.id + "_chunk_", activeNewFile.chunkCount, "वेबसाइट लोड हो रही है…");
+                        var newData = await getCachedOrFreshBundle(newCacheKey, activeNewFile.version, "upd_" + activeNewFile.id + "_chunk_", activeNewFile.chunkCount, "नई अपडेटेड वेबसाइट (" + (activeNewFile.title || activeNewFile.id) + " v" + (activeNewFile.version || 1) + ") लोड हो रही है…");
                         if (!newData || !newData.payloadObj) throw new Error("नई अपडेटेड फ़ाइल (" + activeNewFile.id + ") Cloud से लोड नहीं हो सकी।");
                         var newJoinedScripts = (newData.payloadObj.scripts || []).map(function (s) { return String((s && s.code) || ""); }).join("\n");
                         if (newJoinedScripts.indexOf("function bootFromFirebaseCloud(") !== -1) throw new Error("नई अपडेट फ़ाइल में Auto-Sync Cloud Loader लूप है। कृपया सही HTML अपलोड करें।");
                         await reactWait;
                         await mountBaseBundle(newData.payloadObj);
-                        var loadedNewMeta = { id: activeNewFile.id, version: activeNewFile.version || 1, title: activeNewFile.title || activeNewFile.id, mode: "new-file-only" };
-                        window.__UG_LOADED_UPDATES__.push(loadedNewMeta);
+                        window.__UG_LOADED_UPDATES__.push({ id: activeNewFile.id, version: activeNewFile.version || 1, title: activeNewFile.title || activeNewFile.id, mode: "new-file-only" });
                         var bsNew = document.getElementById("ug-boot-loader-style"); if (bsNew && !document.getElementById("ug-cloud-loader-ui")) bsNew.remove();
-                        setTimeout(function () { if (!document.getElementById("ug-cloud-loader-ui")) { var bsNew2 = document.getElementById("ug-boot-loader-style"); if (bsNew2) bsNew2.remove(); void idbSet("last_good_base", { schema: CACHE_SCHEMA, activeId: activeNewFile.id, version: activeNewFile.version || 1, payloadStr: newData.payloadStr, cloudLink: window.__UG_CLOUD_LINK__ || null, loadedUpdate: loadedNewMeta, savedAt: Date.now() }); } }, 1800);
+                        setTimeout(function () { if (!document.getElementById("ug-cloud-loader-ui")) { var bsNew2 = document.getElementById("ug-boot-loader-style"); if (bsNew2) bsNew2.remove(); void idbSet("last_good_base", { schema: CACHE_SCHEMA, version: activeNewFile.version || 1, payloadStr: newData.payloadStr, savedAt: Date.now() }); } }, 2500);
                         return;
                     }
                 }
@@ -1463,7 +1281,7 @@
                 await reactWait;
                 await mountBaseBundle(baseData.payloadObj);
                 var bs = document.getElementById("ug-boot-loader-style"); if (bs && !document.getElementById("ug-cloud-loader-ui")) bs.remove();
-                setTimeout(function () { if (!document.getElementById("ug-cloud-loader-ui")) { var bs2 = document.getElementById("ug-boot-loader-style"); if (bs2) bs2.remove(); void idbSet("last_good_base", { schema: CACHE_SCHEMA, activeId: "__base__", version: baseData.version || 1, payloadStr: baseData.payloadStr, cloudLink: window.__UG_CLOUD_LINK__ || null, savedAt: Date.now() }); } }, 1800);
+                setTimeout(function () { if (!document.getElementById("ug-cloud-loader-ui")) { var bs2 = document.getElementById("ug-boot-loader-style"); if (bs2) bs2.remove(); void idbSet("last_good_base", { schema: CACHE_SCHEMA, version: baseData.version, payloadStr: baseData.payloadStr, savedAt: Date.now() }); } }, 2500);
             } catch (err) { await showBootError(err && err.message ? err.message : "इंटरनेट जाँचें और पेज Reload करें।"); }
         }
         bootFromFirebaseCloud();
