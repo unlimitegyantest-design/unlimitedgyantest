@@ -9,148 +9,20 @@
     html[data-ug-mode="desktop"], html[data-ug-mode="desktop"] body {
         overflow-x: auto;
     }
-
-    /* =========================================================================
-       DESKTOP MOBILE PREVIEW FRAME (केवल जब Desktop पर Mobile Mode खुला हो)
-       - पूरा मोबाइल UI विंडो के अंदर बीच में फिट रहेगा, कोई हिस्सा नहीं कटेगा
-       - बिना CSS zoom के, सभी बटन व स्क्रॉल 100% सटीक काम करेंगे
-       ========================================================================= */
-    html[data-ug-mode="mobile"][data-ug-preview="desktop-mobile"] {
-        background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%) !important;
-        min-height: 100dvh;
-        overflow: hidden !important;
-    }
-
-    html[data-ug-mode="mobile"][data-ug-preview="desktop-mobile"] body {
-        position: relative !important;
-        width: var(--ug-frame-w, 390px) !important;
-        max-width: calc(100vw - 24px) !important;
-        height: var(--ug-frame-h, calc(100dvh - 24px)) !important;
-        max-height: calc(100dvh - 16px) !important;
-        margin: var(--ug-frame-top, 12px) auto 0 auto !important;
-        border-radius: 26px !important;
-        border: 3px solid rgba(148, 163, 184, 0.35) !important;
-        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55) !important;
-        overflow-x: hidden !important;
-        overflow-y: auto !important;
-        box-sizing: border-box !important;
-    }
-
-    /* Desktop Preview में सभी Mobile Fixed Bars व Overlays को फ्रेम की चौड़ाई/ऊंचाई में लॉक करना */
-    html[data-ug-mode="mobile"][data-ug-preview="desktop-mobile"] #ug-mintro-topbar,
-    html[data-ug-mode="mobile"][data-ug-preview="desktop-mobile"] #ug-mtest-topbar {
-        left: 50% !important;
-        right: auto !important;
-        transform: translateX(-50%) !important;
-        width: calc(var(--ug-frame-w, 390px) - 6px) !important;
-        top: calc(var(--ug-frame-top, 12px) + 3px) !important;
-        border-radius: 23px 23px 0 0 !important;
-    }
-
-    html[data-ug-mode="mobile"][data-ug-preview="desktop-mobile"] #ug-mintro-bottomdock,
-    html[data-ug-mode="mobile"][data-ug-preview="desktop-mobile"] #ug-mtest-bottomdock {
-        left: 50% !important;
-        right: auto !important;
-        transform: translateX(-50%) !important;
-        width: calc(var(--ug-frame-w, 390px) - 6px) !important;
-        bottom: calc(var(--ug-frame-bottom, 12px) + 3px) !important;
-        border-radius: 0 0 23px 23px !important;
-    }
-
-    html[data-ug-mode="mobile"][data-ug-preview="desktop-mobile"] [data-ug-mi-scrollbox="true"],
-    html[data-ug-mode="mobile"][data-ug-preview="desktop-mobile"] [data-ug-mt-viewport="true"] {
-        left: 50% !important;
-        right: auto !important;
-        transform: translateX(-50%) !important;
-        width: calc(var(--ug-frame-w, 390px) - 6px) !important;
-        max-width: calc(var(--ug-frame-w, 390px) - 6px) !important;
-    }
-
-    html[data-ug-mode="mobile"][data-ug-preview="desktop-mobile"] [data-ug-mi-scrollbox="true"] {
-        top: calc(var(--ug-frame-top, 12px) + 3px + var(--mi-top-h, 62px)) !important;
-        bottom: calc(var(--ug-frame-bottom, 12px) + 3px + var(--mi-dock-h, 148px)) !important;
-    }
-
-    html[data-ug-mode="mobile"][data-ug-preview="desktop-mobile"] [data-ug-mt-viewport="true"] {
-        top: calc(var(--ug-frame-top, 12px) + 3px + var(--mt-top-h, 96px)) !important;
-        bottom: calc(var(--ug-frame-bottom, 12px) + 3px + var(--mt-bot-h, 66px)) !important;
-    }
-
-    html[data-ug-mode="mobile"][data-ug-preview="desktop-mobile"] #ug-mtest-backdrop {
-        left: 50% !important;
-        right: auto !important;
-        transform: translateX(-50%) !important;
-        width: calc(var(--ug-frame-w, 390px) - 6px) !important;
-        top: calc(var(--ug-frame-top, 12px) + 3px) !important;
-        bottom: calc(var(--ug-frame-bottom, 12px) + 3px) !important;
-        border-radius: 23px !important;
-    }
-
-    html[data-ug-mode="mobile"][data-ug-preview="desktop-mobile"] #ug-mtest-sheet {
-        top: calc(var(--ug-frame-top, 12px) + 3px) !important;
-        bottom: calc(var(--ug-frame-bottom, 12px) + 3px) !important;
-        right: calc(50% - (var(--ug-frame-w, 390px) / 2) + 3px) !important;
-        width: calc(var(--ug-frame-w, 390px) * 0.86) !important;
-        max-width: 340px !important;
-        border-radius: 0 23px 23px 0 !important;
-    }
-
-    html[data-ug-mode="mobile"][data-ug-preview="desktop-mobile"] #ug-mtest-pause-modal {
-        max-width: calc(var(--ug-frame-w, 390px) - 34px) !important;
-    }
 </style>
 <script id="ug-display-mode-engine">
 (function () {
     "use strict";
     var params = new URLSearchParams(window.location.search);
     var urlForce = (params.get("mode") || "").toLowerCase();
-
-    function isActualMobileDevice() {
-        var ua = navigator.userAgent || "";
-        return /Android|iPhone|iPod|Windows Phone|Mobile/i.test(ua);
-    }
-
     function detectSmartMode() {
         if (urlForce === "desktop" || urlForce === "mobile") return urlForce;
         var w = window.innerWidth || document.documentElement.clientWidth || 1024;
-        if (w <= 768 || (isActualMobileDevice() && w <= 900)) return "mobile";
+        var ua = navigator.userAgent || "";
+        var isMobileUa = /Android|iPhone|iPod|Windows Phone|Mobile/i.test(ua);
+        if (w <= 768 || (isMobileUa && w <= 900)) return "mobile";
         return "desktop";
     }
-
-    function updateDesktopMobilePreviewMetrics(active) {
-        var html = document.documentElement;
-        var vw = window.innerWidth || html.clientWidth || 1024;
-        var vh = window.innerHeight || html.clientHeight || 768;
-        var isDesktopPreview = (active === "mobile" && !isActualMobileDevice() && vw > 540);
-
-        if (isDesktopPreview) {
-            var padY = vh < 680 ? 12 : 24;
-            var padX = 24;
-            var availH = Math.max(360, vh - padY);
-            var availW = Math.max(320, vw - padX);
-            /* यथार्थवादी स्मार्टफोन अनुपात (~9:19.5) जो कभी स्क्रीन से बाहर नहीं कटेगा */
-            var frameH = Math.min(844, availH);
-            var frameW = Math.min(412, availW, Math.max(340, Math.round(frameH * 0.50)));
-            var frameTop = Math.max(6, Math.floor((vh - frameH) / 2));
-
-            html.setAttribute("data-ug-preview", "desktop-mobile");
-            html.style.setProperty("--ug-frame-w", frameW + "px");
-            html.style.setProperty("--ug-frame-h", frameH + "px");
-            html.style.setProperty("--ug-frame-top", frameTop + "px");
-            html.style.setProperty("--ug-frame-bottom", Math.max(6, vh - frameTop - frameH) + "px");
-            window.__UG_DESKTOP_MOBILE_PREVIEW__ = true;
-            window.__UG_EFFECTIVE_MOBILE_WIDTH__ = frameW;
-        } else {
-            html.removeAttribute("data-ug-preview");
-            html.style.removeProperty("--ug-frame-w");
-            html.style.removeProperty("--ug-frame-h");
-            html.style.removeProperty("--ug-frame-top");
-            html.style.removeProperty("--ug-frame-bottom");
-            window.__UG_DESKTOP_MOBILE_PREVIEW__ = false;
-            window.__UG_EFFECTIVE_MOBILE_WIDTH__ = vw;
-        }
-    }
-
     function applySmartAutoMode() {
         try {
             var active = detectSmartMode();
@@ -166,8 +38,6 @@
                 document.body.classList.toggle("ug-mode-mobile", active === "mobile");
                 document.body.classList.toggle("ug-mode-desktop", active === "desktop");
             }
-            updateDesktopMobilePreviewMetrics(active);
-
             var vp = document.querySelector('meta[name="viewport"]');
             if (vp) {
                 if (urlForce === "desktop") {
@@ -183,7 +53,6 @@
             }
         } catch (e) {}
     }
-
     window.__UG_APPLY_DISPLAY_MODE__ = applySmartAutoMode;
     applySmartAutoMode();
     document.addEventListener("DOMContentLoaded", applySmartAutoMode);
@@ -705,7 +574,7 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
         font-size: 12px !important;
     }
 
-    html[data-ug-mode="mobile"][data-ug-mobile-admin-active="true"] #ug-madmin-shell {
+    html[data-ug-mode="mobile"][data-ug-mobile-admin-active="true"][data-ug-admin-verified="true"] #ug-madmin-shell {
         display: block !important;
         font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
         color: var(--madmin-text);
@@ -1515,172 +1384,59 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
             logoutEl: null
         };
 
+        /* Fail closed: Admin Studio is enabled ONLY by the live app RBAC object.
+           Visible labels, page sections, local/session storage hints, and old
+           confirmed-session timestamps are never accepted as admin proof. */
         if (isCloudLoaderVisible()) {
             state.lastConfirmedAdminTs = 0;
             return result;
         }
 
         var container = document.body || document.getElementById("root");
-        if (!container) return result;
-        if (isLiveExamTakingScreen(container)) return result;
+        if (!container || isLiveExamTakingScreen(container)) {
+            state.lastConfirmedAdminTs = 0;
+            return result;
+        }
 
-        result.logoutEl = findRealLogoutButton(container);
-
-        // --- Signal A: Global RBAC / Auth Runtime Objects ---
-        var rbacConfirmed = false;
-        var rbacDenied = false;
         try {
             var rbac = window.__UG_ADMIN_RBAC__;
-            if (rbac && typeof rbac === "object") {
-                var rRole = "";
-                try {
-                    rRole = String(
-                        (typeof rbac.getRole === "function" ? rbac.getRole() : "") ||
-                        rbac.role || rbac.currentRole || rbac.activeRole || rbac.userRole || ""
-                    ).toLowerCase();
-                } catch (e2) {}
-
-                var rIsMaster = safeReadFlag(rbac, "isMasterAdmin") || safeReadFlag(rbac, "masterAdmin") || safeReadFlag(rbac, "isMaster") || /master|super|owner/.test(rRole);
-                var rIsSub = safeReadFlag(rbac, "isSubAdmin") || safeReadFlag(rbac, "isGrantedAdmin") || /sub|grant/.test(rRole);
-                var rIsAdmin = rIsMaster || rIsSub || safeReadFlag(rbac, "isAdmin") || safeReadFlag(rbac, "hasAdminAccess") || safeReadFlag(rbac, "adminMode") || /admin/.test(rRole);
-
-                if (rIsAdmin) {
-                    rbacConfirmed = true;
-                    result.score += 6;
-                    result.roleLabel = rIsMaster ? "Master Admin" : (rIsSub ? "Sub Admin" : "Admin");
-                    if (rbac.email || rbac.adminEmail || rbac.userName) {
-                        result.identity = String(rbac.email || rbac.adminEmail || rbac.userName);
-                    }
-                } else if (rRole && /(student|user|guest|none)/.test(rRole)) {
-                    rbacDenied = true;
-                }
-            }
-        } catch (e) {}
-
-        // --- Signal B: Safe Session / Local Storage Inspection ---
-        var storageAdminHint = false;
-        var storageStudentHint = false;
-        try {
-            var stores = [window.sessionStorage, window.localStorage];
-            for (var sIdx = 0; sIdx < stores.length; sIdx++) {
-                var st = stores[sIdx];
-                if (!st) continue;
-                for (var kIdx = 0; kIdx < st.length; kIdx++) {
-                    var key = String(st.key(kIdx) || "");
-                    if (!key || key.indexOf(PREF_PREFIX) === 0) continue;
-                    var lk = key.toLowerCase();
-                    if (!/(admin|auth|user|role|session|login|ug_|mode|account)/i.test(lk)) continue;
-                    var rawVal = String(st.getItem(key) || "");
-                    if (!rawVal || rawVal.length > 5000) continue;
-                    var lv = rawVal.toLowerCase();
-
-                    if (/(master_?admin|super_?admin|"ismasteradmin"\s*:\s*true)/i.test(lv)) {
-                        storageAdminHint = true;
-                        result.roleLabel = "Master Admin";
-                    } else if (/(sub_?admin|granted_?admin|"role"\s*:\s*"(?:master_?|super_?|sub_?|granted_?)?admin"|"usertype"\s*:\s*"admin"|"isadmin"\s*:\s*true|"admin"\s*:\s*true)/i.test(lv) ||
-                        (/admin/i.test(lk) && /^(true|1|yes|active|logged_in|admin|master)$/i.test(lv.trim()))) {
-                        storageAdminHint = true;
-                    } else if (/"role"\s*:\s*"student"|"usertype"\s*:\s*"student"/i.test(lv)) {
-                        storageStudentHint = true;
-                    }
-
-                    if (storageAdminHint && rawVal.indexOf("@") !== -1) {
-                        var em = rawVal.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-                        if (em && em[0]) result.identity = em[0];
-                    }
-                }
-            }
-        } catch (e) {}
-
-        // --- Signal C: Full-Document Visible DOM Verification (NO 450-node truncation!) ---
-        var strongHeadersRx = /\b(admin\s*panel|admin\s*dashboard|master\s*admin|super\s*admin|sub[\s-]*admin|granted\s*admin|admin\s*control|admin\s*controls|admin\s*portal|admin\s*workspace|admin\s*console|admin\s*studio|admin\s*mode|admin\s*id|owner\s*panel)\b|(एडमिन\s*पैनल|एडमिन\s*डैशबोर्ड|मास्टर\s*एडमिन|सब\s*एडमिन|एडमिन\s*कंट्रोल|एडमिन\s*मोड)/i;
-        var exactAdminBadgeRx = /^(?:master\s*admin|super\s*admin|sub[\s-]*admin|granted\s*admin|admin\s*mode|admin\s*panel|admin|एडमिन)$/i;
-        var loginExcludeRx = /(admin\s*login|login\s*as\s*admin|enter\s*admin|student\s*login|एडमिन\s*लॉगिन|लॉगिन\s*करें)/i;
-        var adminActionPatterns = [
-            { id: "add_q", rx: /(add\s*question|new\s*question|question\s*bank|upload\s*question|edit\s*question|प्रश्न\s*जोड़ें|क्वेश्चन\s*बैंक)/i },
-            { id: "create_test", rx: /(create\s*test|new\s*test|add\s*test|manage\s*test|edit\s*test|delete\s*test|publish\s*test|test\s*manager|टेस्ट\s*बनाएं|नया\s*टेस्ट)/i },
-            { id: "users", rx: /(manage\s*user|user\s*management|all\s*users|student\s*list|all\s*students|total\s*users|block\s*user|यूजर\s*मैनेजमेंट|छात्र\s*सूची)/i },
-            { id: "bulk", rx: /(bulk\s*upload|import\s*json|import\s*csv|export\s*data|cloud\s*uploader|बल्क\s*अपलोड)/i },
-            { id: "access", rx: /(grant\s*admin|admin\s*permission|access\s*control|sub[\s-]*admin|role\s*manager|admin\s*rights|एडमिन\s*परमिशन)/i },
-            { id: "payments", rx: /(payment\s*request|approve\s*payment|pending\s*approval|subscription\s*manage|payment\s*approval|पेमेंट\s*अप्रूव)/i },
-            { id: "batches", rx: /(manage\s*batch|manage\s*course|create\s*batch|category\s*manager|manage\s*subject|बैच\s*मैनेज)/i },
-            { id: "results", rx: /(all\s*results|student\s*results|revenue|leaderboard\s*manage|सभी\s*रिजल्ट)/i },
-            { id: "notices", rx: /(send\s*notice|broadcast|manage\s*banner|announcement|नोटिस\s*भेजें)/i }
-        ];
-
-        var matchedActions = {};
-        var matchedActionCount = 0;
-        var hasStrongHeader = false;
-        var scanNodes = container.querySelectorAll("h1, h2, h3, h4, header, nav, button, a, [role='tab'], [role='button'], [class*='badge' i], [class*='admin' i], [id*='admin' i], span");
-
-        for (var n = 0; n < scanNodes.length; n++) {
-            var el = scanNodes[n];
-            if (!isElementVisible(el)) continue;
-
-            var sig = (String(el.id || "") + " " + String(el.className || "")).toLowerCase();
-            if (/(admin-panel|admin-dashboard|master-admin|admin-workspace|admin-console|admin-portal)/.test(sig) && !/login/.test(sig)) {
-                hasStrongHeader = true;
-                result.score += 3;
+            if (!rbac || typeof rbac !== "object") {
+                state.lastConfirmedAdminTs = 0;
+                return result;
             }
 
-            if (el.tagName === "SPAN" && el.children.length > 0) continue;
+            var role = "";
+            try {
+                role = String(
+                    (typeof rbac.getRole === "function" ? rbac.getRole() : "") ||
+                    rbac.role || rbac.currentRole || rbac.activeRole || rbac.userRole || ""
+                ).trim().toLowerCase().replace(/[\s-]+/g, "_");
+            } catch (roleError) {}
 
-            var txt = stripEmojis(cleanLabel(el.innerText || el.textContent || ""));
-            if (!txt || txt.length > 140) continue;
-            if (loginExcludeRx.test(txt)) continue;
+            var isMasterAdmin = safeReadFlag(rbac, "isMasterAdmin") ||
+                safeReadFlag(rbac, "masterAdmin") ||
+                safeReadFlag(rbac, "isMaster") ||
+                /^(master_admin|super_admin|owner)$/.test(role);
+            var isAdmin = isMasterAdmin || safeReadFlag(rbac, "isAdmin") ||
+                /^(admin|administrator)$/.test(role);
 
-            if (!hasStrongHeader) {
-                if (strongHeadersRx.test(txt) || (exactAdminBadgeRx.test(txt) && (el.closest("header, nav") || /badge|pill|role|admin/i.test(sig)))) {
-                    hasStrongHeader = true;
-                    result.score += 3.5;
-                    if (/master\s*admin|मास्टर\s*एडमिन/i.test(txt)) result.roleLabel = "Master Admin";
-                    else if (/sub[\s-]*admin|granted\s*admin|सब\s*एडमिन/i.test(txt)) result.roleLabel = "Sub Admin";
-                }
+            /* Explicit student/user/guest roles always deny access, even if
+               stale admin hints or a previous session existed in the page. */
+            var isStudentOrGuest = /^(student|user|guest|none|anonymous)$/.test(role);
+            if (!isAdmin || isStudentOrGuest) {
+                state.lastConfirmedAdminTs = 0;
+                return result;
             }
 
-            for (var p = 0; p < adminActionPatterns.length; p++) {
-                var pat = adminActionPatterns[p];
-                if (!matchedActions[pat.id] && pat.rx.test(txt)) {
-                    matchedActions[pat.id] = true;
-                    matchedActionCount++;
-                    result.score += 1.5;
-                }
-            }
-        }
-
-        var hasAdminPanelSignals = hasStrongHeader || matchedActionCount >= 2 || rbacConfirmed;
-        if (isLoginGateVisible(container, hasAdminPanelSignals)) {
-            state.lastConfirmedAdminTs = 0;
-            return result;
-        }
-
-        if (rbacDenied && result.score < 5) {
-            state.lastConfirmedAdminTs = 0;
-            return result;
-        }
-
-        if (rbacConfirmed && (hasStrongHeader || matchedActionCount >= 1 || result.logoutEl)) {
             result.isAdmin = true;
-        } else if (hasStrongHeader && (matchedActionCount >= 1 || result.logoutEl || storageAdminHint)) {
-            result.isAdmin = true;
-        } else if (matchedActionCount >= 2 && (result.logoutEl || storageAdminHint || !storageStudentHint)) {
-            result.isAdmin = true;
-        } else if (matchedActionCount >= 3) {
-            result.isAdmin = true;
-        } else if (storageAdminHint && !storageStudentHint && result.logoutEl && hasStrongHeader) {
-            result.isAdmin = true;
-        }
-
-        /* Keep session stable if an Admin opens a temporary modal/editor inside Admin panel */
-        if (result.isAdmin) {
+            result.roleLabel = isMasterAdmin ? "Master Admin" : "Admin";
+            result.identity = String(rbac.email || rbac.adminEmail || rbac.userName || "Verified Admin ID");
+            result.logoutEl = findRealLogoutButton(container);
+            result.score = 10;
             state.lastConfirmedAdminTs = Date.now();
-        } else if (state.lastConfirmedAdminTs > 0 && !rbacDenied && !storageStudentHint) {
-            var hasOpenDialog = !!container.querySelector('[role="dialog"], .modal');
-            if (hasOpenDialog && (Date.now() - state.lastConfirmedAdminTs) < 120000) {
-                result.isAdmin = true;
-                result.roleLabel = state.adminRoleLabel;
-                result.identity = state.adminIdentity;
-            }
+        } catch (e) {
+            state.lastConfirmedAdminTs = 0;
+            result.isAdmin = false;
         }
 
         return result;
@@ -3225,6 +2981,7 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
 
         setCssEnabled(true);
         document.documentElement.removeAttribute("data-ug-mobile-admin-paused");
+        document.documentElement.setAttribute("data-ug-admin-verified", "true");
         document.documentElement.setAttribute("data-ug-mobile-admin-active", "true");
         if (document.body) document.body.setAttribute("data-ug-mobile-admin-active", "true");
 
@@ -3247,6 +3004,7 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
         state.active = false;
 
         document.documentElement.removeAttribute("data-ug-mobile-admin-active");
+        document.documentElement.removeAttribute("data-ug-admin-verified");
         document.documentElement.removeAttribute("data-ug-madmin-theme");
         document.documentElement.removeAttribute("data-ug-madmin-density");
         document.documentElement.removeAttribute("data-ug-madmin-subbar-collapsed");
@@ -3742,8 +3500,8 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
     /* Testbook 3-Column Exam Info Strip (Questions | Duration | Marks) */
     #ug-mintro-meta {
         display: none;
-        grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
-        gap: 6px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 7px;
         padding: 0 12px 10px;
     }
 
@@ -3882,8 +3640,8 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
        2. TESTBOOK-STYLE LIVE EXAM INTERFACE (ALL TESTS ON MOBILE — 0% DATA CHANGE)
        ======================================================================= */
     html[data-ug-mode="mobile"][data-ug-modern-test="true"] {
-        --mt-top-h: 96px;
-        --mt-bot-h: 66px;
+        --mt-top-h: 77px;
+        --mt-bot-h: 62px;
     }
 
     html[data-ug-mode="mobile"][data-ug-modern-test="true"] body {
@@ -3918,6 +3676,43 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
         max-width: 100vw !important;
         min-width: 0 !important;
         overflow-x: hidden !important;
+    }
+
+    /* Force Desktop-width wrappers to 100% Mobile Screen Width (0% effect on Desktop) */
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"],
+    html[data-ug-mode="mobile"][data-ug-modern-intro="true"] {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+    }
+
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] #root > div,
+    html[data-ug-mode="mobile"][data-ug-modern-intro="true"] #root > div {
+        width: 100% !important;
+        max-width: 100vw !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Prevent horizontal clipping on Desktop min-width / split-grid classes inside Mobile Test */
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] #root [class*="min-w-"],
+    html[data-ug-mode="mobile"][data-ug-modern-intro="true"] #root [class*="min-w-"] {
+        min-width: 0 !important;
+    }
+
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] #root [class*="grid-cols-"],
+    html[data-ug-mode="mobile"][data-ug-modern-intro="true"] #root [class*="grid-cols-"] {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    /* Testbook-style clean instruction typography & spacing */
+    html[data-ug-mode="mobile"][data-ug-modern-intro="true"] #root h1,
+    html[data-ug-mode="mobile"][data-ug-modern-intro="true"] #root h2,
+    html[data-ug-mode="mobile"][data-ug-modern-intro="true"] #root h3 {
+        font-size: 16px !important;
+        font-weight: 800 !important;
+        margin-bottom: 10px !important;
+        line-height: 1.35 !important;
     }
 
     /* Reflow fixed/h-screen desktop CBT wrappers to fit 100% cleanly between Topbar & Bottom Dock */
@@ -4114,6 +3909,80 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
         overflow: hidden !important;
         opacity: 0 !important;
         pointer-events: none !important;
+    }
+
+    /* Compact professional CBT header: keep exam details visible without wasting screen space */
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] #ug-mtest-topbar {
+        --mt-compact-head-h: 77px;
+    }
+
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] .ug-tb-row1 {
+        height: 43px;
+        padding: 0 9px;
+        gap: 6px;
+    }
+
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] .ug-tb-row2 {
+        height: 31px;
+        padding: 0 10px;
+        gap: 5px;
+    }
+
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] .ug-tb-pause-btn,
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] .ug-mt-icon-btn {
+        height: 30px;
+        min-width: 30px;
+        border-radius: 8px;
+        padding-left: 7px;
+        padding-right: 7px;
+    }
+
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] .ug-tb-pause-btn {
+        width: 30px;
+    }
+
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] .ug-tb-timer-val {
+        font-size: 13px;
+    }
+
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] .ug-tb-test-name {
+        font-size: 9.5px;
+        margin-top: 0;
+    }
+
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] .ug-tb-qnum-pill {
+        font-size: 12px;
+    }
+
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] .ug-tb-qwatch,
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] .ug-tb-marks {
+        font-size: 10px;
+        padding-top: 1px;
+        padding-bottom: 1px;
+    }
+
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] .ug-tb-mini-act {
+        width: 25px;
+        height: 25px;
+        font-size: 11px;
+    }
+
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] #ug-mtest-progress-fill,
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] .ug-mt-progress-track {
+        height: 2px;
+    }
+
+    /* A visible grab cue; the question palette can be dismissed with a right swipe */
+    html[data-ug-mode="mobile"][data-ug-modern-test="true"] #ug-mtest-sheet::before {
+        content: "";
+        display: block;
+        width: 38px;
+        height: 4px;
+        flex: 0 0 4px;
+        margin: 8px auto 0;
+        border-radius: 99px;
+        background: var(--mt-muted);
+        opacity: 0.35;
     }
 
     /* Testbook Two-Tier Top Header Bar */
@@ -5133,22 +5002,21 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
         var refs = state.refs;
         refs.introBackBtn = null;
         refs.introProceedBtn = null;
-        refs.introProceedLabel = "Start Test";
+        refs.introProceedLabel = "Agree & Continue";
         refs.introCheckbox = null;
         refs.introLangSelect = null;
         refs.introLangBtns = [];
 
-        var snippet = clean(root.innerText || "").slice(0, 7500);
-        var vw = window.__UG_EFFECTIVE_MOBILE_WIDTH__ || window.innerWidth || document.documentElement.clientWidth || 375;
+        var snippet = clean(root.innerText || "").slice(0, 6500);
 
-        /* 1. टेस्ट का नाम और उपलब्ध जानकारी निकालें (केवल जो पहले से मौजूद है) */
-        state.introMeta.title = "Test Instructions";
+        /* 1. Extract Exam Title & Metadata (Questions, Duration, Marks) */
+        state.introMeta.title = "General Instructions";
         var headings = root.querySelectorAll("h1, h2, h3, header span, header div");
         for (var h = 0; h < Math.min(headings.length, 45); h++) {
             var hel = headings[h];
             if (!isVisible(hel, true)) continue;
             var ht = clean(hel.textContent || "");
-            if (ht.length >= 4 && ht.length <= 80) {
+            if (ht.length >= 4 && ht.length <= 75) {
                 if (/(rrb|pyq|alp|ntpc|group\s*d|rpf|je|cbt|mock|test|paper|shift|set|exam|टेस्ट|परीक्षा)/i.test(ht) &&
                     !/^(?:general\s*instructions|instructions|सामान्य\s*निर्देश)$/i.test(ht)) {
                     state.introMeta.title = ht;
@@ -5160,17 +5028,12 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
         var qm = snippet.match(/(?:total\s*)?(?:questions?|प्रश्नों?|प्रश्न)\s*[:\-–]?\s*(\d{1,3})\b|\b(\d{1,3})\s*(?:questions?|qs|प्रश्न)\b/i);
         var dm = snippet.match(/(?:duration|time|समय)\s*[:\-–]?\s*(\d{1,3})\s*(?:mins?|minutes?|मिनट)|\b(\d{1,3})\s*(?:mins?|minutes?|मिनट)\b/i);
         var mm = snippet.match(/(?:max(?:imum)?\s*marks?|total\s*marks?|अधिकतम\s*अंक|कुल\s*अंक)\s*[:\-–]?\s*(\d{1,3}(?:\.\d+)?)\b|\b(\d{1,3})\s*(?:marks?|अंक)\b/i);
-        var posM = snippet.match(/\+(\d+(?:\.\d+)?)\s*(?:marks?|अंक)?/i);
-        var negM = snippet.match(/(?:negative|नेगेटिव|-)\s*(\d+(?:\.\d+)?|\d+\/\d+)/i);
 
         state.introMeta.questions = qm ? ((qm[1] || qm[2]) + " Qs") : "";
         state.introMeta.duration = dm ? ((dm[1] || dm[2]) + " Mins") : "";
         state.introMeta.marks = mm ? ((mm[1] || mm[2]) + " Marks") : "";
-        state.introMeta.marking = (posM || negM)
-            ? ((posM ? ("+" + posM[1]) : "+1") + " / " + (negM ? ("-" + negM[1].replace(/^-/, "")) : "0"))
-            : "";
 
-        /* 2. Declaration Checkbox खोजें */
+        /* 2. Find Declaration Checkbox */
         var cbs = root.querySelectorAll('input[type="checkbox"]');
         for (var c = 0; c < cbs.length; c++) {
             var cb = cbs[c];
@@ -5178,13 +5041,13 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
             refs.introCheckbox = cb;
             var lblWrap = cb.closest("label") || cb.parentElement;
             var cTxt = clean(lblWrap ? lblWrap.textContent : "");
-            if (cTxt && cTxt.length >= 10 && cTxt.length <= 260) {
+            if (cTxt && cTxt.length >= 12 && cTxt.length <= 240) {
                 state.introMeta.consentText = cTxt;
             }
             break;
         }
 
-        /* 3. Default Language Select खोजें */
+        /* 3. Find Default Language Select or Language Buttons */
         var selects = root.querySelectorAll("select");
         for (var s = 0; s < selects.length; s++) {
             var sel = selects[s];
@@ -5196,7 +5059,7 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
             }
         }
 
-        /* 4. Back, Language और असली Start / Proceed बटन खोजें (FIXED LOOP) */
+        /* 4. Find Back Button, Language Buttons & Primary Proceed / Ready / Start Test Button */
         var btns = root.querySelectorAll("button, a, [role='button'], input[type='submit'], input[type='button']");
         var bestProceedScore = 0;
         for (var b = 0; b < btns.length; b++) {
@@ -5210,16 +5073,19 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
                 continue;
             }
 
-            if (/^(?:english|hindi|हिंदी|हिन्दी|en\s*\/\s*hi|bilingual)$/i.test(lbl)) {
+            if (/^(?:english|hindi|हिंदी|हिन्दी|bilingual|en|hi)$/i.test(lbl)) {
                 refs.introLangBtns.push({ label: lbl, el: btn });
                 continue;
             }
 
             var pScore = 0;
-            if (/(i\s*am\s*ready\s*to\s*begin|ready\s*to\s*begin|मैं\s*शुरू\s*करने\s*के\s*लिए\s*तैयार)/i.test(lbl)) pScore = 10;
-            else if (/(agree\s*(?:&|and)\s*(?:continue|start)|start\s*(?:the\s*)?(?:test|exam)|begin\s*(?:the\s*)?(?:test|exam)|टेस्ट\s*शुरू\s*करें|परीक्षा\s*शुरू\s*करें)/i.test(lbl)) pScore = 9;
-            else if (/(proceed\s*to\s*test|continue\s*to\s*test|resume\s*test|attempt\s*now|^start$)/i.test(lbl)) pScore = 7;
-            else if (/(^proceed$|^continue$|^next$|आगे\s*बढ़ें)/i.test(lbl)) pScore = 5;
+            if (/(i\s*am\s*ready\s*to\s*begin|ready\s*to\s*begin|agree\s*(?:&|and)\s*continue|agree\s*(?:&|and)\s*start|मैं\s*शुरू\s*करने\s*के\s*लिए\s*तैयार)/i.test(lbl)) {
+                pScore = 4;
+            } else if (/(start\s*(?:the\s*)?(?:test|exam)|begin\s*(?:the\s*)?(?:test|exam)|proceed\s*to\s*test|continue\s*to\s*test|टेस्ट\s*शुरू\s*करें|परीक्षा\s*शुरू\s*करें)/i.test(lbl)) {
+                pScore = 3;
+            } else if (/(^proceed$|^continue$|^next$|आगे\s*बढ़ें|शुरू\s*करें)/i.test(lbl)) {
+                pScore = 2;
+            }
 
             if (pScore > bestProceedScore) {
                 bestProceedScore = pScore;
@@ -5228,26 +5094,28 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
             }
         }
 
-        /* 5. Instruction Modal/Wrapper को मोबाइल स्क्रीन के अंदर सुरक्षित Reflow करना */
+        /* 5. Detect if Instructions live inside a fixed modal overlay or rigid desktop wrapper
+              and reflow every ancestor so 100% of instructions fit inside the mobile screen */
         var anchorEl = root.querySelector("ul, ol, table") || refs.introProceedBtn || refs.introCheckbox || root.querySelector("h1, h2, h3");
         if (anchorEl) {
             var cur = anchorEl.parentElement;
             var depth = 0;
             var foundFixedScroll = false;
+            var vw = window.innerWidth || document.documentElement.clientWidth || 375;
             while (cur && cur !== document.body && cur !== document.documentElement && depth < 12) {
                 depth++;
                 if (cur === root) break;
                 try {
                     var st = window.getComputedStyle(cur);
                     var rect = cur.getBoundingClientRect();
-                    if (!foundFixedScroll && st.position === "fixed" && (rect.height >= window.innerHeight * 0.45 || cur.scrollHeight > window.innerHeight * 0.45)) {
+                    if (!foundFixedScroll && st.position === "fixed" && (rect.height >= window.innerHeight * 0.55 || cur.scrollHeight > window.innerHeight * 0.55)) {
                         cur.setAttribute("data-ug-mi-scrollbox", "true");
                         foundFixedScroll = true;
                     } else if (
                         st.overflow === "hidden" || st.overflowY === "hidden" ||
                         rect.width > vw + 2 || cur.scrollWidth > vw + 2 ||
                         (st.display === "flex" && st.flexDirection === "row" && rect.width >= vw * 0.8) ||
-                        (st.display === "grid" && (st.gridTemplateColumns || "").trim().split(/\s+/).length > 1)
+                        (st.display === "grid" && (st.gridTemplateColumns || "").split(" ").length > 1)
                     ) {
                         cur.setAttribute("data-ug-mi-flow", "true");
                     }
@@ -5256,7 +5124,7 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
             }
         }
 
-        /* 6. डुप्लीकेट Header/Footer को सुरक्षित छिपाना (असली React बटन live रहेंगे) */
+        /* 6. Safely tuck away duplicate raw top header and bottom action/checkbox bar while keeping React controls live */
         if (refs.introBackBtn) {
             var topBar = refs.introBackBtn.closest("header, nav") || refs.introBackBtn.parentElement;
             if (topBar && topBar !== root && topBar !== document.body &&
@@ -5291,13 +5159,24 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
             }
         }
 
-        /* 7. Instruction कंटेंट को Testbook कार्ड स्टाइल देना */
+        /* 7. Polish main instruction content container as a crisp Testbook card */
         var listEl = root.querySelector("ul, ol");
         if (listEl && isVisible(listEl)) {
             var card = listEl.closest("section, article, main, [class*='card' i], [class*='rounded'], div");
             if (card && card !== root && card !== document.body && !card.getAttribute("data-ug-mi-scrollbox")) {
                 card.setAttribute("data-ug-mi-card", "true");
             }
+        }
+    }
+
+    function safeScanIntroScreen() {
+        var prevGuard = state.isMutatingOwnDom;
+        state.isMutatingOwnDom = true;
+        try {
+            scanAndTagIntroScreen();
+        } catch (e) {
+        } finally {
+            state.isMutatingOwnDom = prevGuard;
         }
     }
 
@@ -5339,7 +5218,7 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
         refs.subjectBtns = [];
 
         var visibleTxt = clean(root.innerText || "").slice(0, 8000);
-        var vw = window.__UG_EFFECTIVE_MOBILE_WIDTH__ || window.innerWidth || document.documentElement.clientWidth || 375;
+        var vw = window.innerWidth || document.documentElement.clientWidth || 375;
 
         /* 1. Extract Test Title */
         var headings = root.querySelectorAll("h1, h2, h3, header span, header div");
@@ -5760,7 +5639,6 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
             '    <div class="ug-tb-qinfo-left">',
             '      <span id="ug-mt-qbadge" class="ug-tb-qnum-pill">Q. 1</span>',
             '      <span id="ug-mt-qwatch" class="ug-tb-qwatch"><i class="fa-solid fa-stopwatch" style="font-size:10px;"></i><span>00:00</span></span>',
-            '<span id="ug-mt-sec-badge" class="ug-tb-qwatch" style="display:none;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>',
             '    </div>',
             '    <div class="ug-tb-qinfo-right">',
             '      <span id="ug-mt-marks" class="ug-tb-marks"><span class="ug-tb-mark-pos">+1</span><span style="opacity:0.35;">|</span><span class="ug-tb-mark-neg">-0.33</span></span>',
@@ -5841,7 +5719,6 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
             '    <div id="ug-mi-meta-q" class="ug-mi-meta-pill"><i class="fa-regular fa-circle-question"></i><span>--</span></div>',
             '    <div id="ug-mi-meta-t" class="ug-mi-meta-pill"><i class="fa-regular fa-clock"></i><span>--</span></div>',
             '    <div id="ug-mi-meta-m" class="ug-mi-meta-pill"><i class="fa-solid fa-award"></i><span>--</span></div>',
-            '    <div id="ug-mi-meta-s" class="ug-mi-meta-pill" style="display:none;"><i class="fa-solid fa-scale-balanced"></i><span>--</span></div>',
             '  </div>',
             '</header>',
 
@@ -5876,7 +5753,7 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
 
         if (btnBack) btnBack.addEventListener("click", function () {
             tapHaptic();
-            scanAndTagIntroScreen();
+            safeScanIntroScreen();
             if (state.refs.introBackBtn && document.contains(state.refs.introBackBtn)) {
                 try { state.refs.introBackBtn.click(); } catch (e) {}
                 setTimeout(function () { syncEngine(true); }, 200);
@@ -5911,7 +5788,7 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
 
         if (consentRow) consentRow.addEventListener("click", function () {
             tapHaptic();
-            scanAndTagIntroScreen();
+            safeScanIntroScreen();
             if (state.refs.introCheckbox && document.contains(state.refs.introCheckbox)) {
                 try { state.refs.introCheckbox.click(); } catch (e) {}
                 setTimeout(function () { renderIntroChrome(); }, 60);
@@ -5920,29 +5797,28 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
 
         if (ctaBtn) ctaBtn.addEventListener("click", function () {
             tapHaptic();
-            scanAndTagIntroScreen();
+            safeScanIntroScreen();
             state.attemptBoostUntil = Date.now() + 9000;
 
             var cb = state.refs.introCheckbox;
             var proceed = state.refs.introProceedBtn;
 
-            /* मूल सहमति (Consent Validation) का 100% पालन — ऑटो-बाईपास नहीं होगा */
+            /* If declaration checkbox exists and isn't checked yet, tick it smoothly first so user never gets stuck */
             if (cb && document.contains(cb) && !cb.checked) {
-                var cRow = document.getElementById("ug-mi-consent-row");
-                if (cRow) {
-                    cRow.style.outline = "2px solid var(--mt-rose)";
-                    cRow.style.borderRadius = "8px";
-                    setTimeout(function () { cRow.style.outline = ""; }, 1600);
-                }
-                showToast("कृपया पहले निर्देशों की सहमति (Checkbox) पर टिक करें");
+                try { cb.click(); } catch (e) {}
+                renderIntroChrome();
+                setTimeout(function () {
+                    safeScanIntroScreen();
+                    var p2 = state.refs.introProceedBtn || proceed;
+                    if (p2 && document.contains(p2)) {
+                        try { p2.click(); } catch (e) {}
+                        [120, 350, 750].forEach(function (d) { setTimeout(function () { syncEngine(true); }, d); });
+                    }
+                }, 90);
                 return;
             }
 
             if (proceed && document.contains(proceed)) {
-                if (proceed.disabled) {
-                    showToast("कृपया सभी अनिवार्य विकल्प चुनें");
-                    return;
-                }
                 try { proceed.click(); } catch (e) {}
                 [120, 350, 750].forEach(function (d) { setTimeout(function () { syncEngine(true); }, d); });
             } else {
@@ -5975,20 +5851,6 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
             if (metaQ) metaQ.textContent = state.introMeta.questions || "CBT Exam";
             if (metaT) metaT.textContent = state.introMeta.duration || "Timed";
             if (metaM) metaM.textContent = state.introMeta.marks || "PYQ";
-
-        var pillQ = document.getElementById("ug-mi-meta-q");
-        var pillT = document.getElementById("ug-mi-meta-t");
-        var pillM = document.getElementById("ug-mi-meta-m");
-        var pillS = document.getElementById("ug-mi-meta-s");
-        var metaS = pillS ? pillS.querySelector("span") : null;
-
-        if (pillQ) pillQ.style.display = state.introMeta.questions ? "flex" : "none";
-        if (pillT) pillT.style.display = state.introMeta.duration ? "flex" : "none";
-        if (pillM) pillM.style.display = state.introMeta.marks ? "flex" : "none";
-        if (pillS && metaS) {
-            pillS.style.display = state.introMeta.marking ? "flex" : "none";
-            metaS.textContent = state.introMeta.marking || "";
-        }
         } else {
             document.documentElement.removeAttribute("data-ug-mi-has-meta");
         }
@@ -6046,12 +5908,6 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
             ctaLabel.textContent = state.refs.introProceedLabel || "Agree & Continue";
         }
 
-        var ctaBtnEl = document.getElementById("ug-mi-cta-btn");
-        if (ctaBtnEl) {
-            var needsConsent = !!(state.refs.introCheckbox && document.contains(state.refs.introCheckbox) && !state.refs.introCheckbox.checked);
-            ctaBtnEl.style.opacity = needsConsent ? "0.62" : "1";
-        }
-
         /* Sync exact dynamic dock height so bottom instruction text is never obscured */
         if (dock) {
             var h = dock.getBoundingClientRect().height;
@@ -6060,11 +5916,11 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
             }
         }
 
-        var introTopEl = document.getElementById("ug-mintro-topbar");
-        if (introTopEl) {
-            var ith = introTopEl.getBoundingClientRect().height;
-            if (ith > 40) {
-                document.documentElement.style.setProperty("--mi-top-h", Math.ceil(ith) + "px");
+        var introTop = document.getElementById("ug-mintro-topbar");
+        if (introTop) {
+            var thIntro = introTop.getBoundingClientRect().height;
+            if (thIntro > 40) {
+                document.documentElement.style.setProperty("--mi-top-h", Math.ceil(thIntro) + "px");
             }
         }
     }
@@ -6267,27 +6123,60 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
             pauseModernUi();
         });
 
-        /* Smooth horizontal swipe navigation on Mobile Live Test */
+        /* Testbook-style question swipe: left = Save & Next (answers saved by the real CBT button), right = Previous.
+           Gestures are accepted only on the question content, never on controls or vertical scrolling. */
         if (!window.__UG_MT_SWIPE_BOUND__) {
             window.__UG_MT_SWIPE_BOUND__ = true;
-            var sx = 0, sy = 0;
+            var sx = 0, sy = 0, swipeStartTarget = null, lastSwipeAt = 0;
             document.addEventListener("touchstart", function (e) {
                 if (state.mode !== "live_test" || !state.swipeEnabled || state.sheetOpen || state.pauseModalOpen) return;
-                if (e.touches && e.touches.length === 1) {
-                    sx = e.touches[0].clientX;
-                    sy = e.touches[0].clientY;
-                }
+                if (!e.touches || e.touches.length !== 1) return;
+                var target = e.target;
+                if (!target || !target.closest || !target.closest("#root")) return;
+                if (target.closest("button, a, input, textarea, select, label, [role='button'], #ug-mtest-sheet, #ug-mtest-topbar, #ug-mtest-bottomdock")) return;
+                sx = e.touches[0].clientX;
+                sy = e.touches[0].clientY;
+                swipeStartTarget = target;
             }, { passive: true });
             document.addEventListener("touchend", function (e) {
-                if (state.mode !== "live_test" || !state.swipeEnabled || state.sheetOpen || state.pauseModalOpen) return;
-                if (!e.changedTouches || !e.changedTouches[0]) return;
+                if (state.mode !== "live_test" || !state.swipeEnabled || state.sheetOpen || state.pauseModalOpen || !swipeStartTarget) return;
+                if (!e.changedTouches || !e.changedTouches[0]) { swipeStartTarget = null; return; }
                 var dx = e.changedTouches[0].clientX - sx;
                 var dy = e.changedTouches[0].clientY - sy;
-                if (Math.abs(dx) > 78 && Math.abs(dx) > Math.abs(dy) * 1.8) {
-                    if (dx < 0) triggerExamControl("nextBtn");
-                    else triggerExamControl("prevBtn");
+                swipeStartTarget = null;
+                if (Math.abs(dx) < 68 || Math.abs(dx) < Math.abs(dy) * 1.55) return;
+                if (Date.now() - lastSwipeAt < 350) return;
+                lastSwipeAt = Date.now();
+                if (dx < 0) {
+                    /* This clicks the source test's Save & Next control, preserving its native answer-save logic. */
+                    if (!triggerExamControl("nextBtn")) showToast("Save & Next बटन उपलब्ध नहीं है");
+                } else {
+                    triggerExamControl("prevBtn", "यह पहला प्रश्न है");
                 }
             }, { passive: true });
+        }
+
+        /* Swipe the open question palette to the right to dismiss it. */
+        if (!window.__UG_MT_PALETTE_SWIPE_BOUND__) {
+            window.__UG_MT_PALETTE_SWIPE_BOUND__ = true;
+            var psx = 0, psy = 0;
+            var palette = shell.querySelector("#ug-mtest-sheet");
+            if (palette) {
+                palette.addEventListener("touchstart", function (e) {
+                    if (!state.sheetOpen || !e.touches || e.touches.length !== 1) return;
+                    psx = e.touches[0].clientX;
+                    psy = e.touches[0].clientY;
+                }, { passive: true });
+                palette.addEventListener("touchend", function (e) {
+                    if (!state.sheetOpen || !e.changedTouches || !e.changedTouches[0]) return;
+                    var pdx = e.changedTouches[0].clientX - psx;
+                    var pdy = e.changedTouches[0].clientY - psy;
+                    if (pdx > 65 && pdx > Math.abs(pdy) * 1.35) {
+                        tapHaptic();
+                        closeAllOverlays();
+                    }
+                }, { passive: true });
+            }
         }
     }
 
@@ -6426,15 +6315,6 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
 
         if (titleEl) titleEl.textContent = state.testTitle || "RRB PYQ Test";
         if (langBtn) langBtn.style.display = (state.refs.langBtn && document.contains(state.refs.langBtn)) ? "inline-flex" : "none";
-
-        var secBadge = document.getElementById("ug-mt-sec-badge");
-        if (secBadge) {
-            var activeSub = (state.refs.subjectBtns || []).find(function (s) {
-                return s.el && /\b(active|selected|bg-blue|bg-indigo|bg-cyan|border-b-2)\b/i.test(String(s.el.className || ""));
-            }) || (state.refs.subjectBtns || [])[0];
-            secBadge.style.display = activeSub ? "inline-flex" : "none";
-            if (activeSub) secBadge.textContent = activeSub.label;
-        }
 
         var counts = computePaletteCounts();
         var total = Math.max(state.totalQ, (state.refs.paletteBtns || []).length, state.currentQ);
