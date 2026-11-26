@@ -68,8 +68,6 @@
 <meta name="theme-color" content="#0f172a">
 <title>Unlimited Gyan Test</title>
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
-<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
-<link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
@@ -114,428 +112,6 @@ loadChainWithTimeout(["https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.p
 });
 })();
 </script>
-<script id="ug-login-stability-engine">
-(function () {
-    "use strict";
-    if (window.__UG_LOGIN_STABILITY_INSTALLED__) return;
-    window.__UG_LOGIN_STABILITY_INSTALLED__ = true;
-
-    // 1. React DOM Reconciliation Crash Shield (prevents login freeze when patches wrap password inputs or forms)
-    if (typeof Node === "function" && Node.prototype) {
-        var origRemoveChild = Node.prototype.removeChild;
-        Node.prototype.removeChild = function (child) {
-            if (child && child.parentNode !== this) {
-                if (window.__UG_UPDATE_ERRORS__) {
-                    window.__UG_UPDATE_ERRORS__.push("DOM Guard: skipped mismatched removeChild");
-                }
-                return child;
-            }
-            return origRemoveChild.apply(this, arguments);
-        };
-        var origInsertBefore = Node.prototype.insertBefore;
-        Node.prototype.insertBefore = function (newNode, referenceNode) {
-            if (referenceNode && referenceNode.parentNode !== this) {
-                if (window.__UG_UPDATE_ERRORS__) {
-                    window.__UG_UPDATE_ERRORS__.push("DOM Guard: skipped mismatched insertBefore");
-                }
-                return newNode;
-            }
-            return origInsertBefore.apply(this, arguments);
-        };
-    }
-
-    // 2. Universal Async Timeout Wrapper for Firebase Auth & Firestore calls
-    window.__UG_WRAP_ASYNC__ = function (fn, ms, label) {
-        if (typeof fn !== "function") return fn;
-        return function () {
-            var res;
-            try {
-                res = fn.apply(this, arguments);
-            } catch (syncErr) {
-                throw syncErr;
-            }
-            if (!res || typeof res.then !== "function") return res;
-            return new Promise(function (resolve, reject) {
-                var settled = false;
-                var timer = setTimeout(function () {
-                    if (settled) return;
-                    settled = true;
-                    var err = new Error("सर्वर से जवाब नहीं मिला (" + (label || "request") + " Timeout)। कृपया इंटरनेट जाँचें और दोबारा प्रयास करें।");
-                    err.code = "ug/timeout";
-                    reject(err);
-                }, ms || 18000);
-                res.then(function (val) {
-                    if (settled) return;
-                    settled = true;
-                    clearTimeout(timer);
-                    resolve(val);
-                }, function (err) {
-                    if (settled) return;
-                    settled = true;
-                    clearTimeout(timer);
-                    reject(err);
-                });
-            });
-        };
-    };
-
-    // 3. Safe Fetch Timeout Guard for Firebase Auth & one-shot Firestore REST endpoints (never interrupts streaming/long-polling channels)
-    if (typeof window.fetch === "function") {
-        var nativeFetch = window.fetch.bind(window);
-        window.fetch = function (input, init) {
-            var urlStr = "";
-            try {
-                urlStr = typeof input === "string" ? input : (input && input.url ? String(input.url) : "");
-            } catch (e) {}
-            var isAuthApi = /identitytoolkit\.googleapis\.com|securetoken\.googleapis\.com/i.test(urlStr);
-            var isFirestoreDocRest = /firestore\.googleapis\.com\/v1\/.*\/documents\//i.test(urlStr) && !/\/channel|Listen|Write/i.test(urlStr);
-            if (!isAuthApi && !isFirestoreDocRest) {
-                return nativeFetch(input, init);
-            }
-            if (typeof AbortController === "undefined") {
-                return nativeFetch(input, init);
-            }
-            var timeoutMs = isAuthApi ? 20000 : 16000;
-            var ctrl = new AbortController();
-            var opts = init ? Object.assign({}, init) : {};
-            var origSignal = opts.signal || (input && typeof input === "object" && input.signal ? input.signal : null);
-            if (origSignal) {
-                if (origSignal.aborted) {
-                    ctrl.abort();
-                } else {
-                    origSignal.addEventListener("abort", function () { try { ctrl.abort(); } catch (e) {} }, { once: true });
-                }
-            }
-            opts.signal = ctrl.signal;
-            var timedOut = false;
-            var t = setTimeout(function () {
-                timedOut = true;
-                try { ctrl.abort(); } catch (e) {}
-            }, timeoutMs);
-            return nativeFetch(input, opts).then(function (resp) {
-                clearTimeout(t);
-                return resp;
-            }, function (err) {
-                clearTimeout(t);
-                if (timedOut) {
-                    var tErr = new Error("Firebase सर्वर से समय पर जवाब नहीं मिला (Timeout)। इंटरनेट जाँचें।");
-                    tErr.code = "auth/network-request-failed";
-                    throw tErr;
-                }
-                throw err;
-            });
-        };
-    }
-
-    // 4. Safe XMLHttpRequest Timeout Guard for Auth REST endpoints only
-    if (typeof XMLHttpRequest !== "undefined" && XMLHttpRequest.prototype) {
-        var origXhrOpen = XMLHttpRequest.prototype.open;
-        var origXhrSend = XMLHttpRequest.prototype.send;
-        XMLHttpRequest.prototype.open = function (method, url) {
-            try { this.__ugUrl = String(url || ""); } catch (e) {}
-            return origXhrOpen.apply(this, arguments);
-        };
-        XMLHttpRequest.prototype.send = function () {
-            try {
-                if (this.__ugUrl && /identitytoolkit\.googleapis\.com|securetoken\.googleapis\.com/i.test(this.__ugUrl) && !this.timeout) {
-                    this.timeout = 22000;
-                }
-            } catch (e) {}
-            return origXhrSend.apply(this, arguments);
-        };
-    }
-
-    // 5. Compat Firebase SDK Safety Wrapper (if base website uses window.firebase compat SDK)
-    window.__UG_PATCH_COMPAT_FIREBASE__ = function () {
-        try {
-            var fb = window.firebase;
-            if (!fb || fb.__ugWrapped) return;
-            fb.__ugWrapped = true;
-            if (typeof fb.auth === "function") {
-                var a = fb.auth();
-                if (a) {
-                    ["signInWithEmailAndPassword", "createUserWithEmailAndPassword", "signInAnonymously", "sendPasswordResetEmail"].forEach(function (m) {
-                        if (typeof a[m] === "function" && !a[m].__ugSafe) {
-                            var wrapped = window.__UG_WRAP_ASYNC__(a[m].bind(a), 20000, m);
-                            wrapped.__ugSafe = true;
-                            a[m] = wrapped;
-                        }
-                    });
-                }
-            }
-            if (fb.firestore && fb.firestore.DocumentReference && fb.firestore.DocumentReference.prototype) {
-                var dp = fb.firestore.DocumentReference.prototype;
-                ["get", "set", "update", "delete"].forEach(function (m) {
-                    if (typeof dp[m] === "function" && !dp[m].__ugSafe) {
-                        var orig = dp[m];
-                        dp[m] = window.__UG_WRAP_ASYNC__(orig, 18000, "doc." + m);
-                        dp[m].__ugSafe = true;
-                    }
-                });
-            }
-        } catch (e) {}
-    };
-
-    // 6. Smart Login Anti-Freeze Watchdog & One-Click Recovery Bar
-    var activeLoginState = null;
-    var watchdogTimer = null;
-    var lastLoginErrorMsg = "";
-    var lastLoginErrorAt = 0;
-
-    function recordLoginErr(msg) {
-        if (!msg) return;
-        var s = String(msg);
-        if (/ResizeObserver|Script error\.?$/i.test(s)) return;
-        lastLoginErrorMsg = s.slice(0, 220);
-        lastLoginErrorAt = Date.now();
-    }
-    window.addEventListener("error", function (ev) { recordLoginErr(ev && ev.message); });
-    window.addEventListener("unhandledrejection", function (ev) {
-        var r = ev && ev.reason;
-        recordLoginErr(r && (r.message || r.code || String(r)));
-    });
-
-    function isVisibleEl(el) {
-        if (!el || !document.body || !document.body.contains(el)) return false;
-        try {
-            var r = el.getBoundingClientRect();
-            var cs = window.getComputedStyle(el);
-            return r.width > 0 && r.height > 0 && cs.display !== "none" && cs.visibility !== "hidden" && cs.opacity !== "0";
-        } catch (e) { return false; }
-    }
-
-    function hasVisiblePasswordOrAuthForm() {
-        var pw = document.querySelector('input[type="password"]');
-        if (pw && isVisibleEl(pw)) return true;
-        var authInputs = document.querySelectorAll('input[type="email"], input[name*="email" i], input[name*="mobile" i], input[name*="phone" i]');
-        for (var i = 0; i < authInputs.length; i++) {
-            if (isVisibleEl(authInputs[i])) return true;
-        }
-        return false;
-    }
-
-    function looksLikeSpinningOrLocked(btn) {
-        if (!btn) return false;
-        if (btn.disabled || btn.getAttribute("aria-busy") === "true") return true;
-        var cls = String(btn.className || "");
-        var html = String(btn.innerHTML || "");
-        var txt = String(btn.textContent || "");
-        if (/animate-spin|fa-spin|fa-spinner|fa-circle-notch|spinner|loading/i.test(html + " " + cls)) return true;
-        if (/logging\s*in|signing\s*in|please\s*wait|verifying|checking|loading|लॉगिन\s*हो\s*रहा|प्रतीक्षा|लोड\s*हो\s*रहा|सत्यापित/i.test(txt)) return true;
-        try {
-            var cs = window.getComputedStyle(btn);
-            if (cs.pointerEvents === "none") return true;
-        } catch (e) {}
-        return false;
-    }
-
-    function looksLikeLoginTrigger(el) {
-        if (!el) return false;
-        var btn = el.closest ? el.closest('button, input[type="submit"], [role="button"]') : null;
-        if (!btn) return false;
-        if (btn.closest && btn.closest("#ug-login-recovery-bar")) return false;
-        var txt = (btn.textContent || btn.value || btn.getAttribute("aria-label") || "").trim();
-        var isLoginText = /(?:^|\s)(?:login|log\s*in|sign\s*in|signin|sign\s*up|register|google|लॉगिन|लॉग\s*इन|साइन\s*इन|प्रवेश|रजिस्टर|जारी\s*रखें|सत्यापित|continue)(?:$|\s|!|\.)/i.test(txt);
-        var inAuthForm = !!(btn.closest("form") && btn.closest("form").querySelector('input[type="password"], input[type="email"], input[type="tel"]'));
-        return isLoginText || inAuthForm;
-    }
-
-    function removeRecoveryBar() {
-        var bar = document.getElementById("ug-login-recovery-bar");
-        if (bar) bar.remove();
-    }
-
-    function clearAllAuthAndAppCaches() {
-        var tasks = [];
-        try {
-            if (window.indexedDB && typeof window.indexedDB.databases === "function") {
-                tasks.push(window.indexedDB.databases().then(function (dbs) {
-                    return Promise.all((dbs || []).map(function (d) {
-                        if (!d || !d.name) return Promise.resolve();
-                        if (/UGT_|firebase|firestore/i.test(d.name)) {
-                            return new Promise(function (res) {
-                                try {
-                                    var req = window.indexedDB.deleteDatabase(d.name);
-                                    req.onsuccess = req.onerror = req.onblocked = function () { res(); };
-                                    setTimeout(res, 1500);
-                                } catch (e) { res(); }
-                            });
-                        }
-                        return Promise.resolve();
-                    }));
-                }).catch(function () {}));
-            } else if (window.indexedDB) {
-                ["firebaseLocalStorageDb", "firebase-heartbeat-database", "firebase-installations-database"].forEach(function (nm) {
-                    tasks.push(new Promise(function (res) {
-                        try {
-                            var req = window.indexedDB.deleteDatabase(nm);
-                            req.onsuccess = req.onerror = req.onblocked = function () { res(); };
-                            setTimeout(res, 1200);
-                        } catch (e) { res(); }
-                    }));
-                });
-            }
-        } catch (e) {}
-        return Promise.all(tasks);
-    }
-
-    function showLoginRecoveryBar(reasonText) {
-        if (document.getElementById("ug-login-recovery-bar")) return;
-        var bar = document.createElement("div");
-        bar.id = "ug-login-recovery-bar";
-        bar.setAttribute("style", "position:fixed;left:12px;right:12px;bottom:14px;z-index:2147483646;max-width:480px;margin:0 auto;background:#0f172a;color:#f8fafc;border:1.5px solid #38bdf8;border-radius:16px;padding:14px 16px;box-shadow:0 18px 40px rgba(2,6,23,0.55);font-family:'Noto Sans Devanagari','Inter',Arial,sans-serif;");
-        var safeReason = String(reasonText || "लॉगिन प्रक्रिया उम्मीद से ज़्यादा समय ले रही है।").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        bar.innerHTML =
-            '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">' +
-                '<div>' +
-                    '<div style="font-size:14px;font-weight:800;color:#38bdf8;margin-bottom:4px;">लॉगिन अटक गया है?</div>' +
-                    '<div style="font-size:12px;line-height:1.5;color:#cbd5e1;word-break:break-word;">' + safeReason + '</div>' +
-                '</div>' +
-                '<button id="ug-lr-close" type="button" aria-label="Close" style="background:transparent;border:none;color:#94a3b8;font-size:18px;line-height:1;cursor:pointer;padding:2px 4px;">&times;</button>' +
-            '</div>' +
-            '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">' +
-                '<button id="ug-lr-unlock" type="button" style="flex:1;min-width:120px;background:#0284c7;color:#fff;border:none;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;cursor:pointer;">बटन अनलॉक करें</button>' +
-                '<button id="ug-lr-safe" type="button" style="flex:1;min-width:120px;background:#059669;color:#fff;border:none;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;cursor:pointer;">सेफ लॉगिन मोड</button>' +
-                '<button id="ug-lr-reset" type="button" style="flex:1;min-width:120px;background:#334155;color:#f8fafc;border:1px solid #475569;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;">लॉगिन कैश रीसेट</button>' +
-            '</div>';
-        document.body.appendChild(bar);
-
-        var closeBtn = document.getElementById("ug-lr-close");
-        if (closeBtn) closeBtn.onclick = removeRecoveryBar;
-
-        var unlockBtn = document.getElementById("ug-lr-unlock");
-        if (unlockBtn) {
-            unlockBtn.onclick = function () {
-                try {
-                    var st = activeLoginState;
-                    if (st && st.btn && document.body.contains(st.btn)) {
-                        st.btn.disabled = false;
-                        st.btn.removeAttribute("disabled");
-                        st.btn.removeAttribute("aria-busy");
-                        st.btn.style.pointerEvents = "";
-                        st.btn.style.opacity = "";
-                        if (st.origText && looksLikeSpinningOrLocked(st.btn)) {
-                            st.btn.textContent = st.origText;
-                        }
-                        st.btn.focus();
-                    }
-                    Array.from(document.querySelectorAll('button[disabled], input[type="submit"][disabled]')).forEach(function (b) {
-                        if (looksLikeSpinningOrLocked(b)) {
-                            b.disabled = false;
-                            b.removeAttribute("disabled");
-                            b.style.pointerEvents = "";
-                        }
-                    });
-                } catch (e) {}
-                activeLoginState = null;
-                if (watchdogTimer) { clearInterval(watchdogTimer); watchdogTimer = null; }
-                removeRecoveryBar();
-            };
-        }
-
-        var safeBtn = document.getElementById("ug-lr-safe");
-        if (safeBtn) {
-            safeBtn.onclick = function () {
-                try {
-                    var u = new URL(window.location.href);
-                    u.searchParams.set("safe", "1");
-                    window.location.href = u.toString();
-                } catch (e) { window.location.reload(); }
-            };
-        }
-
-        var resetBtn = document.getElementById("ug-lr-reset");
-        if (resetBtn) {
-            resetBtn.onclick = function () {
-                resetBtn.textContent = "रीसेट हो रहा है…";
-                resetBtn.disabled = true;
-                clearAllAuthAndAppCaches().then(function () {
-                    try {
-                        var u = new URL(window.location.href);
-                        u.searchParams.set("fresh", "1");
-                        window.location.href = u.toString();
-                    } catch (e) { window.location.reload(); }
-                });
-            };
-        }
-    }
-
-    function startLoginWatch(targetEl) {
-        var btn = targetEl && targetEl.closest ? targetEl.closest('button, input[type="submit"], [role="button"]') : null;
-        if (!btn && targetEl && targetEl.tagName === "FORM") {
-            btn = targetEl.querySelector('button[type="submit"], button:not([type]), input[type="submit"]');
-        }
-        if (!btn) return;
-        removeRecoveryBar();
-        var cleanText = (btn.textContent || btn.value || "").trim();
-        if (/logging|loading|wait|लॉगिन\s*हो\s*रहा|लोड/i.test(cleanText)) cleanText = "लॉगिन करें";
-        activeLoginState = {
-            btn: btn,
-            origText: cleanText || "लॉगिन करें",
-            startedAt: Date.now()
-        };
-        if (watchdogTimer) clearInterval(watchdogTimer);
-        watchdogTimer = setInterval(function () {
-            if (!activeLoginState) {
-                clearInterval(watchdogTimer);
-                watchdogTimer = null;
-                return;
-            }
-            var elapsed = Date.now() - activeLoginState.startedAt;
-            var btnInDom = activeLoginState.btn && document.body && document.body.contains(activeLoginState.btn);
-            if (!btnInDom && !hasVisiblePasswordOrAuthForm()) {
-                activeLoginState = null;
-                clearInterval(watchdogTimer);
-                watchdogTimer = null;
-                removeRecoveryBar();
-                return;
-            }
-            var stillBusy = btnInDom && looksLikeSpinningOrLocked(activeLoginState.btn);
-            if (!stillBusy && elapsed > 3000) {
-                activeLoginState = null;
-                clearInterval(watchdogTimer);
-                watchdogTimer = null;
-                return;
-            }
-            var hasFreshErr = lastLoginErrorAt >= activeLoginState.startedAt && !!lastLoginErrorMsg;
-            if (!navigator.onLine && elapsed >= 3000) {
-                showLoginRecoveryBar("इंटरनेट कनेक्शन बंद है। कृपया नेटवर्क चालू करें और दोबारा प्रयास करें।");
-                clearInterval(watchdogTimer);
-                watchdogTimer = null;
-                return;
-            }
-            if (hasFreshErr && stillBusy && elapsed >= 4500) {
-                showLoginRecoveryBar("लॉगिन के दौरान त्रुटि आई: " + lastLoginErrorMsg);
-                clearInterval(watchdogTimer);
-                watchdogTimer = null;
-                return;
-            }
-            if (stillBusy && elapsed >= 14000) {
-                var hint = window.location.protocol === "file:"
-                    ? "फ़ाइल लोकल (file://) से खुली है या नेटवर्क धीमा है। 'सेफ लॉगिन मोड' या 'बटन अनलॉक करें' आज़माएँ।"
-                    : "सर्वर या लॉगिन पैच से जवाब मिलने में देरी हो रही है। आप बटन अनलॉक कर सकते हैं या 'सेफ लॉगिन मोड' से तुरंत लॉगिन कर सकते हैं।";
-                showLoginRecoveryBar(hint);
-                clearInterval(watchdogTimer);
-                watchdogTimer = null;
-                return;
-            }
-            if (elapsed > 45000) {
-                clearInterval(watchdogTimer);
-                watchdogTimer = null;
-            }
-        }, 1000);
-    }
-
-    document.addEventListener("click", function (ev) {
-        if (looksLikeLoginTrigger(ev.target)) startLoginWatch(ev.target);
-    }, true);
-    document.addEventListener("submit", function (ev) {
-        if (ev.target && ev.target.querySelector && ev.target.querySelector('input[type="password"], input[type="email"], input[type="tel"]')) {
-            startLoginWatch(ev.target);
-        }
-    }, true);
-})();
-</script>
 <style id="ug-boot-loader-style">body{margin:0;font-family:'Noto Sans Devanagari','Inter',Arial,sans-serif;}@keyframes ugSpin{to{transform:rotate(360deg)}}</style>
 </head>
 <body>
@@ -555,8 +131,8 @@ var BUNDLE_COL = "cloud_code_bundle";
 var CACHE_DB_NAME = "UGT_AutoSync_DB_" + firebaseConfig.projectId;
 var CACHE_STORE = "bundles";
 var CACHE_SCHEMA = 8;
-var BUILD_SYNC_ID = "sync_1795588043810_b2_r81";
-var EXPECTED_BASE_VERSION = 2;
+var BUILD_SYNC_ID = "sync_1795666978779_b3_r89";
+var EXPECTED_BASE_VERSION = 3;
 var FS_BASE = "https://firestore.googleapis.com/v1/projects/" + encodeURIComponent(firebaseConfig.projectId) + "/databases/(default)/documents/artifacts/" + encodeURIComponent(APP_ID) + "/public/data/" + encodeURIComponent(BUNDLE_COL) + "/";
 var params = new URLSearchParams(window.location.search);
 var targetPageId = (window.__UG_PREVIEW_PAGE_ID__ || params.get("page") || "").replace(/[^a-zA-Z0-9_]/g, "");
@@ -565,7 +141,7 @@ var skipPatches = (params.has("safe") || params.has("nopatch") || params.has("ol
 var useBackup = params.has("backup");
 window.__UG_UPDATE_ERRORS__ = [];
 window.__UG_LOADED_UPDATES__ = [];
-var EMBEDDED_LINKED_ITEMS = [];
+var EMBEDDED_LINKED_ITEMS = [{"id":"index_update_disabled","mode":"patch","targetDevice":"auto","title":"index update disabled","fileName":"index update disabled.html","version":1,"chunkCount":3,"enabled":true},{"id":"index_update","mode":"patch","targetDevice":"mobile","title":"index update","fileName":"index update.html","version":1,"chunkCount":3,"enabled":true}];
 var capturedBaseErr = "";
 var isMountingBase = false;
 var queuedReadyCallbacks = [];
@@ -717,72 +293,18 @@ var oDoc = document.addEventListener.bind(document), oWin = window.addEventListe
 document.addEventListener = function (type, fn, opts) { if (type === "DOMContentLoaded" && typeof fn === "function") { if (isMountingBase) queuedReadyCallbacks.push({ target: document, type: "DOMContentLoaded", fn: fn }); else setTimeout(function () { invokeReady(document, "DOMContentLoaded", fn); }, 0); return; } return oDoc(type, fn, opts); };
 window.addEventListener = function (type, fn, opts) { if ((type === "DOMContentLoaded" || type === "load") && typeof fn === "function") { if (isMountingBase) queuedReadyCallbacks.push({ target: window, type: type, fn: fn }); else setTimeout(function () { invokeReady(window, type, fn); }, 0); return; } return oWin(type, fn, opts); };
 }
-function injectFirebaseModuleTimeouts(rawCode) {
-try {
-var code = String(rawCode || "");
-if (!code || code.indexOf("__ugRaw_") !== -1 || code.indexOf("firebase-") === -1) return code;
-var timeoutMap = {
-signInWithEmailAndPassword: 20000,
-createUserWithEmailAndPassword: 20000,
-signInAnonymously: 20000,
-sendPasswordResetEmail: 20000,
-signInWithPopup: 60000,
-getDoc: 18000,
-getDocFromServer: 18000,
-getDocs: 22000,
-setDoc: 18000,
-updateDoc: 18000,
-addDoc: 18000,
-deleteDoc: 18000
-};
-return code.replace(/(^|[\r\n;])([ \t]*)import\s*\{([^}]+)\}\s*from\s*(["'])(https?:\/\/[^"']*firebase-(?:firestore|auth)[^"']*\.js(?:\?[^"']*)?)\4\s*;?/g, function (full, lead, indent, specBlock, q, url) {
-var cleaned = specBlock.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\r\n]*/g, "");
-var parts = cleaned.split(",").map(function (x) { return x.trim(); }).filter(Boolean);
-if (!parts.length) return full;
-var newSpecs = [];
-var wrappers = [];
-for (var i = 0; i < parts.length; i++) {
-var m = parts[i].match(/^([a-zA-Z_$][\w$]*)(?:\s+as\s+([a-zA-Z_$][\w$]*))?$/);
-if (!m) return full;
-var origName = m[1], localName = m[2] || m[1];
-if (Object.prototype.hasOwnProperty.call(timeoutMap, origName)) {
-var rawAlias = "__ugRaw_" + localName;
-newSpecs.push(origName + " as " + rawAlias);
-wrappers.push("const " + localName + " = window.__UG_WRAP_ASYNC__(" + rawAlias + ", " + timeoutMap[origName] + ", " + JSON.stringify(origName) + ");");
-} else {
-newSpecs.push(parts[i]);
-}
-}
-if (!wrappers.length) return full;
-return lead + indent + "import { " + newSpecs.join(", ") + " } from " + q + url + q + ";\n" + indent + wrappers.join("\n" + indent) + "\n";
-});
-} catch (e) {
-return rawCode;
-}
-}
 function runScriptSafe(sc, tagName, isolated) {
 return new Promise(function (resolve) {
 if (!sc) return resolve();
 if (sc.src || sc.kind === "external") { loadSingleExternalScript(sc).then(resolve); return; }
 var code = String(sc.code || ""); if (!code.trim()) return resolve();
 code = code.replace(/([(\[,=?:!&|]\s*\/[^\/\r\n'"]+?)\\\\\/\/([gimsuy]{1,6})\.(test|exec)\(/g, "$1\\//$2.$3(");
-if (/experimentalAutoDetectLongPolling\s*:\s*true/.test(code)) {
-if (/useFetchStreams\s*:/.test(code)) {
-code = code.replace(/experimentalAutoDetectLongPolling\s*:\s*true/g, "experimentalForceLongPolling: true");
-} else {
 code = code.replace(/experimentalAutoDetectLongPolling\s*:\s*true/g, "experimentalForceLongPolling: true, useFetchStreams: false");
-}
-}
 var t = String(sc.type || "").trim().toLowerCase(), isMod = t === "module", isCls = !t || t === "text/javascript" || t === "application/javascript";
-if (isMod) {
-code = injectFirebaseModuleTimeouts(code);
-}
 if (isCls && !isMod) { try { new Function(code); } catch (synErr) { window.__UG_UPDATE_ERRORS__.push(tagName + " SyntaxError: " + synErr.message); if (!isolated && !capturedBaseErr) capturedBaseErr = synErr.message; return resolve(); } }
 var jsEl = document.createElement("script"); if (sc.id) jsEl.id = sc.id; if (sc.type) jsEl.type = sc.type;
 jsEl.textContent = isMod ? (code + "\n//# sourceURL=" + tagName + ".mjs") : (isolated ? ("(function(){\ntry{\n" + code + "\n}catch(__ugErr){window.__UG_UPDATE_ERRORS__.push(" + JSON.stringify(tagName + ": ") + "+(__ugErr&&__ugErr.message?__ugErr.message:__ugErr));}\n})();\n//# sourceURL=" + tagName + ".js") : (code + "\n//# sourceURL=" + tagName + ".js"));
-document.body.appendChild(jsEl);
-if (typeof window.__UG_PATCH_COMPAT_FIREBASE__ === "function") { setTimeout(window.__UG_PATCH_COMPAT_FIREBASE__, 120); }
-resolve();
+document.body.appendChild(jsEl); resolve();
 });
 }
 async function mountBaseBundle(p) {
@@ -799,7 +321,7 @@ await loadExternalScripts(p.externalScripts || []);
 await ensureBabelIfNeeded(p.scripts || []);
 installReadyHooks(); isMountingBase = true; var prevOnload = window.onload;
 try { for (var i = 0; i < p.scripts.length; i++) await runScriptSafe(p.scripts[i], "base_script_" + (i + 1), false); if (window.Babel && typeof window.Babel.transformScriptTags === "function") { try { window.Babel.transformScriptTags(); } catch (e) {} } } finally { isMountingBase = false; var list = queuedReadyCallbacks.slice(); queuedReadyCallbacks.length = 0; list.forEach(function (it) { setTimeout(function () { invokeReady(it.target, it.type, it.fn); }, 0); }); }
-setTimeout(function () { if (typeof window.onload === "function" && window.onload !== prevOnload) { try { window.onload(new Event("load")); } catch (e) {} } if (typeof window.__UG_PATCH_COMPAT_FIREBASE__ === "function") window.__UG_PATCH_COMPAT_FIREBASE__(); }, 60);
+setTimeout(function () { if (typeof window.onload === "function" && window.onload !== prevOnload) { try { window.onload(new Event("load")); } catch (e) {} } }, 60);
 }
 function adaptRuntimePatchCode(rawCode) {
 var s = String(rawCode || "");
@@ -942,7 +464,6 @@ wrap.innerHTML = tmp.innerHTML; document.body.appendChild(wrap);
 }
 applyScopedStyleStates(activeMode);
 await loadExternalScripts(p.externalScripts || []);
-await ensureBabelIfNeeded(p.scripts || []);
 for (var i = 0; i < (p.scripts || []).length; i++) {
 var origSc = p.scripts[i];
 if (!origSc) continue;
@@ -966,11 +487,6 @@ async function bootFromFirebaseCloud() {
 initSafeGlobalsAndErrorWatcher();
 setTimeout(function () { if (document.getElementById("ug-cloud-loader-ui") && capturedBaseErr) void showBootError("स्क्रिप्ट एरर: " + capturedBaseErr); }, 6500);
 try {
-var lastSync = await idbGet("last_build_sync_id");
-if (lastSync !== BUILD_SYNC_ID) {
-await idbClear();
-await idbSet("last_build_sync_id", BUILD_SYNC_ID);
-}
 var reactWait = Promise.race([window.__UG_REACT_READY__ || Promise.resolve(false), new Promise(function (r) { setTimeout(function () { r(false); }, 11000); })]);
 if (targetPageId) {
 setStatus("लिंक किया पेज (" + targetPageId + ") लोड हो रहा है…");
@@ -1001,6 +517,7 @@ regItems = (Array.isArray(cReg) && cReg.length) ? cReg : EMBEDDED_LINKED_ITEMS;
 }
 }
 var enabledPatches = (regItems || []).filter(function (it) { return it && it.mode === "patch" && it.enabled !== false && it.id; });
+var lastSync = await idbGet("last_build_sync_id"); if (lastSync !== BUILD_SYNC_ID) { await idbClear(); await idbSet("last_build_sync_id", BUILD_SYNC_ID); }
 var cachedLocal = forceFresh ? null : await idbGet(activeKey);
 var hasCache = !!(cachedLocal && cachedLocal.schema === CACHE_SCHEMA && cachedLocal.payloadStr);
 var baseData = null;
