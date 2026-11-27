@@ -2,901 +2,99 @@
 <html lang="hi">
 <head>
 <style id="ug-display-mode-style">
-    html[data-ug-mode="mobile"], html[data-ug-mode="mobile"] body {
-        overflow-x: hidden;
-        -webkit-text-size-adjust: 100%;
-    }
-    html[data-ug-mode="desktop"], html[data-ug-mode="desktop"] body {
-        overflow-x: auto;
-    }
+html[data-ug-mode="mobile"], html[data-ug-mode="mobile"] body {
+overflow-x: hidden;
+-webkit-text-size-adjust: 100%;
+}
+html[data-ug-mode="desktop"], html[data-ug-mode="desktop"] body {
+overflow-x: auto;
+}
 </style>
 <script id="ug-display-mode-engine">
 (function () {
-    "use strict";
-    var params = new URLSearchParams(window.location.search);
-    var urlForce = (params.get("mode") || "").toLowerCase();
-    function detectSmartMode() {
-        if (urlForce === "desktop" || urlForce === "mobile") return urlForce;
-        var w = window.innerWidth || document.documentElement.clientWidth || 1024;
-        var ua = navigator.userAgent || "";
-        var isMobileUa = /Android|iPhone|iPod|Windows Phone|Mobile/i.test(ua);
-        if (w <= 768 || (isMobileUa && w <= 900)) return "mobile";
-        return "desktop";
-    }
-    function applySmartAutoMode() {
-        try {
-            var active = detectSmartMode();
-            window.__UG_DISPLAY_MODE__ = active;
-            window.__UG_SMART_BOTH_MODE__ = true;
-            window.__UG_FORCE_DESKTOP_MODE__ = (active === "desktop");
-            window.__UG_FORCE_MOBILE_MODE__ = (active === "mobile");
-            document.documentElement.setAttribute("data-ug-mode", active);
-            document.documentElement.classList.toggle("ug-mode-mobile", active === "mobile");
-            document.documentElement.classList.toggle("ug-mode-desktop", active === "desktop");
-            if (document.body) {
-                document.body.setAttribute("data-ug-mode", active);
-                document.body.classList.toggle("ug-mode-mobile", active === "mobile");
-                document.body.classList.toggle("ug-mode-desktop", active === "desktop");
-            }
-            var vp = document.querySelector('meta[name="viewport"]');
-            if (vp) {
-                if (urlForce === "desktop") {
-                    var sw = (window.screen && window.screen.width) ? Math.min(window.screen.width, window.screen.height || window.screen.width) : 1280;
-                    var sc = sw < 1280 ? Math.max(0.25, +(sw / 1280).toFixed(3)) : 1;
-                    vp.setAttribute("content", "width=1280, initial-scale=" + sc + ", minimum-scale=0.25, maximum-scale=5.0, user-scalable=yes");
-                } else {
-                    vp.setAttribute("content", "width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover");
-                }
-            }
-            if (typeof window.__UG_SYNC_DEVICE_CHANGES__ === "function") {
-                window.__UG_SYNC_DEVICE_CHANGES__(active);
-            }
-        } catch (e) {}
-    }
-    window.__UG_APPLY_DISPLAY_MODE__ = applySmartAutoMode;
-    applySmartAutoMode();
-    document.addEventListener("DOMContentLoaded", applySmartAutoMode);
-    window.addEventListener("resize", applySmartAutoMode);
-    window.addEventListener("orientationchange", applySmartAutoMode);
+"use strict";
+var params = new URLSearchParams(window.location.search);
+var urlForce = (params.get("mode") || "").toLowerCase();
+function detectSmartMode() {
+if (urlForce === "desktop" || urlForce === "mobile") return urlForce;
+var w = window.innerWidth || document.documentElement.clientWidth || 1024;
+var ua = navigator.userAgent || "";
+var isMobileUa = /Android|iPhone|iPod|Windows Phone|Mobile/i.test(ua);
+if (w <= 768 || (isMobileUa && w <= 900)) return "mobile";
+return "desktop";
+}
+function applySmartAutoMode() {
+try {
+var active = detectSmartMode();
+window.__UG_DISPLAY_MODE__ = active;
+window.__UG_SMART_BOTH_MODE__ = true;
+window.__UG_FORCE_DESKTOP_MODE__ = (active === "desktop");
+window.__UG_FORCE_MOBILE_MODE__ = (active === "mobile");
+document.documentElement.setAttribute("data-ug-mode", active);
+document.documentElement.classList.toggle("ug-mode-mobile", active === "mobile");
+document.documentElement.classList.toggle("ug-mode-desktop", active === "desktop");
+if (document.body) {
+document.body.setAttribute("data-ug-mode", active);
+document.body.classList.toggle("ug-mode-mobile", active === "mobile");
+document.body.classList.toggle("ug-mode-desktop", active === "desktop");
+}
+var vp = document.querySelector('meta[name="viewport"]');
+if (vp) {
+if (urlForce === "desktop") {
+var sw = (window.screen && window.screen.width) ? Math.min(window.screen.width, window.screen.height || window.screen.width) : 1280;
+var sc = sw < 1280 ? Math.max(0.25, +(sw / 1280).toFixed(3)) : 1;
+vp.setAttribute("content", "width=1280, initial-scale=" + sc + ", minimum-scale=0.25, maximum-scale=5.0, user-scalable=yes");
+} else {
+vp.setAttribute("content", "width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover");
+}
+}
+if (typeof window.__UG_SYNC_DEVICE_CHANGES__ === "function") {
+window.__UG_SYNC_DEVICE_CHANGES__(active);
+}
+} catch (e) {}
+}
+window.__UG_APPLY_DISPLAY_MODE__ = applySmartAutoMode;
+applySmartAutoMode();
+document.addEventListener("DOMContentLoaded", applySmartAutoMode);
+window.addEventListener("resize", applySmartAutoMode);
+window.addEventListener("orientationchange", applySmartAutoMode);
 })();
 </script>
-<style id="ug-permanent-main-lock-css">
-  html.ug-preauth-hide, html.ug-preauth-hide body { background: #020617 !important; overflow: hidden !important; }
-  html.ug-preauth-hide #root { opacity: 0 !important; visibility: hidden !important; }
-  @keyframes ugZeroFlashSpin { to { transform: rotate(360deg); } }
-  [data-ug-update-ui] [id*="login" i],
-  [data-ug-update-ui] [class*="login-modal" i],
-  [data-ug-update-ui] [class*="login-screen" i],
-  [data-ug-update-ui] [class*="auth-overlay" i],
-  [data-ug-update-ui] [class*="auth-modal" i] { display: none !important; visibility: hidden !important; pointer-events: none !important; }
+<style id="ug-zero-flash-inline-css">
+html.ug-preauth-hide, html.ug-preauth-hide body { background: #020617 !important; overflow: hidden !important; }
+html.ug-preauth-hide #root { opacity: 0 !important; visibility: hidden !important; }
+@keyframes ugZeroFlashSpin { to { transform: rotate(360deg); } }
 </style>
-<script id="ug-permanent-main-lock-shield">
+<script id="ug-zero-flash-inline-boot">
 (function () {
-  "use strict";
-  var MAIN_CFG = Object.freeze({"apiKey":"AIzaSyD02eg9jaNN-jACslUNpb0QL8wTsHlQnGM","authDomain":"unlimited-gyan1.firebaseapp.com","projectId":"unlimited-gyan1","storageBucket":"unlimited-gyan1.firebasestorage.app","messagingSenderId":"576198101472","appId":"1:576198101472:web:2496fda85c2d5439934385","measurementId":"G-4ZNEC6QNX0"});
-  var MAIN_EMAIL = "unlimitegyantest2.0@gmail.com";
-  var PROJECT_TAG = String(MAIN_CFG.projectId || "default");
-  var DEVICE_ID_KEY = "ug_device_identity_v1_" + PROJECT_TAG;
-  var SESSION_FLAG_KEY = "ug_device_autologin_v1_" + PROJECT_TAG;
-  window.__UG_PERMANENT_MAIN_LOCK__ = true;
-  window.__UG_MAIN_FIREBASE_CONFIG__ = MAIN_CFG;
-  window.__UG_MAIN_MASTER_EMAIL__ = MAIN_EMAIL;
-  window.__UG_EXPLICIT_LOGOUT__ = false;
-
-  // सुरक्षित Getter/Setter: हमेशा Main Firebase Config की कॉपी लौटाएगा
-  try {
-    Object.defineProperty(window, "firebaseConfig", {
-      get: function () { return Object.assign({}, MAIN_CFG); },
-      set: function () {},
-      configurable: true
-    });
-  } catch (e) { window.firebaseConfig = Object.assign({}, MAIN_CFG); }
-
-  // ==================== 1. DEVICE IDENTITY व PERSISTENT SESSION HELPER ====================
-  function getOrCreateDeviceId() {
-    try {
-      var id = localStorage.getItem(DEVICE_ID_KEY);
-      if (id && id.length >= 10) return id;
-      id = "dev_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 12);
-      localStorage.setItem(DEVICE_ID_KEY, id);
-      return id;
-    } catch (e) { return "dev_mem"; }
-  }
-  function hasFirebaseLocalAuthRecord() {
-    try {
-      var key = "firebase:authUser:" + (MAIN_CFG.apiKey || "") + ":[DEFAULT]";
-      var raw = localStorage.getItem(key);
-      if (raw && raw.length > 20 && raw !== "null") return true;
-    } catch (e) {}
-    return false;
-  }
-  function readDeviceSession() {
-    try {
-      var raw = localStorage.getItem(SESSION_FLAG_KEY);
-      if (raw) {
-        var obj = JSON.parse(raw);
-        if (obj && obj.loggedIn && obj.deviceId === getOrCreateDeviceId()) return obj;
-      }
-    } catch (e) {}
-    if (hasFirebaseLocalAuthRecord()) return { loggedIn: true, uid: "", email: "", deviceId: getOrCreateDeviceId() };
-    return null;
-  }
-  function saveDeviceSession(uid, email) {
-    try {
-      window.__UG_EXPLICIT_LOGOUT__ = false;
-      localStorage.setItem(SESSION_FLAG_KEY, JSON.stringify({
-        loggedIn: true,
-        uid: String(uid || ""),
-        email: String(email || ""),
-        deviceId: getOrCreateDeviceId(),
-        ts: Date.now()
-      }));
-    } catch (e) {}
-  }
-  function clearDeviceSession() {
-    try { localStorage.removeItem(SESSION_FLAG_KEY); } catch (e) {}
-  }
-  var rememberedSession = readDeviceSession();
-  var IS_REMEMBERED_DEVICE = !!(rememberedSession && rememberedSession.loggedIn);
-  window.__UG_DEVICE_ID__ = getOrCreateDeviceId();
-  window.__UG_DEVICE_AUTO_LOGIN_EXPECTED__ = IS_REMEMBERED_DEVICE;
-
-  // ==================== 2. ZERO-FLASH PRE-AUTH CURTAIN (0ms से सक्रिय) ====================
-  var curtainReleased = false;
-  var curtainReleaseTimer = null;
-  var curtainSafetyTimer = null;
-  var curtainPollTimer = null;
-  try { document.documentElement.classList.add("ug-preauth-hide"); } catch (e) {}
-
-  function mountZeroFlashCurtain() {
-    if (curtainReleased || document.getElementById("ug-zero-flash-curtain")) return;
-    try {
-      var el = document.createElement("div");
-      el.id = "ug-zero-flash-curtain";
-      el.style.cssText = "position:fixed;inset:0;z-index:2147483647;background:radial-gradient(circle at top,#0f172a,#020617);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#fff;font-family:Arial,sans-serif;text-align:center;padding:24px;transition:opacity 0.25s ease;";
-      var spin = document.createElement("div");
-      spin.style.cssText = "width:48px;height:48px;border:4px solid rgba(56,189,248,0.25);border-top-color:#34d399;border-radius:50%;animation:ugZeroFlashSpin 0.75s linear infinite;";
-      var h = document.createElement("div");
-      h.style.cssText = "font-size:19px;font-weight:900;letter-spacing:0.3px;";
-      h.textContent = "Unlimited Gyan Test";
-      var msg = document.createElement("div");
-      msg.id = "ug-zero-flash-msg";
-      msg.style.cssText = "font-size:13px;font-weight:700;color:#94a3b8;";
-      msg.textContent = IS_REMEMBERED_DEVICE ? "डिवाइस पहचाना गया — सुरक्षित ऑटो-लॉगिन हो रहा है…" : "वेबसाइट तैयार हो रही है…";
-      el.appendChild(spin); el.appendChild(h); el.appendChild(msg);
-      // <html> पर जोड़ने से body.innerHTML बदलने पर भी फ्लैश नहीं आता!
-      document.documentElement.appendChild(el);
-    } catch (e) {}
-  }
-  mountZeroFlashCurtain();
-
-  function releaseZeroFlashCurtain(reason, delayMs) {
-    if (curtainReleased) return;
-    var wait = Number(delayMs || 0);
-    if (curtainReleaseTimer) clearTimeout(curtainReleaseTimer);
-    curtainReleaseTimer = setTimeout(function () {
-      if (curtainReleased) return;
-      curtainReleased = true;
-      if (curtainSafetyTimer) clearTimeout(curtainSafetyTimer);
-      if (curtainPollTimer) clearInterval(curtainPollTimer);
-      try { document.documentElement.classList.remove("ug-preauth-hide"); } catch (e) {}
-      var el = document.getElementById("ug-zero-flash-curtain");
-      if (el) {
-        el.style.pointerEvents = "none";
-        el.style.opacity = "0";
-        setTimeout(function () { try { if (el.parentNode) el.parentNode.removeChild(el); } catch (e) {} }, 270);
-      }
-    }, wait);
-  }
-  window.__UG_RELEASE_ZERO_FLASH__ = releaseZeroFlashCurtain;
-
-  // Smart Auto-Release Poll: यदि वेबसाइट React/HTML रेंडर कर दे तो फ्लैश के बिना तुरंत खोलें
-  var curtainBootTs = Date.now();
-  curtainPollTimer = setInterval(function () {
-    if (curtainReleased) { clearInterval(curtainPollTimer); return; }
-    var root = document.getElementById("root");
-    var bootLoader = document.getElementById("ug-cloud-loader-ui");
-    var hasAppUi = !!(root && !bootLoader && root.innerHTML && root.innerHTML.trim().length > 40);
-    if (!hasAppUi) return;
-    var hasPwField = !!root.querySelector("input[type=\"password\"]");
-    if (!IS_REMEMBERED_DEVICE) {
-      releaseZeroFlashCurtain("guest-ui-ready", 80);
-      return;
-    }
-    if (!hasPwField && (Date.now() - curtainBootTs) > 350) {
-      releaseZeroFlashCurtain("dashboard-ready", 120);
-    }
-  }, 120);
-  // अंतिम सुरक्षा टाइमर: किसी भी स्थिति में पेज कभी अटकने न पाए
-  curtainSafetyTimer = setTimeout(function () { releaseZeroFlashCurtain("safety-timeout", 0); }, IS_REMEMBERED_DEVICE ? 4200 : 2400);
-
-  // ==================== 3. ANTI-HANG MUTATION OBSERVER GUARD ====================
-  if (typeof window.MutationObserver === "function" && !window.__UG_MO_GUARDED__) {
-    window.__UG_MO_GUARDED__ = true;
-    var OrigMO = window.MutationObserver;
-    window.MutationObserver = function SafeMutationObserver(cb) {
-      var hits = 0, winStart = Date.now(), pending = null, pendingRecords = [];
-      var wrappedCb = function (records, obs) {
-        var now = Date.now();
-        if (now - winStart > 400) { winStart = now; hits = 0; }
-        hits++;
-        if (hits <= 12) { try { cb(records, obs); } catch (e) {} }
-        else {
-          pendingRecords = records;
-          if (!pending) {
-            pending = setTimeout(function () {
-              pending = null; hits = 0; winStart = Date.now();
-              var recs = pendingRecords; pendingRecords = [];
-              try { cb(recs, obs); } catch (e) {}
-            }, 140);
-          }
-        }
-      };
-      return new OrigMO(wrappedCb);
-    };
-    window.MutationObserver.prototype = OrigMO.prototype;
-  }
-
-  // ==================== 4. FIREBASE v10 SINGLETON + PERMANENT DEVICE AUTO-LOGIN ====================
-  var _ugFbCorePromise = null;
-  var _ugFsByApp = typeof WeakMap !== "undefined" ? new WeakMap() : null;
-  var _ugAuthByApp = typeof WeakMap !== "undefined" ? new WeakMap() : null;
-  window.loadFirebaseCoreModules = function () {
-    if (_ugFbCorePromise) return _ugFbCorePromise;
-    function loadFromBase(baseUrl) {
-      return Promise.all([
-        import(baseUrl + "firebase-app.js"),
-        import(baseUrl + "firebase-auth.js"),
-        import(baseUrl + "firebase-firestore.js")
-      ]);
-    }
-    _ugFbCorePromise = loadFromBase("https://www.gstatic.com/firebasejs/10.8.1/")
-      .catch(function () { return loadFromBase("https://www.gstatic.com/firebasejs/10.12.5/"); })
-      .then(function (mods) {
-        var appMod = mods[0], authMod = mods[1], fsMod = mods[2];
-        function safeInitializeApp(cfg, name) {
-          var effectiveCfg = window.__UG_PERMANENT_MAIN_LOCK__ ? Object.assign({}, MAIN_CFG) : (cfg || Object.assign({}, MAIN_CFG));
-          var targetName = name || "[DEFAULT]";
-          var existing = (appMod.getApps ? appMod.getApps() : []).find(function (a) { return a && a.name === targetName; });
-          if (existing) return existing;
-          return name ? appMod.initializeApp(effectiveCfg, name) : appMod.initializeApp(effectiveCfg);
-        }
-        function attachPersistentAuthWatcher(authInst) {
-          if (!authInst || authInst.__UG_AUTOLOGIN_WATCHED__) return;
-          authInst.__UG_AUTOLOGIN_WATCHED__ = true;
-          var readyP = (typeof authInst.authStateReady === "function")
-            ? authInst.authStateReady().catch(function () {})
-            : new Promise(function (r) { setTimeout(r, 450); });
-          readyP.then(function () {
-            if (authInst.currentUser) {
-              saveDeviceSession(authInst.currentUser.uid, authInst.currentUser.email || "");
-              window.__UG_MAIN_AUTH_OK__ = true;
-              window.__UG_MAIN_AUTH_USER__ = authInst.currentUser;
-              releaseZeroFlashCurtain("authed", 260);
-            } else {
-              clearDeviceSession();
-              releaseZeroFlashCurtain("guest", 90);
-            }
-          });
-          try {
-            authMod.onAuthStateChanged(authInst, function (u) {
-              if (u) {
-                saveDeviceSession(u.uid, u.email || "");
-                window.__UG_MAIN_AUTH_OK__ = true;
-                window.__UG_MAIN_AUTH_USER__ = u;
-                releaseZeroFlashCurtain("authed-live", 220);
-              } else if (window.__UG_EXPLICIT_LOGOUT__) {
-                clearDeviceSession();
-                window.__UG_MAIN_AUTH_OK__ = false;
-                releaseZeroFlashCurtain("logout", 0);
-              }
-            });
-          } catch (e) {}
-        }
-        function safeGetAuth(app) {
-          var targetApp = app || safeInitializeApp(MAIN_CFG);
-          if (_ugAuthByApp && _ugAuthByApp.has(targetApp)) return _ugAuthByApp.get(targetApp);
-          var a = authMod.getAuth(targetApp);
-          if (_ugAuthByApp) _ugAuthByApp.set(targetApp, a);
-          try {
-            if (typeof authMod.setPersistence === "function" && authMod.browserLocalPersistence) {
-              authMod.setPersistence(a, authMod.browserLocalPersistence).catch(function () {});
-            }
-          } catch (e) {}
-          attachPersistentAuthWatcher(a);
-          return a;
-        }
-        function safeOnAuthStateChanged(authInst, nextOrObserver, errorCb, completedCb) {
-          var a = authInst || safeGetAuth();
-          var readyDone = false;
-          if (typeof a.authStateReady === "function") {
-            a.authStateReady().catch(function () {}).then(function () { readyDone = true; });
-          } else { readyDone = true; }
-          if (typeof nextOrObserver === "function") {
-            return authMod.onAuthStateChanged(a, function (user) {
-              // याद रखे गए डिवाइस पर Auth रिस्टोर होने से पहले अस्थायी null फ्लैश न जाने दें
-              if (!user && IS_REMEMBERED_DEVICE && !readyDone && !window.__UG_EXPLICIT_LOGOUT__ && typeof a.authStateReady === "function") {
-                a.authStateReady().catch(function () {}).then(function () {
-                  readyDone = true;
-                  if (!a.currentUser) { clearDeviceSession(); nextOrObserver(null); }
-                });
-                return;
-              }
-              if (user) saveDeviceSession(user.uid, user.email || "");
-              nextOrObserver(user);
-            }, errorCb, completedCb);
-          }
-          return authMod.onAuthStateChanged(a, nextOrObserver, errorCb, completedCb);
-        }
-        function safeSignInWithEmailAndPassword(authInst, email, password) {
-          var a = authInst || safeGetAuth();
-          var pSet = (typeof authMod.setPersistence === "function" && authMod.browserLocalPersistence)
-            ? authMod.setPersistence(a, authMod.browserLocalPersistence).catch(function () {})
-            : Promise.resolve();
-          return pSet.then(function () {
-            return authMod.signInWithEmailAndPassword(a, email, password).then(function (cred) {
-              if (cred && cred.user) saveDeviceSession(cred.user.uid, cred.user.email || email);
-              return cred;
-            });
-          });
-        }
-        function safeSignOut(authInst) {
-          window.__UG_EXPLICIT_LOGOUT__ = true;
-          clearDeviceSession();
-          if (typeof window.__UG_GATE_LOGOUT__ === "function") { try { window.__UG_GATE_LOGOUT__(); } catch (e) {} }
-          return authMod.signOut(authInst || safeGetAuth());
-        }
-        function safeInitializeFirestore(app, settings) {
-          var targetApp = app || safeInitializeApp(MAIN_CFG);
-          if (_ugFsByApp && _ugFsByApp.has(targetApp)) return _ugFsByApp.get(targetApp);
-          var mergedSettings = Object.assign({}, settings || {});
-          delete mergedSettings.experimentalAutoDetectLongPolling;
-          mergedSettings.experimentalForceLongPolling = true;
-          mergedSettings.useFetchStreams = false;
-          var db;
-          try { db = fsMod.initializeFirestore(targetApp, mergedSettings); } catch (e) { db = fsMod.getFirestore(targetApp); }
-          if (_ugFsByApp) _ugFsByApp.set(targetApp, db);
-          return db;
-        }
-        var safeAppMod = Object.assign({}, appMod, { initializeApp: safeInitializeApp });
-        var safeAuthMod = Object.assign({}, authMod, {
-          getAuth: safeGetAuth,
-          onAuthStateChanged: safeOnAuthStateChanged,
-          signInWithEmailAndPassword: safeSignInWithEmailAndPassword,
-          signOut: safeSignOut
-        });
-        var safeFsMod = Object.assign({}, fsMod, { initializeFirestore: safeInitializeFirestore, getFirestore: safeInitializeFirestore });
-        var bundle = Object.assign({}, safeAppMod, safeAuthMod, safeFsMod, {
-          initializeApp: safeInitializeApp,
-          getAuth: safeGetAuth,
-          onAuthStateChanged: safeOnAuthStateChanged,
-          signInWithEmailAndPassword: safeSignInWithEmailAndPassword,
-          signOut: safeSignOut,
-          initializeFirestore: safeInitializeFirestore,
-          getFirestore: safeInitializeFirestore,
-          appMod: safeAppMod, authMod: safeAuthMod, fsMod: safeFsMod, firestoreMod: safeFsMod,
-          0: safeAppMod, 1: safeAuthMod, 2: safeFsMod, length: 3
-        });
-        if (typeof Symbol !== "undefined" && Symbol.iterator) {
-          Object.defineProperty(bundle, Symbol.iterator, {
-            enumerable: false,
-            value: function () { var arr = [safeAppMod, safeAuthMod, safeFsMod], idx = 0; return { next: function () { return idx < arr.length ? { value: arr[idx++], done: false } : { done: true }; } }; }
-          });
-        }
-        window.__UG_FIREBASE_CORE_MODULES__ = bundle;
-        return bundle;
-      }).catch(function (err) { _ugFbCorePromise = null; throw err; });
-    return _ugFbCorePromise;
-  };
-
-  // ==================== 5. FOREIGN LOGIN OVERLAY BLOCKER ====================
-  var _ugHideTimer = null;
-  function hideForeignLoginOverlays() {
-    try {
-      var patchNodes = document.querySelectorAll("[data-ug-update-ui]");
-      if (!patchNodes || !patchNodes.length) return;
-      for (var p = 0; p < patchNodes.length; p++) {
-        var list = patchNodes[p].querySelectorAll("[id*=\"login\" i],[class*=\"login-modal\" i],[class*=\"login-screen\" i],[class*=\"auth-overlay\" i]");
-        for (var i = 0; i < list.length; i++) {
-          var n = list[i];
-          if (n.id === "root" || (n.closest && n.closest("#root"))) continue;
-          if (n.style.display !== "none") n.style.setProperty("display", "none", "important");
-        }
-      }
-    } catch (e) {}
-  }
-  function scheduleHideForeignLogin() {
-    if (_ugHideTimer) return;
-    _ugHideTimer = setTimeout(function () { _ugHideTimer = null; hideForeignLoginOverlays(); }, 200);
-  }
-  document.addEventListener("DOMContentLoaded", function () {
-    hideForeignLoginOverlays();
-    if (typeof MutationObserver !== "undefined" && document.body) {
-      new MutationObserver(scheduleHideForeignLogin).observe(document.body, { childList: true });
-    }
-  });
-
-  // ==================== 6. UNIVERSAL REACT-SAFE PASSWORD SHOW/HIDE EYE ICON ====================
-  (function initUniversalPasswordEyeIcons() {
-    var EYE_OPEN = "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg>";
-    var EYE_CLOSED = "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24\"></path><line x1=\"1\" y1=\"1\" x2=\"23\" y2=\"23\"></line></svg>";
-    var tracked = [], layer = null, scanTimer = null, posRaf = 0, keepAliveTimer = null;
-    function ensureLayer() {
-      if (layer && document.body && document.body.contains(layer)) return layer;
-      if (!document.body) return null;
-      layer = document.getElementById("ug-pw-eye-layer");
-      if (!layer) {
-        layer = document.createElement("div");
-        layer.id = "ug-pw-eye-layer";
-        layer.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:2147483645;";
-        document.body.appendChild(layer);
-      }
-      return layer;
-    }
-    function hasNativeEyeButton(inp) {
-      var p = inp && inp.parentElement;
-      if (!p) return false;
-      var btns = p.querySelectorAll("button,[role=\"button\"]");
-      for (var i = 0; i < btns.length; i++) {
-        var b = btns[i];
-        if (b.getAttribute("data-ug-eye-btn")) continue;
-        var br = b.getBoundingClientRect();
-        if (br.width < 12 || br.height < 12) continue;
-        var sig = ((b.getAttribute("aria-label") || "") + " " + (b.title || "") + " " + (b.innerHTML || "")).toLowerCase();
-        if (/fa-eye|eye|password|show|hide|दिखा|छिपा/.test(sig)) return true;
-      }
-      return false;
-    }
-    function updatePositions() {
-      posRaf = 0;
-      for (var i = tracked.length - 1; i >= 0; i--) {
-        var it = tracked[i];
-        if (!it.inp || !document.body || !document.body.contains(it.inp)) {
-          if (it.btn && it.btn.parentNode) it.btn.parentNode.removeChild(it.btn);
-          tracked.splice(i, 1);
-          continue;
-        }
-        var cs = window.getComputedStyle(it.inp);
-        var r = it.inp.getBoundingClientRect();
-        var visible = !document.documentElement.classList.contains("ug-preauth-hide") && cs.display !== "none" && cs.visibility !== "hidden" && Number(cs.opacity || 1) > 0 && r.width > 50 && r.height > 20 && r.bottom > 0 && r.top < window.innerHeight;
-        if (!visible) { it.btn.style.display = "none"; continue; }
-        it.btn.style.display = "flex";
-        it.btn.style.top = Math.round(r.top + (r.height - 32) / 2) + "px";
-        it.btn.style.left = Math.round(r.right - 36) + "px";
-        if (cs.color) it.btn.style.color = cs.color;
-      }
-      if (tracked.length === 0 && keepAliveTimer) { clearInterval(keepAliveTimer); keepAliveTimer = null; }
-    }
-    function schedulePos() { if (!posRaf && tracked.length > 0) posRaf = requestAnimationFrame(updatePositions); }
-    function attachToInput(inp) {
-      if (!inp || inp.getAttribute("data-ug-pw-tracked") === "1" || hasNativeEyeButton(inp)) return;
-      var host = ensureLayer(); if (!host) return;
-      inp.setAttribute("data-ug-pw-tracked", "1");
-      var curPr = parseFloat(window.getComputedStyle(inp).paddingRight || "0") || 0;
-      if (curPr < 38) inp.style.paddingRight = "40px";
-      var btn = document.createElement("button");
-      btn.type = "button"; btn.setAttribute("data-ug-eye-btn", "1");
-      btn.setAttribute("aria-label", "Password दिखाएँ"); btn.title = "Password दिखाएँ";
-      btn.style.cssText = "position:fixed;width:32px;height:32px;display:none;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;pointer-events:auto;opacity:0.75;padding:0;border-radius:8px;outline:none;transition:opacity 0.15s;";
-      btn.innerHTML = EYE_OPEN;
-      var item = { inp: inp, btn: btn, revealed: false };
-      btn.addEventListener("mouseenter", function () { btn.style.opacity = "1"; });
-      btn.addEventListener("mouseleave", function () { btn.style.opacity = "0.75"; });
-      btn.addEventListener("mousedown", function (e) { e.preventDefault(); e.stopPropagation(); });
-      btn.addEventListener("click", function (e) {
-        e.preventDefault(); e.stopPropagation();
-        item.revealed = !item.revealed;
-        try { inp.type = item.revealed ? "text" : "password"; } catch (err) {}
-        btn.innerHTML = item.revealed ? EYE_CLOSED : EYE_OPEN;
-        btn.setAttribute("aria-label", item.revealed ? "Password छिपाएँ" : "Password दिखाएँ");
-        btn.title = item.revealed ? "Password छिपाएँ" : "Password दिखाएँ";
-      });
-      host.appendChild(btn); tracked.push(item);
-      if (!keepAliveTimer) keepAliveTimer = setInterval(updatePositions, 350);
-    }
-    function scanPasswordInputs() {
-      try {
-        var list = document.querySelectorAll("input[type=\"password\"]");
-        for (var i = 0; i < list.length; i++) attachToInput(list[i]);
-        updatePositions();
-      } catch (e) {}
-    }
-    function scheduleScan() { if (scanTimer) return; scanTimer = setTimeout(function () { scanTimer = null; scanPasswordInputs(); }, 220); }
-    function bootEyeWatcher() {
-      scanPasswordInputs(); setTimeout(scanPasswordInputs, 700); setTimeout(scanPasswordInputs, 1600);
-      window.addEventListener("scroll", schedulePos, true); window.addEventListener("resize", schedulePos);
-      if (typeof MutationObserver !== "undefined" && document.body) {
-        new MutationObserver(function (records) {
-          for (var i = 0; i < records.length; i++) {
-            var t = records[i].target;
-            if (t && (t.id === "ug-pw-eye-layer" || t.id === "ug-zero-flash-curtain" || t.id === "ug-modern-sb-host" || t.id === "ug-fs-esc-toast" || (t.closest && (t.closest("#ug-pw-eye-layer") || t.closest("#ug-modern-sb-host"))))) continue;
-            scheduleScan(); break;
-          }
-        }).observe(document.body, { childList: true, subtree: true });
-      }
-    }
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootEyeWatcher);
-    else bootEyeWatcher();
-  })();
-  // ==================== 7. MODERN EDTECH 3-LINE SIDEBAR HIDE + PERMANENT DELETE "मेनू छुपाए" + ESC FULLSCREEN ====================
-  (function initModernEdTechSidebarAndEscFullscreen() {
-    if (window.__UG_MODERN_EDTECH_SB_INIT__) return;
-    window.__UG_MODERN_EDTECH_SB_INIT__ = true;
-
-    var OLD_HIDE_MENU_RE = /(?:(?:मेनू|मेन्यू|मेनु|साइडबार)\s*(?:छुपाए|छुपाएँ|छुपाएं|छिपाए|छिपाएँ|छिपाएं|दिखाए|दिखाएँ|दिखाएं|बंद\s*करें|खोलें))|(?:^(?:hide|show|collapse|toggle)\s+(?:menu|sidebar)$)|(?:^(?:menu|sidebar)\s+(?:hide|show)$)/i;
-    var SIDEBAR_ITEM_HINT_RE = /mock\s*test\s*series|rrb\s*pyq|test\s*generator\s*simulator|rdso\s*alp|test\s*simulator\s*engine|manage\s*&\s*remove\s*tests|payment\s*settings|admin\s*id\s*provider|settings\s*\/\s*login/i;
-
-    // ---------- A. CSS इंजेक्शन (Modern EdTech 3-Line + असली Sidebar Smooth Collapse + Permanent Delete) ----------
-    function injectModernSidebarCss() {
-      if (document.getElementById("ug-modern-edtech-sb-css")) return;
-      var st = document.createElement("style");
-      st.id = "ug-modern-edtech-sb-css";
-      st.textContent = [
-        "html.ug-preauth-hide #ug-modern-sb-host, html.ug-preauth-hide #ug-fs-esc-toast { display:none !important; }",
-        ".ug-deleted-old-menu-btn { display:none !important; visibility:hidden !important; opacity:0 !important; pointer-events:none !important; width:0 !important; height:0 !important; min-height:0 !important; max-height:0 !important; margin:0 !important; padding:0 !important; border:0 !important; overflow:hidden !important; position:fixed !important; left:-99999px !important; top:-99999px !important; }",
-        ".ug-real-sidebar-el { transition: transform 0.28s cubic-bezier(0.22,1,0.36,1), width 0.28s cubic-bezier(0.22,1,0.36,1), min-width 0.28s cubic-bezier(0.22,1,0.36,1), opacity 0.22s ease !important; will-change: transform, width; }",
-        "html.ug-sidebar-hidden .ug-real-sidebar-el { width:0 !important; min-width:0 !important; max-width:0 !important; flex-basis:0 !important; padding-left:0 !important; padding-right:0 !important; margin-left:0 !important; margin-right:0 !important; border-width:0 !important; opacity:0 !important; pointer-events:none !important; overflow:hidden !important; transform:translateX(-106%) !important; }",
-        "html.ug-sidebar-hidden .ug-main-expand-el { margin-left:0 !important; padding-left:0 !important; width:100% !important; max-width:100% !important; }",
-        "@media (max-width: 768px) {",
-        "  .ug-real-sidebar-el { position:fixed !important; top:0 !important; left:0 !important; bottom:0 !important; z-index:2147483641 !important; max-width:82vw !important; box-shadow:16px 0 42px rgba(2,6,23,0.72) !important; }",
-        "  html.ug-sidebar-hidden .ug-real-sidebar-el { transform:translateX(-110%) !important; }",
-        "}",
-        "#ug-modern-sb-backdrop { position:fixed; inset:0; z-index:2147483640; background:rgba(2,6,23,0.58); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); opacity:0; pointer-events:none; transition:opacity 0.22s ease; }",
-        "#ug-modern-sb-backdrop.is-show { opacity:1; pointer-events:auto; }",
-        "#ug-modern-sb-toggle { position:fixed; top:12px; left:12px; z-index:2147483643; width:36px; height:36px; border-radius:10px; border:1px solid rgba(56,189,248,0.45); background:linear-gradient(135deg, rgba(15,23,42,0.92), rgba(30,41,59,0.92)); color:#f8fafc; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); display:none; flex-direction:column; align-items:center; justify-content:center; gap:4.5px; cursor:pointer; box-shadow:0 6px 20px rgba(2,6,23,0.48); transition:left 0.28s cubic-bezier(0.22,1,0.36,1), top 0.2s ease, background 0.18s ease, border-color 0.18s ease, transform 0.16s ease; padding:0; outline:none; }",
-        "#ug-modern-sb-toggle:hover { background:linear-gradient(135deg, rgba(30,64,175,0.95), rgba(15,23,42,0.98)); border-color:#38bdf8; transform:scale(1.06); }",
-        "#ug-modern-sb-toggle:active { transform:scale(0.95); }",
-        "#ug-modern-sb-toggle .ug-bar { display:block; width:18px; height:2px; border-radius:999px; background:#f8fafc; transition:transform 0.22s ease, width 0.22s ease, background 0.22s ease; }",
-        "#ug-modern-sb-toggle .ug-bar-2 { width:13px; align-self:flex-start; margin-left:8px; background:#38bdf8; }",
-        "#ug-modern-sb-toggle .ug-bar-3 { width:16px; align-self:flex-start; margin-left:8px; }",
-        "#ug-modern-sb-toggle.is-sb-open .ug-bar-1 { width:16px; }",
-        "#ug-modern-sb-toggle.is-sb-open .ug-bar-2 { width:12px; background:#34d399; }",
-        "#ug-modern-sb-toggle.is-sb-open .ug-bar-3 { width:18px; }",
-        "#ug-fs-esc-toast { position:fixed; bottom:18px; left:50%; transform:translateX(-50%) translateY(16px); z-index:2147483646; background:rgba(15,23,42,0.95); color:#f8fafc; border:1px solid rgba(52,211,153,0.55); padding:9px 16px; border-radius:999px; font-family:Arial,sans-serif; font-size:12px; font-weight:800; box-shadow:0 12px 32px rgba(0,0,0,0.5); opacity:0; pointer-events:none; transition:opacity 0.2s ease, transform 0.2s ease; white-space:nowrap; max-width:92vw; overflow:hidden; text-overflow:ellipsis; }",
-        "#ug-fs-esc-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }"
-      ].join("\n");
-      (document.head || document.documentElement).appendChild(st);
-    }
-
-    // ---------- B. पुराना "मेनू छुपाए" बटन हमेशा के लिए PERMANENT DELETE (React-Safe) ----------
-    function permanentlyDeleteOldHideMenuButtons() {
-      try {
-        var rootScope = document.getElementById("root") || document.body;
-        if (!rootScope) return;
-        var els = rootScope.querySelectorAll("button, a, [role=button], span, div");
-        for (var i = 0; i < els.length; i++) {
-          var el = els[i];
-          if (!el || el.classList.contains("ug-deleted-old-menu-btn")) continue;
-          if (el.id === "root" || el.id === "ug-modern-sb-toggle" || el.classList.contains("ug-real-sidebar-el")) continue;
-          if (el.children && el.children.length > 3) continue;
-          var txt = String(el.textContent || "").replace(/\s+/g, " ").trim();
-          if (!txt || txt.length > 36) continue;
-          if (!OLD_HIDE_MENU_RE.test(txt)) continue;
-          var targetBtn = (el.closest && el.closest("button, a, [role=button]")) || el;
-          if (!targetBtn || targetBtn.id === "root" || targetBtn.id === "ug-modern-sb-toggle" || targetBtn.classList.contains("ug-real-sidebar-el")) continue;
-          targetBtn.classList.add("ug-deleted-old-menu-btn");
-          targetBtn.setAttribute("aria-hidden", "true");
-          targetBtn.setAttribute("tabindex", "-1");
-          var par = targetBtn.parentElement;
-          if (par && par.id !== "root" && !par.classList.contains("ug-real-sidebar-el") && par.children && par.children.length === 1) {
-            var pTxt = String(par.textContent || "").replace(/\s+/g, " ").trim();
-            if (pTxt.length <= 36 && OLD_HIDE_MENU_RE.test(pTxt)) {
-              par.classList.add("ug-deleted-old-menu-btn");
-            }
-          }
-        }
-      } catch (e) {}
-    }
-
-    // ---------- C. असली UNLIMITED GYAN SIDEBAR की स्मार्ट पहचान व TOP-CORNER 3-LINE CONTROL ----------
-    var realSidebarEl = null;
-    var mainSiblingEl = null;
-    var toggleBtnEl = null;
-    var backdropEl = null;
-    var sidebarHidden = false;
-    var sbScanTimer = null;
-
-    try {
-      if (sessionStorage.getItem("ug_edtech_sb_hidden_v1") === "1") sidebarHidden = true;
-    } catch (e) {}
-
-    function isSidebarValidCandidate(el) {
-      if (!el || el === document.body || el === document.documentElement || el.id === "root") return false;
-      if (el.id === "ug-modern-sb-host" || (el.closest && el.closest("#ug-modern-sb-host"))) return false;
-      if (el.classList.contains("ug-real-sidebar-el")) return true;
-      var r = el.getBoundingClientRect();
-      var vw = window.innerWidth || 1024;
-      var maxAllowedW = vw <= 520 ? Math.min(360, vw * 0.9) : Math.min(380, vw * 0.45);
-      if (r.left > 60) return false;
-      if (r.width < 155 || r.width > maxAllowedW) return false;
-      if (r.height < Math.min(300, (window.innerHeight || 600) * 0.45)) return false;
-      return true;
-    }
-
-    function findRealSidebar() {
-      if (realSidebarEl && document.body && document.body.contains(realSidebarEl)) return realSidebarEl;
-      realSidebarEl = null;
-      var rootScope = document.getElementById("root") || document.body;
-      if (!rootScope) return null;
-
-      // 1) पहले <aside> खोजें
-      var asides = rootScope.querySelectorAll("aside");
-      for (var a = 0; a < asides.length; a++) {
-        if (isSidebarValidCandidate(asides[a])) {
-          realSidebarEl = asides[a];
-          return realSidebarEl;
-        }
-      }
-
-      // 2) फिर Unlimited Gyan के असली मेन्यू आइटम (Mock Test Series, RRB PYQ, Admin ID Provider आदि) से पैरेंट साइडबार खोजें
-      var navNodes = rootScope.querySelectorAll("button, a, div, li");
-      var anchorNode = null;
-      for (var i = 0; i < navNodes.length; i++) {
-        var n = navNodes[i];
-        if (!n || (n.children && n.children.length > 4)) continue;
-        var t = String(n.textContent || "").replace(/\s+/g, " ").trim();
-        if (t && t.length <= 45 && SIDEBAR_ITEM_HINT_RE.test(t)) {
-          anchorNode = n;
-          break;
-        }
-      }
-      if (anchorNode) {
-        var cur = anchorNode.parentElement;
-        var best = null;
-        var depth = 0;
-        while (cur && cur !== rootScope && cur !== document.body && depth < 8) {
-          if (isSidebarValidCandidate(cur)) best = cur;
-          cur = cur.parentElement;
-          depth++;
-        }
-        if (best) {
-          realSidebarEl = best;
-          return realSidebarEl;
-        }
-      }
-      return null;
-    }
-
-    function detectMainExpandSibling(sb) {
-      if (!sb || !sb.parentElement) return;
-      if (mainSiblingEl && document.body.contains(mainSiblingEl)) return;
-      try {
-        var cs = window.getComputedStyle(sb);
-        if (cs.position === "fixed" || cs.position === "absolute") {
-          var sibs = sb.parentElement.children;
-          for (var i = 0; i < sibs.length; i++) {
-            var s = sibs[i];
-            if (s === sb) continue;
-            var scs = window.getComputedStyle(s);
-            var ml = parseFloat(scs.marginLeft || "0") || 0;
-            var pl = parseFloat(scs.paddingLeft || "0") || 0;
-            if (ml >= 150 || pl >= 150 || s.tagName === "MAIN") {
-              mainSiblingEl = s;
-              mainSiblingEl.classList.add("ug-main-expand-el");
-              break;
-            }
-          }
-        }
-      } catch (e) {}
-    }
-
-    function positionTopCornerToggleBtn() {
-      if (!toggleBtnEl) return;
-      var sb = findRealSidebar();
-      if (!sb) {
-        toggleBtnEl.style.display = "none";
-        if (backdropEl) backdropEl.classList.remove("is-show");
-        return;
-      }
-      sb.classList.add("ug-real-sidebar-el");
-      detectMainExpandSibling(sb);
-      toggleBtnEl.style.display = "flex";
-      var isMobile = (window.innerWidth || 1024) <= 768;
-      if (sidebarHidden) {
-        toggleBtnEl.classList.remove("is-sb-open");
-        toggleBtnEl.style.left = "12px";
-        toggleBtnEl.style.top = "12px";
-        toggleBtnEl.title = "साइडबार मेन्यू दिखाएँ";
-        toggleBtnEl.setAttribute("aria-label", "साइडबार मेन्यू दिखाएँ");
-        toggleBtnEl.setAttribute("aria-expanded", "false");
-        if (backdropEl) backdropEl.classList.remove("is-show");
-      } else {
-        toggleBtnEl.classList.add("is-sb-open");
-        var r = sb.getBoundingClientRect();
-        var sbW = (r.width >= 150 && r.width <= 400) ? r.width : 260;
-        var targetLeft = Math.max(12, Math.min((window.innerWidth || 1024) - 48, Math.round(r.left + sbW - 44)));
-        toggleBtnEl.style.left = targetLeft + "px";
-        toggleBtnEl.style.top = "12px";
-        toggleBtnEl.title = "साइडबार मेन्यू छुपाएँ";
-        toggleBtnEl.setAttribute("aria-label", "साइडबार मेन्यू छुपाएँ");
-        toggleBtnEl.setAttribute("aria-expanded", "true");
-        if (backdropEl) backdropEl.classList.toggle("is-show", isMobile);
-      }
-    }
-
-    function applySidebarHiddenState(hide) {
-      sidebarHidden = !!hide;
-      try { sessionStorage.setItem("ug_edtech_sb_hidden_v1", sidebarHidden ? "1" : "0"); } catch (e) {}
-      document.documentElement.classList.toggle("ug-sidebar-hidden", sidebarHidden);
-      positionTopCornerToggleBtn();
-      setTimeout(positionTopCornerToggleBtn, 310);
-    }
-
-    function mountModernTopCornerSystem() {
-      injectModernSidebarCss();
-      if (!document.getElementById("ug-modern-sb-host")) {
-        var hostParent = document.body || document.documentElement;
-        if (!hostParent) return;
-        var host = document.createElement("div");
-        host.id = "ug-modern-sb-host";
-
-        backdropEl = document.createElement("div");
-        backdropEl.id = "ug-modern-sb-backdrop";
-        backdropEl.addEventListener("click", function () { applySidebarHiddenState(true); });
-
-        toggleBtnEl = document.createElement("button");
-        toggleBtnEl.id = "ug-modern-sb-toggle";
-        toggleBtnEl.type = "button";
-        var b1 = document.createElement("span"); b1.className = "ug-bar ug-bar-1";
-        var b2 = document.createElement("span"); b2.className = "ug-bar ug-bar-2";
-        var b3 = document.createElement("span"); b3.className = "ug-bar ug-bar-3";
-        toggleBtnEl.appendChild(b1); toggleBtnEl.appendChild(b2); toggleBtnEl.appendChild(b3);
-        toggleBtnEl.addEventListener("click", function (ev) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          applySidebarHiddenState(!sidebarHidden);
-        });
-
-        host.appendChild(backdropEl);
-        host.appendChild(toggleBtnEl);
-        hostParent.appendChild(host);
-      }
-
-      // मोबाइल पर किसी साइडबार मेन्यू आइटम पर क्लिक करते ही साइडबार ऑटो-हाइड हो जाए
-      document.addEventListener("click", function (ev) {
-        if ((window.innerWidth || 1024) > 768 || sidebarHidden) return;
-        var t = ev && ev.target;
-        if (!t || !t.closest) return;
-        if (t.closest("#ug-modern-sb-toggle")) return;
-        var inSb = t.closest(".ug-real-sidebar-el");
-        if (inSb && t.closest("button, a, [role=button]")) {
-          setTimeout(function () { applySidebarHiddenState(true); }, 140);
-        }
-      }, true);
-
-      function syncSidebarAndPurgeOldBtn() {
-        permanentlyDeleteOldHideMenuButtons();
-        var sb = findRealSidebar();
-        if (sb) {
-          sb.classList.add("ug-real-sidebar-el");
-          document.documentElement.classList.toggle("ug-sidebar-hidden", sidebarHidden);
-        }
-        positionTopCornerToggleBtn();
-      }
-
-      function scheduleSbSync() {
-        if (sbScanTimer) return;
-        sbScanTimer = setTimeout(function () {
-          sbScanTimer = null;
-          syncSidebarAndPurgeOldBtn();
-        }, 220);
-      }
-
-      syncSidebarAndPurgeOldBtn();
-      setTimeout(syncSidebarAndPurgeOldBtn, 500);
-      setTimeout(syncSidebarAndPurgeOldBtn, 1400);
-      setTimeout(syncSidebarAndPurgeOldBtn, 2600);
-      window.addEventListener("resize", scheduleSbSync);
-      if (typeof MutationObserver !== "undefined" && document.body) {
-        new MutationObserver(function (records) {
-          for (var i = 0; i < records.length; i++) {
-            var t = records[i].target;
-            if (t && (t.id === "ug-modern-sb-host" || t.id === "ug-fs-esc-toast" || t.id === "ug-pw-eye-layer" || (t.closest && (t.closest("#ug-modern-sb-host") || t.closest("#ug-pw-eye-layer"))))) continue;
-            scheduleSbSync();
-            break;
-          }
-        }).observe(document.body, { childList: true, subtree: true });
-      }
-    }
-
-    // ---------- D. ALL-TIME FULLSCREEN ENGINE (केवल ESC से ON/OFF) ----------
-    var fsWanted = true;
-    var wasFsActive = false;
-    var lastFsExitTs = 0;
-    var fsToastTimer = null;
-
-    function isFsActive() {
-      return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-    }
-    function showFsToast(text) {
-      try {
-        var host = document.body || document.documentElement;
-        if (!host) return;
-        var t = document.getElementById("ug-fs-esc-toast");
-        if (!t) {
-          t = document.createElement("div");
-          t.id = "ug-fs-esc-toast";
-          host.appendChild(t);
-        }
-        t.textContent = text;
-        t.classList.add("show");
-        clearTimeout(fsToastTimer);
-        fsToastTimer = setTimeout(function () { t.classList.remove("show"); }, 2200);
-      } catch (e) {}
-    }
-    function enterFullscreenSafe() {
-      if (isFsActive()) { wasFsActive = true; return; }
-      var el = document.documentElement;
-      if (!el) return;
-      var fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-      if (typeof fn !== "function") return;
-      try {
-        var p = fn.call(el);
-        if (p && typeof p.catch === "function") p.catch(function () {});
-      } catch (e) {}
-    }
-    function exitFullscreenSafe() {
-      if (!isFsActive()) return;
-      var fn = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
-      if (typeof fn !== "function") return;
-      try {
-        var p = fn.call(document);
-        if (p && typeof p.catch === "function") p.catch(function () {});
-      } catch (e) {}
-    }
-    function onFsStateChange() {
-      var active = isFsActive();
-      if (active) {
-        wasFsActive = true;
-        fsWanted = true;
-      } else if (wasFsActive) {
-        wasFsActive = false;
-        lastFsExitTs = Date.now();
-        if (fsWanted) {
-          fsWanted = false;
-          showFsToast("⏸️ Fullscreen OFF — दोबारा ON करने के लिए ESC दबाएँ");
-        }
-      }
-      setTimeout(positionTopCornerToggleBtn, 120);
-    }
-    document.addEventListener("fullscreenchange", onFsStateChange);
-    document.addEventListener("webkitfullscreenchange", onFsStateChange);
-    document.addEventListener("mozfullscreenchange", onFsStateChange);
-    document.addEventListener("MSFullscreenChange", onFsStateChange);
-
-    window.addEventListener("keydown", function (e) {
-      var isEsc = (e && (e.key === "Escape" || e.key === "Esc" || e.keyCode === 27));
-      if (isEsc) {
-        if (e.repeat) return;
-        if (Date.now() - lastFsExitTs < 260) return;
-        if (isFsActive()) {
-          fsWanted = false;
-          wasFsActive = false;
-          lastFsExitTs = Date.now();
-          exitFullscreenSafe();
-          showFsToast("⏸️ Fullscreen OFF — दोबारा ON करने के लिए ESC दबाएँ");
-        } else {
-          fsWanted = true;
-          enterFullscreenSafe();
-          showFsToast("⛶ Fullscreen ON — बंद करने के लिए ESC दबाएँ");
-        }
-        return;
-      }
-      if (fsWanted && !isFsActive()) enterFullscreenSafe();
-    }, true);
-
-    window.addEventListener("pointerdown", function () {
-      if (fsWanted && !isFsActive()) enterFullscreenSafe();
-    }, true);
-
-    function bootAll() {
-      mountModernTopCornerSystem();
-      enterFullscreenSafe();
-    }
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootAll);
-    else bootAll();
-  })();
-
+"use strict";
+var MAIN_CFG = Object.freeze({"apiKey":"AIzaSyD02eg9jaNN-jACslUNpb0QL8wTsHlQnGM","authDomain":"unlimited-gyan1.firebaseapp.com","projectId":"unlimited-gyan1","storageBucket":"unlimited-gyan1.firebasestorage.app","messagingSenderId":"576198101472","appId":"1:576198101472:web:2496fda85c2d5439934385","measurementId":"G-4ZNEC6QNX0"});
+var MAIN_EMAIL = "unlimitegyantest2.0@gmail.com";
+var PROJECT_TAG = String(MAIN_CFG.projectId || "default");
+window.__UG_PERMANENT_MAIN_LOCK__ = true;
+window.__UG_MAIN_FIREBASE_CONFIG__ = MAIN_CFG;
+window.__UG_MAIN_MASTER_EMAIL__ = MAIN_EMAIL;
+try { Object.defineProperty(window, "firebaseConfig", { get: function () { return Object.assign({}, MAIN_CFG); }, set: function () {}, configurable: true }); } catch (e) { window.firebaseConfig = Object.assign({}, MAIN_CFG); }
+var isRem = false;
+try {
+var sRaw = localStorage.getItem("ug_device_autologin_v1_" + PROJECT_TAG) || "";
+var fbRaw = localStorage.getItem("firebase:authUser:" + (MAIN_CFG.apiKey || "") + ":[DEFAULT]") || "";
+isRem = (sRaw.indexOf("loggedIn") !== -1 && sRaw.indexOf("true") !== -1) || (fbRaw.length > 20 && fbRaw !== "null");
+} catch (e) {}
+try { document.documentElement.classList.add("ug-preauth-hide"); } catch (e) {}
+if (!document.getElementById("ug-zero-flash-curtain")) {
+var el = document.createElement("div");
+el.id = "ug-zero-flash-curtain";
+el.style.cssText = "position:fixed;inset:0;z-index:2147483647;background:radial-gradient(circle at top,#0f172a,#020617);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#fff;font-family:Arial,sans-serif;text-align:center;padding:24px;transition:opacity 0.25s ease;";
+el.innerHTML = '<div style="width:48px;height:48px;border:4px solid rgba(56,189,248,0.25);border-top-color:#34d399;border-radius:50%;animation:ugZeroFlashSpin 0.75s linear infinite;"></div><div style="font-size:19px;font-weight:900;letter-spacing:0.3px;">Unlimited Gyan Test</div><div id="ug-zero-flash-msg" style="font-size:13px;font-weight:700;color:#94a3b8;">' + (isRem ? "डिवाइस पहचाना गया — सुरक्षित ऑटो-लॉगिन हो रहा है…" : "वेबसाइट तैयार हो रही है…") + '</div>';
+document.documentElement.appendChild(el);
+}
+setTimeout(function () {
+if (window.__UG_CLOUD_SHIELD_MOUNTED__) return;
+try { document.documentElement.classList.remove("ug-preauth-hide"); } catch (e) {}
+var c = document.getElementById("ug-zero-flash-curtain");
+if (c && c.parentNode) c.parentNode.removeChild(c);
+}, isRem ? 5500 : 3500);
 })();
 </script>
 <meta charset="UTF-8">
@@ -970,8 +168,10 @@ var BUNDLE_COL = "cloud_code_bundle";
 var CACHE_DB_NAME = "UGT_AutoSync_DB_" + firebaseConfig.projectId;
 var CACHE_STORE = "bundles";
 var CACHE_SCHEMA = 8;
-var BUILD_SYNC_ID = "sync_1795693025620_b3_r91";
+var BUILD_SYNC_ID = "sync_1795757475294_b3_r91";
 var EXPECTED_BASE_VERSION = 3;
+var USE_CLOUD_SHIELD = true;
+var EXPECTED_SHIELD_VERSION = 6;
 var FS_BASE = "https://firestore.googleapis.com/v1/projects/" + encodeURIComponent(firebaseConfig.projectId) + "/databases/(default)/documents/artifacts/" + encodeURIComponent(APP_ID) + "/public/data/" + encodeURIComponent(BUNDLE_COL) + "/";
 var params = new URLSearchParams(window.location.search);
 var targetPageId = (window.__UG_PREVIEW_PAGE_ID__ || params.get("page") || "").replace(/[^a-zA-Z0-9_]/g, "");
@@ -1340,6 +540,39 @@ var r1 = document.getElementById("ug-r1"); if (r1) r1.onclick = function () { wi
 var r2 = document.getElementById("ug-r2"); if (r2) r2.onclick = async function () { await idbClear(); navWith({ fresh: "1" }); };
 var sf = document.getElementById("ug-safe"); if (sf && hasSafe) sf.onclick = async function () { await idbSet("base_bundle", good); window.location.reload(); };
 }
+async function loadAndMountCloudPermanentShield(shieldDoc) {
+if (!USE_CLOUD_SHIELD) return false;
+try {
+var cached = forceFresh ? null : await idbGet("cloud_permanent_shield_v1");
+var chosen = null;
+if (shieldDoc && typeof shieldDoc.jsCode === "string" && shieldDoc.jsCode.trim()) {
+chosen = { shieldVersion: Number(shieldDoc.shieldVersion || 1), cssText: String(shieldDoc.cssText || ""), jsCode: String(shieldDoc.jsCode || "") };
+await idbSet("cloud_permanent_shield_v1", chosen);
+} else if (cached && typeof cached.jsCode === "string" && cached.jsCode.trim()) {
+chosen = cached;
+}
+if (!chosen) return false;
+if (chosen.cssText && !document.getElementById("ug-permanent-main-lock-css")) {
+var stEl = document.createElement("style");
+stEl.id = "ug-permanent-main-lock-css";
+stEl.textContent = chosen.cssText;
+(document.head || document.documentElement).appendChild(stEl);
+}
+if (!document.getElementById("ug-permanent-main-lock-shield")) {
+installReadyHooks();
+var scEl = document.createElement("script");
+scEl.id = "ug-permanent-main-lock-shield";
+scEl.textContent = chosen.jsCode + "\n//# sourceURL=ug_cloud_shield_v" + (chosen.shieldVersion || 1) + ".js";
+(document.head || document.documentElement).appendChild(scEl);
+}
+window.__UG_CLOUD_SHIELD_MOUNTED__ = true;
+window.__UG_CLOUD_SHIELD_VERSION__ = chosen.shieldVersion || 1;
+return true;
+} catch (e) {
+window.__UG_UPDATE_ERRORS__.push("CloudShield: " + (e && e.message ? e.message : e));
+return false;
+}
+}
 async function bootFromFirebaseCloud() {
 initSafeGlobalsAndErrorWatcher();
 setTimeout(function () { if (document.getElementById("ug-cloud-loader-ui") && capturedBaseErr) void showBootError("स्क्रिप्ट एरर: " + capturedBaseErr); }, 6500);
@@ -1354,15 +587,18 @@ if (!pData) throw new Error("पेज ?page=" + targetPageId + " Cloud मे�
 await reactWait; await mountBaseBundle(pData.payloadObj); return;
 }
 var activeManId = useBackup ? "backup_manifest" : "manifest", activePref = useBackup ? "backup_chunk_" : "chunk_", activeKey = useBackup ? "backup_base_bundle" : "base_bundle";
-var manifest = null, regDoc = null, regOk = false, regItems = [];
+var manifest = null, regDoc = null, shieldDoc = null, regOk = false, regItems = [];
 try {
 var metaPair = await Promise.all([
-fsGetDoc(activeManId,25000).catch(function () { return null; }),
-skipPatches ? Promise.resolve(null) : fsGetDoc("updates_registry", 25000).then(function (d) { regOk = true; return d; }).catch(function () { return null; })
+fsGetDoc(activeManId, 25000).catch(function () { return null; }),
+skipPatches ? Promise.resolve(null) : fsGetDoc("updates_registry", 25000).then(function (d) { regOk = true; return d; }).catch(function () { return null; }),
+USE_CLOUD_SHIELD ? fsGetDoc("permanent_shield_bundle", 20000).catch(function () { return null; }) : Promise.resolve(null)
 ]);
 manifest = metaPair[0];
 regDoc = metaPair[1];
+shieldDoc = metaPair[2];
 } catch (e) {}
+await loadAndMountCloudPermanentShield(shieldDoc);
 if (!skipPatches) {
 if (regOk) {
 if (regDoc && typeof regDoc.itemsJson === "string") { try { regItems = JSON.parse(regDoc.itemsJson); } catch (e) {} }
@@ -1374,8 +610,9 @@ regItems = (Array.isArray(cReg) && cReg.length) ? cReg : EMBEDDED_LINKED_ITEMS;
 }
 }
 var enabledPatches = (regItems || []).filter(function (it) { return it && it.mode === "patch" && it.enabled !== false && it.id; });
-var liveVerTag = BUILD_SYNC_ID + "_live_" + (manifest && manifest.version ? manifest.version : EXPECTED_BASE_VERSION);
+var liveVerTag = BUILD_SYNC_ID + "_live_" + (manifest && manifest.version ? manifest.version : EXPECTED_BASE_VERSION) + "_sh_" + (shieldDoc && shieldDoc.shieldVersion ? shieldDoc.shieldVersion : EXPECTED_SHIELD_VERSION);
 var lastSync = await idbGet("last_build_sync_id"); if (lastSync !== liveVerTag) { await idbClear(); await idbSet("last_build_sync_id", liveVerTag); }
+if (shieldDoc && shieldDoc.jsCode) { await idbSet("cloud_permanent_shield_v1", { shieldVersion: Number(shieldDoc.shieldVersion || 1), cssText: String(shieldDoc.cssText || ""), jsCode: String(shieldDoc.jsCode || "") }); }
 var cachedLocal = forceFresh ? null : await idbGet(activeKey);
 var hasCache = !!(cachedLocal && cachedLocal.schema === CACHE_SCHEMA && cachedLocal.payloadStr);
 var baseData = null;
